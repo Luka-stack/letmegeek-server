@@ -21,7 +21,6 @@ export default class Book {
   @Column()
   title: string;
 
-  @Index()
   @Column()
   slug: string;
 

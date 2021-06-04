@@ -43,7 +43,7 @@ const mockBook = {
   draft: false,
 };
 
-describe('BooksControler (e2e)', () => {
+describe('BooksController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
