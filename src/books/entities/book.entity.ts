@@ -33,6 +33,9 @@ export default class Book {
   @Column({ nullable: true, type: 'text' })
   description: string;
 
+  @Column({ nullable: true })
+  genres: string;
+
   @Column()
   publisher: string;
 

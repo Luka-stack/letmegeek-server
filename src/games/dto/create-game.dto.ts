@@ -1,4 +1,5 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsGenreString } from 'src/utils/genre-validator';
 
 export class CreateGameDto {
   @IsNotEmpty()
@@ -12,6 +13,10 @@ export class CreateGameDto {
   @IsOptional()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsGenreString()
+  genres: string;
 
   @IsNotEmpty()
   @IsString()

@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsGenreString } from 'src/utils/genre-validator';
 
 export class CreateComicDto {
   @IsNotEmpty()
@@ -16,6 +17,10 @@ export class CreateComicDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsGenreString()
+  genres: string;
 
   @IsNotEmpty()
   @IsString()

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import Book from './entities/book.entity';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -14,6 +18,18 @@ export class BooksService {
   ) {}
 
   createBook(createBookDto: CreateBookDto): Promise<Book> {
+    if (createBookDto.genres) {
+      const regex = /^[a-zA-Z]+$/;
+      const genres = createBookDto.genres.split(' ');
+      genres.forEach((genre) => {
+        if (!regex.test(genre.trim())) {
+          throw new BadRequestException(
+            'Genres can contain only letters. Multiple genres have to be separate with a space',
+          );
+        }
+      });
+    }
+
     return this.booksRepository.createBook(createBookDto);
   }
 
