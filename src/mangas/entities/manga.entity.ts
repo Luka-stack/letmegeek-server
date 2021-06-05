@@ -8,8 +8,8 @@ import {
 
 import { makeId, slugify } from '../../utils/helpers';
 
-@Entity('comics')
-export default class Comic {
+@Entity('mangas')
+export default class Manga {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -23,9 +23,6 @@ export default class Comic {
   @Index()
   @Column()
   title: string;
-
-  @Column({ nullable: true })
-  series: string;
 
   @Column()
   author: string;
