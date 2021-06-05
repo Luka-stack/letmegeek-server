@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as request from 'supertest';
 
-import { BooksModule } from '../src/books/books.module';
-import { BooksRepository } from '../src/books/books.repository';
+import { ComicsModule } from '../src/comics/comics.module';
+import { ComicsRepository } from '../src/comics/comics.repository';
 
-const mockBooksRepository = {
-  createBook: jest.fn((dto) => ({
+const mockComicsRepository = {
+  createComic: jest.fn((dto) => ({
     id: '643790b4-ad59-49dc-baec-f5617e700bac',
     slug: 'test-slug',
     identifier: '80Vni9G',
@@ -15,18 +15,10 @@ const mockBooksRepository = {
   })),
   save: jest.fn((book) => book),
   find: jest.fn(() => {
-    return [
-      {
-        title: 'Title',
-        author: 'Author',
-        publisher: 'Publisher',
-        premiered: new Date().toString(),
-        draft: false,
-      },
-    ];
+    return [mockComic];
   }),
   findOne: jest.fn((payload) => {
-    return payload.identifier === 'notfound' ? null : mockBook;
+    return payload.identifier === 'notfound' ? null : mockComic;
   }),
   delete: jest.fn((payload) => {
     return payload.identifier === 'notfound'
@@ -35,7 +27,7 @@ const mockBooksRepository = {
   }),
 };
 
-const mockBook = {
+const mockComic = {
   title: 'Title',
   author: 'Author',
   publisher: 'Publisher',
@@ -43,78 +35,79 @@ const mockBook = {
   draft: false,
 };
 
-describe('BooksController (e2e)', () => {
+describe('ComicsController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [BooksModule, TypeOrmModule.forFeature([BooksRepository])],
+      imports: [ComicsModule, TypeOrmModule.forFeature([ComicsRepository])],
     })
-      .overrideProvider(BooksRepository)
-      .useValue(mockBooksRepository)
+      .overrideProvider(ComicsRepository)
+      .useValue(mockComicsRepository)
       .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  describe('/api/books (POST)', () => {
-    it('return created book and status 201', async () => {
+  describe('/api/comics (POST)', () => {
+    it('returns created Comic and status 201', async () => {
       const response = await request(app.getHttpServer())
-        .post('/api/books')
-        .send(mockBook)
+        .post('/api/comics')
+        .send(mockComic)
         .expect('Content-Type', /json/)
         .expect(201);
+
       expect(response.body).toEqual({
         id: expect.any(String),
         identifier: expect.any(String),
         slug: expect.any(String),
-        ...mockBook,
+        ...mockComic,
       });
     });
   });
 
-  describe('/api/books (GET)', () => {
-    it('return list of books and status 200', async () => {
+  describe('/api/comics (GET)', () => {
+    it('return list of comics and status 200', async () => {
       const response = await request(app.getHttpServer())
-        .get('/api/books')
+        .get('/api/comics')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(response.body).toHaveLength(1);
+      expect(response.body).toEqual([mockComic]);
     });
   });
 
-  describe('/api/books/:identifier (PATCH)', () => {
+  describe('/api/comics/:identifier (PATCH)', () => {
     it('returns status 404', async () => {
       await request(app.getHttpServer())
-        .patch('/api/books/notfound')
-        .send(mockBook)
+        .patch('/api/comics/notfound')
+        .send(mockComic)
         .expect('Content-Type', /json/)
         .expect(404);
     });
 
     it('returns updated book and status 200', async () => {
       const response = await request(app.getHttpServer())
-        .patch('/api/books/123123')
-        .send(mockBook)
+        .patch('/api/comics/123')
+        .send(mockComic)
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(response.body).toEqual(mockBook);
+      expect(response.body).toEqual(mockComic);
     });
   });
 
-  describe('/api/books/:identifier (DELETE)', () => {
+  describe('/api/comics/:identifier (DELETE)', () => {
     it('returns status 404', async () => {
       await request(app.getHttpServer())
-        .delete('/api/books/notfound')
+        .delete('/api/comics/notfound')
         .expect('Content-Type', /json/)
         .expect(404);
     });
 
     it('returns status 204', async () => {
-      await request(app.getHttpServer()).delete('/api/books/12313').expect(204);
+      await request(app.getHttpServer()).delete('/api/comics/123').expect(204);
     });
   });
 });
