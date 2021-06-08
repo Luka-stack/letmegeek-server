@@ -1,52 +1,20 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-
-import { makeId, slugify } from '../../utils/helpers';
+import Article from '../../shared/entities/article.entity';
+import { Column, Entity } from 'typeorm';
+import { UpdateBookDto } from '../dto/update-book.dto';
 
 @Entity('books')
-export default class Book {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Index()
-  @Column()
-  identifier: string;
-
-  @Index()
-  @Column()
-  title: string;
-
-  @Column()
-  slug: string;
-
+export default class Book extends Article {
   @Column({ nullable: true })
   series: string;
 
-  @Column()
-  author: string;
-
-  @Column({ nullable: true, type: 'text' })
-  description: string;
-
   @Column({ nullable: true })
-  genres: string;
-
-  @Column()
-  publisher: string;
-
-  @Column()
   premiered: Date;
 
   @Column({ nullable: true })
-  imageUrn: string;
+  pages: number;
 
-  @Column()
-  draft: boolean;
+  @Column({ nullable: true })
+  volume: number;
 
   // sequel
   // prequel One-To-One Book-Book
@@ -63,9 +31,18 @@ export default class Book {
    */
   // comments
 
-  @BeforeInsert()
-  makeIdAndSlug() {
-    this.identifier = makeId(7);
-    this.slug = slugify(this.title);
+  updateFields(updateBookDto: UpdateBookDto) {
+    this.title = updateBookDto.title || this.title;
+    this.series = updateBookDto.series || this.series;
+    this.description = updateBookDto.description || this.description;
+    this.premiered = updateBookDto.premiered || this.premiered;
+    this.pages = updateBookDto.pages || this.pages;
+    this.genres = updateBookDto.genres || this.genres;
+    this.authors = updateBookDto.authors || this.authors;
+    this.publishers = updateBookDto.publishers || this.publishers;
+
+    if (updateBookDto.draft != null) {
+      this.draft = updateBookDto.draft;
+    }
   }
 }
