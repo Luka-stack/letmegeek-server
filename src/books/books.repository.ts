@@ -7,7 +7,7 @@ import Book from './entities/book.entity';
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
   async getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
-    const { name, genres, author, publisher, pages } = filterDto;
+    const { name, genres, authors, publishers, pages } = filterDto;
     const query = this.createQueryBuilder('book');
     query.where('1=1');
 
@@ -33,20 +33,20 @@ export class BooksRepository extends Repository<Book> {
       query.andWhere(genreQuery, values);
     }
 
-    if (author) {
+    if (authors) {
       query.andWhere('LOWER(book.authors) LIKE :author', {
-        author: `%${author.toLowerCase()}%`,
+        author: `%${authors.toLowerCase()}%`,
       });
     }
 
-    if (publisher) {
+    if (publishers) {
       query.andWhere('LOWER(book.publishers) LIKE :publisher', {
-        publisher: `%${publisher.toLowerCase()}%`,
+        publisher: `%${publishers.toLowerCase()}%`,
       });
     }
 
     if (pages) {
-      query.andWhere('pages <= :pages', { pages });
+      query.andWhere('book.pages <= :pages', { pages });
     }
 
     try {

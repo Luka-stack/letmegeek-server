@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
 
-import { CreateComicDto } from './create-comic.dto';
+import { ComicDto } from './comic.dto';
 
-export class UpdateComicDto extends PartialType(CreateComicDto) {}
+export class UpdateComicDto extends PartialType(ComicDto) {}

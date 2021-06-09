@@ -11,11 +11,11 @@ export class BooksFilterDto {
 
   @IsOptional()
   @IsString()
-  author?: string;
+  authors?: string;
 
   @IsOptional()
   @IsString()
-  publisher?: string;
+  publishers?: string;
 
   @IsOptional()
   @IsNumberString()

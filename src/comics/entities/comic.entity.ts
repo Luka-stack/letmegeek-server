@@ -1,56 +1,34 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
-import { makeId, slugify } from '../../utils/helpers';
+import Article from '../../shared/entities/article.entity';
+import { UpdateComicDto } from '../dto/update-comic.dto';
 
 @Entity('comics')
-export default class Comic {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Index()
-  @Column()
-  identifier: string;
-
-  @Column()
-  slug: string;
-
-  @Index()
-  @Column()
-  title: string;
+export default class Comic extends Article {
+  @Column({ nullable: true })
+  issues: number;
 
   @Column({ nullable: true })
-  series: string;
-
-  @Column()
-  author: string;
-
-  @Column({ nullable: true, type: 'text' })
-  description: string;
+  finished: Date;
 
   @Column({ nullable: true })
-  genres: string;
-
-  @Column()
-  publisher: string;
-
-  @Column()
   premiered: Date;
 
-  @Column({ nullable: true })
-  imageUrn: string;
+  updateFields(updateComicDto: UpdateComicDto) {
+    this.title = updateComicDto.title || this.title;
+    this.issues = updateComicDto.issues || this.issues;
+    this.description = updateComicDto.description || this.description;
+    this.premiered = updateComicDto.premiered || this.premiered;
+    this.finished = updateComicDto.finished || this.finished;
+    this.genres = updateComicDto.genres || this.genres;
+    this.authors = updateComicDto.authors || this.authors;
+    this.publishers = updateComicDto.publishers || this.publishers;
 
-  @Column()
-  draft: boolean;
-
-  @BeforeInsert()
-  makeIdAndSlug() {
-    this.identifier = makeId(7);
-    this.slug = slugify(this.title);
+    if (updateComicDto.draft != null) {
+      this.draft = updateComicDto.draft;
+      if (updateComicDto.draft) {
+        this.createdAt = new Date();
+      }
+    }
   }
 }

@@ -93,12 +93,12 @@ describe('BooksService', () => {
       booksRepository.findOne.mockResolvedValue(null);
 
       // when, then
-      expect(booksService.updateBook('someId', 'slug', {})).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(
+        booksService.updateBook('someId', 'slug', {}),
+      ).rejects.toThrowError(NotFoundException);
     });
 
-    it('calls BookRepository.findOne, finds book then calls BookRepository.save, updates book and returns books', async () => {
+    it('calls BookRepository.findOne, finds book then calls BookRepository.save, updates book and returns book', async () => {
       // given
       const mockBookObject = new Book();
       mockBookObject.title = mockBook.title;

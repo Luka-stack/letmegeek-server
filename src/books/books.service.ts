@@ -58,7 +58,6 @@ export class BooksService {
       if (err.code == 23505) {
         throw new ConflictException('Title has to be unique');
       }
-      throw err;
     });
 
     return book;
