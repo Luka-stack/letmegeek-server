@@ -11,6 +11,10 @@ export function makeId(length: number): string {
   return result;
 }
 
+export function queryParamToString(param: string): string {
+  return param.trim().replace('+', ' ');
+}
+
 export function slugify(str: string): string {
   str = str.trim().toLowerCase();
 

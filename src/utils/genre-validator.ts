@@ -4,13 +4,13 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
-export function IsGenreString(validationOptions?: ValidationOptions) {
+export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
     const message =
-      'Genres can contain only letters. Multiple genres have to be separate with a space';
+      'Value can contain only letters and numbers. Multiple values have to be separate with a space';
 
     const validate = function (value: any, _args: ValidationArguments) {
-      const regex = /^[a-zA-Z]+$/;
+      const regex = /^[a-zA-Z0-9]+$/;
       const genres = value.split(' ');
       genres.forEach((genre) => {
         if (!regex.test(genre)) {
@@ -26,7 +26,7 @@ export function IsGenreString(validationOptions?: ValidationOptions) {
     };
 
     registerDecorator({
-      name: 'isGenreString',
+      name: 'isCommaSeparatedString',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,

@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
 
-import { CreateMangaDto } from './create-manga.dto';
+import { MangaDto } from './manga.dto';
 
-export class UpdateMangaDto extends PartialType(CreateMangaDto) {}
+export class UpdateMangaDto extends PartialType(MangaDto) {}

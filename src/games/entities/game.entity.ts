@@ -1,53 +1,35 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
-import { makeId, slugify } from '../../utils/helpers';
+import Article from '../../shared/entities/article.entity';
+import { UpdateGameDto } from '../dto/update-game.dto';
 
 @Entity('games')
-export default class Game {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Index()
-  @Column()
-  identifier: string;
-
-  @Column()
-  slug: string;
-
-  @Index()
-  @Column()
-  title: string;
-
-  @Column()
-  studio: string;
-
-  @Column({ nullable: true, type: 'text' })
-  description: string;
-
+export default class Game extends Article {
   @Column({ nullable: true })
-  genres: string;
-
-  @Column()
-  publisher: string;
-
-  @Column()
   premiered: Date;
 
   @Column({ nullable: true })
-  imageUrn: string;
+  completeTime: number;
 
-  @Column()
-  draft: boolean;
+  @Column({ nullable: true })
+  gameMode: string;
 
-  @BeforeInsert()
-  makeIdAndSlug() {
-    this.identifier = makeId(7);
-    this.slug = slugify(this.title);
+  @Column({ nullable: true })
+  gears: string;
+
+  mapDtoToEntity(updateGameDto: UpdateGameDto) {
+    this.title = updateGameDto.title || this.title;
+    this.premiered = updateGameDto.premiered || this.premiered;
+    this.completeTime = updateGameDto.completeTime || this.completeTime;
+    this.gameMode = updateGameDto.gameMode || this.gameMode;
+    this.gears = updateGameDto.gears || this.gears;
+    this.authors = updateGameDto.authors || this.authors;
+    this.description = updateGameDto.description || this.description;
+    this.publishers = updateGameDto.publishers || this.publishers;
+    this.genres = updateGameDto.genres || this.genres;
+
+    if (updateGameDto.draft != null) {
+      this.draft = updateGameDto.draft;
+    }
   }
 }

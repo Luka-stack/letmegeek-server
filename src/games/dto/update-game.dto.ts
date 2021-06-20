@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
 
-import { CreateGameDto } from './create-game.dto';
+import { GameDto } from './game.dto';
 
-export class UpdateGameDto extends PartialType(CreateGameDto) {}
+export class UpdateGameDto extends PartialType(GameDto) {}
