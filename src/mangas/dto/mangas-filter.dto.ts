@@ -1,16 +1,8 @@
-import {
-  IsBooleanString,
-  IsNumberString,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsBooleanString, IsNumberString, IsOptional } from 'class-validator';
 
-export class MangasFilterDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
+import { ArticleFitlerDto } from '../../shared/dto/article-filter.dto';
 
+export class MangasFilterDto extends ArticleFitlerDto {
   @IsOptional()
   @IsNumberString()
   volumes?: number;
@@ -18,21 +10,4 @@ export class MangasFilterDto {
   @IsOptional()
   @IsBooleanString()
   finished?: boolean;
-
-  @IsOptional()
-  @IsString()
-  genres?: string;
-
-  @IsOptional()
-  @IsString()
-  authors?: string;
-
-  @IsOptional()
-  @IsString()
-  publishers?: string;
-
-  @IsOptional()
-  @IsNumberString()
-  @Length(4)
-  premiered?: number;
 }

@@ -1,22 +1,8 @@
-import { IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional } from 'class-validator';
 
-export class BooksFilterDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
+import { ArticleFitlerDto } from '../../shared/dto/article-filter.dto';
 
-  @IsOptional()
-  @IsString()
-  genres?: string;
-
-  @IsOptional()
-  @IsString()
-  authors?: string;
-
-  @IsOptional()
-  @IsString()
-  publishers?: string;
-
+export class BooksFilterDto extends ArticleFitlerDto {
   @IsOptional()
   @IsNumberString()
   pages?: number;

@@ -1,12 +1,9 @@
-import { IsNumberString, IsOptional, IsString, Length } from 'class-validator';
+import { IsNumberString, IsOptional } from 'class-validator';
 
 import { IsCommaSeparatedString } from '../../utils/genre-validator';
+import { ArticleFitlerDto } from '../../shared/dto/article-filter.dto';
 
-export class GamesFilterDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
-
+export class GamesFilterDto extends ArticleFitlerDto {
   @IsOptional()
   @IsNumberString()
   completeTime?: number;
@@ -18,21 +15,4 @@ export class GamesFilterDto {
   @IsOptional()
   @IsCommaSeparatedString()
   gears?: string;
-
-  @IsOptional()
-  @IsCommaSeparatedString()
-  genres?: string;
-
-  @IsOptional()
-  @IsCommaSeparatedString()
-  authors?: string;
-
-  @IsOptional()
-  @IsCommaSeparatedString()
-  publishers?: string;
-
-  @IsOptional()
-  @IsNumberString()
-  @Length(4)
-  premiered?: number;
 }

@@ -8,7 +8,7 @@ import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
   async getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
-    const { name, genres, authors, publishers, pages } = filterDto;
+    const { name, genres, authors, publishers, pages, premiered } = filterDto;
     const query = this.createQueryBuilder('book');
     query.where('1=1');
 
@@ -46,6 +46,13 @@ export class BooksRepository extends Repository<Book> {
 
     if (pages) {
       query.andWhere('book.pages <= :pages', { pages });
+    }
+
+    if (premiered) {
+      query.andWhere(
+        "DATE_PART('year', manga.premiered) - DATE_PART('year', :premiered::date) >= 0",
+        { premiered: `${premiered}-01-01` },
+      );
     }
 
     try {
