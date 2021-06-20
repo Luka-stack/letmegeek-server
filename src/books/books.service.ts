@@ -48,10 +48,8 @@ export class BooksService {
     }
 
     book.updateFields(updateBookDto);
-    if (updateBookDto.draft != null) {
-      if (updateBookDto.draft) {
-        book.createdAt = new Date();
-      }
+    if (updateBookDto.draft != null && updateBookDto.draft) {
+      book.createdAt = new Date();
     }
 
     await this.booksRepository.save(book).catch((err) => {

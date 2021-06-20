@@ -43,7 +43,7 @@ describe('ComicsService', () => {
   });
 
   describe('createComic', () => {
-    it('calls ComicsRepository.createComic, creates one and returns newly created comic', async () => {
+    it('calls ComicsRepository.create and save, creates one and returns newly created comic', async () => {
       // given
       mockComic.createdAt = null;
 
@@ -66,7 +66,7 @@ describe('ComicsService', () => {
       });
     });
 
-    it('calls ComicsRepository.createComic, returns 409 since Title is not unique', async () => {
+    it('calls ComicsRepository.create and save, returns 409 since Title is not unique', async () => {
       // given
       comicsRepository.create.mockResolvedValue(mockComic);
       comicsRepository.save.mockRejectedValue({ code: 23505 });

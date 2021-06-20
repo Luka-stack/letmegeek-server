@@ -46,7 +46,10 @@ export class ComicsService {
       throw new NotFoundException('Comic not found');
     }
 
-    comic.updateFields(updateComicDto);
+    comic.mapDtoToEntity(updateComicDto);
+    if (updateComicDto.draft != null && updateComicDto.draft) {
+      comic.createdAt = new Date();
+    }
 
     await this.comicsRepository.save(comic).catch((err) => {
       if (err.code == 23505) {

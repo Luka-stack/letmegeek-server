@@ -41,7 +41,7 @@ describe('BooksService', () => {
   });
 
   describe('createBook', () => {
-    it('calls BooksRepository.create and save, creates one and returns newly created book', async () => {
+    it('calls BooksRepository.createBook, creates one and returns newly created book', async () => {
       // given
       booksRepository.create.mockResolvedValue(mockBook);
       booksRepository.save.mockResolvedValue(mockBook);
@@ -61,7 +61,7 @@ describe('BooksService', () => {
       });
     });
 
-    it('calls BooksRepositroy.create and save, return 409 since Title is not unique', async () => {
+    it('calls BooksRepositroy.createBook, returns 409 since Title is not unique', async () => {
       // given
       booksRepository.create.mockResolvedValue(mockBook);
       booksRepository.save.mockRejectedValue({ code: 23505 });

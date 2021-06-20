@@ -14,7 +14,7 @@ export default class Comic extends Article {
   @Column({ nullable: true })
   premiered: Date;
 
-  updateFields(updateComicDto: UpdateComicDto) {
+  mapDtoToEntity(updateComicDto: UpdateComicDto) {
     this.title = updateComicDto.title || this.title;
     this.issues = updateComicDto.issues || this.issues;
     this.description = updateComicDto.description || this.description;
@@ -26,9 +26,6 @@ export default class Comic extends Article {
 
     if (updateComicDto.draft != null) {
       this.draft = updateComicDto.draft;
-      if (updateComicDto.draft) {
-        this.createdAt = new Date();
-      }
     }
   }
 }
