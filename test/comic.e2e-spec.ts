@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
@@ -30,11 +30,38 @@ describe('ComicsController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     comicsRepository = moduleFixture.get(ComicsRepository);
     await app.init();
   });
 
   describe('/api/comics (POST)', () => {
+    it('return 400, didnt create comic cuz title was empty', async () => {
+      // when then
+      const comicDto = {
+        draft: false,
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/comics')
+        .send(comicDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, didnt create comic cuz draft was empty', async () => {
+      // when then
+      const comicDto = {
+        title: 'SomeTitle',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/comics')
+        .send(comicDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
     it('returns created Comic and status 201', async () => {
       // given
       comicsRepository.create.mockImplementation((dto) => {
@@ -53,6 +80,8 @@ describe('ComicsController (e2e)', () => {
         title: 'New Title',
         draft: false,
         issues: 24,
+        finished: new Date().toISOString(),
+        premiered: new Date().toISOString(),
       };
 
       // when, then
@@ -71,6 +100,8 @@ describe('ComicsController (e2e)', () => {
         draft: comicDto.draft,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
+        finished: comicDto.premiered,
+        premiered: comicDto.premiered,
       });
     });
 
@@ -94,7 +125,31 @@ describe('ComicsController (e2e)', () => {
   });
 
   describe('/api/comics (GET)', () => {
-    it('return list of comics and status 200', async () => {
+    it('reutrns 400, filters issues not a number', async () => {
+      // when then
+      await request(app.getHttpServer())
+        .get('/api/comics?issues=adasd')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('reutrns 400, filters finished not a boolean', async () => {
+      // when then
+      await request(app.getHttpServer())
+        .get('/api/comics?finished=123')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('reutrns 400, filters premiered not a year', async () => {
+      // when then
+      await request(app.getHttpServer())
+        .get('/api/comics?premiered=23')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('returns 200 and a list of comics', async () => {
       // given
       comicsRepository.getComics.mockResolvedValue([new Comic()]);
 
@@ -231,6 +286,49 @@ describe('ComicsController (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/api/comics/identifier/slug')
         .expect(204);
+    });
+  });
+
+  describe('DTO validation test', () => {
+    it('return 400, provided draft as a string', async () => {
+      const comicDto = {
+        title: 'title',
+        draft: 'false',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/comics')
+        .send(comicDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided genres not as a comma separated strings', async () => {
+      const comicDto = {
+        title: 'title23',
+        draft: false,
+        genres: 'qwe) qwe) qwe',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/comics')
+        .send(comicDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided finished not as a date', async () => {
+      const comicDto = {
+        title: 'title23',
+        draft: false,
+        finished: 'asdasd',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/comics')
+        .send(comicDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
     });
   });
 });

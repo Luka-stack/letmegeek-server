@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { IsCommaSeparatedString } from '../../utils/genre-validator';
 
@@ -22,6 +28,10 @@ export default abstract class ArticleDto {
   @IsOptional()
   @IsCommaSeparatedString()
   publishers?: string;
+
+  @IsOptional()
+  @IsDateString()
+  premiered?: Date;
 
   @IsNotEmpty()
   @IsBoolean()

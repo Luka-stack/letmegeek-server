@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 
 import { BooksRepository } from '../src/books/books.repository';
@@ -40,11 +40,38 @@ describe('BooksController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     booksRepository = moduleFixture.get(BooksRepository);
     await app.init();
   });
 
   describe('/api/books (POST)', () => {
+    it('return 400, didnt create book cuz title was empty', async () => {
+      // when then
+      const bookDto = {
+        draft: false,
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/books')
+        .send(bookDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, didnt create book cuz draft was empty', async () => {
+      // when then
+      const bookDto = {
+        title: 'SomeTitle',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/books')
+        .send(bookDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
     it('returns created book and status 201', async () => {
       // given
       booksRepository.save.mockResolvedValue({});
@@ -92,7 +119,23 @@ describe('BooksController (e2e)', () => {
   });
 
   describe('/api/books (GET)', () => {
-    it('return list of books and status 200', async () => {
+    it('returns 400, filter pages not a string', async () => {
+      // when then
+      await request(app.getHttpServer())
+        .get('/api/books?pages=ten')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('returns 400, filter premirerd not a year', async () => {
+      // when then
+      await request(app.getHttpServer())
+        .get('/api/books?premiered=19o1')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('returns list of books and status 200', async () => {
       // given
       booksRepository.getBooks.mockResolvedValue([new Book()]);
 
@@ -224,6 +267,35 @@ describe('BooksController (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/api/books/identifier/slug')
         .expect(204);
+    });
+  });
+
+  describe('DTO validation test', () => {
+    it('return 400, provided draft as a string', async () => {
+      const bookDto = {
+        title: 'title',
+        draft: 'false',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/books')
+        .send(bookDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided genres not as a comma separated strings', async () => {
+      const bookDto = {
+        title: 'title23',
+        draft: false,
+        genres: 'qwe) qwe) qwe',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/books')
+        .send(bookDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
     });
   });
 });

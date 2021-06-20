@@ -1,6 +1,5 @@
-import { IsNumberString, IsOptional } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
-import { IsCommaSeparatedString } from '../../utils/genre-validator';
 import { ArticleFitlerDto } from '../../shared/dto/article-filter.dto';
 
 export class GamesFilterDto extends ArticleFitlerDto {
@@ -9,10 +8,10 @@ export class GamesFilterDto extends ArticleFitlerDto {
   completeTime?: number;
 
   @IsOptional()
-  @IsCommaSeparatedString()
+  @IsString()
   gameMode?: boolean;
 
   @IsOptional()
-  @IsCommaSeparatedString()
+  @IsString()
   gears?: string;
 }

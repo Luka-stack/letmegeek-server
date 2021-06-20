@@ -14,8 +14,4 @@ export class MangaDto extends ArticleDto {
   @IsOptional()
   @IsDateString()
   finished?: Date;
-
-  @IsOptional()
-  @IsDateString()
-  premiered?: Date;
 }

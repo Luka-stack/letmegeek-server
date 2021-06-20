@@ -10,8 +10,4 @@ export class ComicDto extends ArticleDto {
   @IsOptional()
   @IsDateString()
   finished?: Date;
-
-  @IsOptional()
-  @IsDateString()
-  premiered?: Date;
 }

@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 
@@ -30,6 +30,7 @@ describe('MangasController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     mangasRepository = moduleFixture.get(MangasRepository);
     await app.init();
   });
@@ -38,7 +39,10 @@ describe('MangasController (e2e)', () => {
     const mangaDto = {
       title: 'Newe Title',
       draft: false,
-      premiered: new Date(),
+      premiered: new Date().toISOString(),
+      volumes: 123,
+      chapters: 123,
+      finished: new Date().toISOString(),
     };
 
     it('returns created Manga and status 201', async () => {
@@ -70,7 +74,10 @@ describe('MangasController (e2e)', () => {
         draft: mangaDto.draft,
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
-        premiered: mangaDto.premiered.toISOString(),
+        premiered: mangaDto.premiered,
+        finished: mangaDto.finished,
+        volumes: 123,
+        chapters: 123,
       });
     });
 
@@ -88,6 +95,20 @@ describe('MangasController (e2e)', () => {
   });
 
   describe('/api/mangas (GET)', () => {
+    it('returns 400, filter volumes not a number', async () => {
+      await request(app.getHttpServer())
+        .get('/api/mangas?volumes=ten')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('returns 400, filter finished not a boolean', async () => {
+      await request(app.getHttpServer())
+        .get('/api/mangas?finished=741')
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
     it('returns list of mangas and status 200', async () => {
       // given
       mangasRepository.getMangas.mockResolvedValue([new Manga()]);
@@ -217,6 +238,77 @@ describe('MangasController (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/api/mangas/identifier/slug')
         .expect(204);
+    });
+  });
+
+  describe('DTO validation test', () => {
+    it('return 400, provided draft as a string', async () => {
+      const mangaDto = {
+        title: 'title',
+        draft: 'false',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/mangas')
+        .send(mangaDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided genres not as a comma separated strings', async () => {
+      const mangaDto = {
+        title: 'title23',
+        draft: false,
+        genres: 'qwe) qwe) qwe',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/mangas')
+        .send(mangaDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided volumes not as a number', async () => {
+      const mangaDto = {
+        title: 'title23',
+        draft: false,
+        volumes: 'adasd',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/mangas')
+        .send(mangaDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided chapters not as a number', async () => {
+      const mangaDto = {
+        title: 'title23',
+        draft: false,
+        chapters: 'adasd',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/mangas')
+        .send(mangaDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
+    });
+
+    it('return 400, provided finished not as a date', async () => {
+      const mangaDto = {
+        title: 'title23',
+        draft: false,
+        finished: 'adasd',
+      };
+
+      await request(app.getHttpServer())
+        .post('/api/mangas')
+        .send(mangaDto)
+        .expect('Content-Type', /json/)
+        .expect(400);
     });
   });
 });

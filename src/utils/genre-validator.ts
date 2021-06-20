@@ -10,15 +10,17 @@ export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
       'Value can contain only letters and numbers. Multiple values have to be separate with a space';
 
     const validate = function (value: any, _args: ValidationArguments) {
+      let result = true;
       const regex = /^[a-zA-Z0-9]+$/;
       const genres = value.split(' ');
-      genres.forEach((genre) => {
+      genres.forEach((genre: string) => {
         if (!regex.test(genre)) {
-          return false;
+          result = false;
+          return;
         }
       });
 
-      return true;
+      return result;
     };
 
     const defaultMessage = function () {
