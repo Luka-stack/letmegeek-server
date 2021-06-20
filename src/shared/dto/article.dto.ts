@@ -1,6 +1,6 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-import { IsGenreString } from '../../utils/genre-validator';
+import { IsCommaSeparatedString } from '../../utils/genre-validator';
 
 export default abstract class ArticleDto {
   @IsNotEmpty()
@@ -12,15 +12,15 @@ export default abstract class ArticleDto {
   description?: string;
 
   @IsOptional()
-  @IsGenreString()
+  @IsCommaSeparatedString()
   genres?: string;
 
   @IsOptional()
-  @IsString()
+  @IsCommaSeparatedString()
   authors?: string;
 
   @IsOptional()
-  @IsString()
+  @IsCommaSeparatedString()
   publishers?: string;
 
   @IsNotEmpty()

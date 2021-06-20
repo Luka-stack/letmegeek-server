@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 
 import Manga from './entities/manga.entity';
 import { MangasFilterDto } from './dto/mangas-filter.dto';
+import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Manga)
 export class MangasRepository extends Repository<Manga> {
@@ -19,42 +20,26 @@ export class MangasRepository extends Repository<Manga> {
     }
 
     if (genres) {
-      let genreQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((genre) => {
-        genreQuery += `LOWER(manga.genres) LIKE :${genre.toLowerCase()} OR `;
-        values[genre.toLowerCase()] = `%${genre.toLowerCase()}%`;
-      });
-      genreQuery = genreQuery.slice(0, -3) + ')';
-
+      const [genreQuery, values] = prepareMultipleNestedAndQueryForStringField(
+        genres,
+        'manga.genres',
+      );
       query.andWhere(genreQuery, values);
     }
 
     if (authors) {
-      let authorQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((author) => {
-        authorQuery += `LOWER(manga.authors) LIKE :${author.toLowerCase()} OR `;
-        values[author.toLowerCase()] = `%${author.toLowerCase()}%`;
-      });
-      authorQuery = authorQuery.slice(0, -3) + ')';
-
-      query.andWhere(authorQuery, values);
+      const [authorsQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(authors, 'manga.authors');
+      query.andWhere(authorsQuery, values);
     }
 
     if (publishers) {
-      let publisherQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((publisher) => {
-        publisherQuery += `LOWER(manga.publishers) LIKE :${publisher.toLowerCase()} OR `;
-        values[publisher.toLowerCase()] = `%${publisher.toLowerCase()}%`;
-      });
-      publisherQuery = publisherQuery.slice(0, -3) + ')';
-
-      query.andWhere(publisherQuery, values);
+      const [publishersQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(
+          publishers,
+          'manga.publishers',
+        );
+      query.andWhere(publishersQuery, values);
     }
 
     if (volumes) {

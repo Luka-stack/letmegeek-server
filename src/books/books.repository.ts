@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 
 import { BooksFilterDto } from './dto/books-filter.dto';
 import Book from './entities/book.entity';
+import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
@@ -21,28 +22,26 @@ export class BooksRepository extends Repository<Book> {
     }
 
     if (genres) {
-      let genreQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((genre) => {
-        genreQuery += `LOWER(book.genres) LIKE :${genre.toLowerCase()} OR `;
-        values[genre.toLowerCase()] = `%${genre.toLowerCase()}%`;
-      });
-      genreQuery = genreQuery.slice(0, -3) + ')';
-
+      const [genreQuery, values] = prepareMultipleNestedAndQueryForStringField(
+        genres,
+        'book.genres',
+      );
       query.andWhere(genreQuery, values);
     }
 
     if (authors) {
-      query.andWhere('LOWER(book.authors) LIKE :author', {
-        author: `%${authors.toLowerCase()}%`,
-      });
+      const [authorsQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(authors, 'book.authors');
+      query.andWhere(authorsQuery, values);
     }
 
     if (publishers) {
-      query.andWhere('LOWER(book.publishers) LIKE :publisher', {
-        publisher: `%${publishers.toLowerCase()}%`,
-      });
+      const [publishersQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(
+          publishers,
+          'book.publishers',
+        );
+      query.andWhere(publishersQuery, values);
     }
 
     if (pages) {

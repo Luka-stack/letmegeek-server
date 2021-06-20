@@ -1,8 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { GamesFilterDto } from './dto/games-filter.dto';
 
 import Game from './entities/game.entity';
+import { GamesFilterDto } from './dto/games-filter.dto';
+import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Game)
 export class GamesRepository extends Repository<Game> {
@@ -27,67 +28,42 @@ export class GamesRepository extends Repository<Game> {
     }
 
     if (genres) {
-      let genreQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((genre) => {
-        genreQuery += `LOWER(game.genres) LIKE :${genre.toLowerCase()} OR `;
-        values[genre.toLowerCase()] = `%${genre.toLowerCase()}%`;
-      });
-      genreQuery = genreQuery.slice(0, -3) + ')';
-
+      const [genreQuery, values] = prepareMultipleNestedAndQueryForStringField(
+        genres,
+        'game.genres',
+      );
       query.andWhere(genreQuery, values);
     }
 
     if (authors) {
-      let authorQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((author) => {
-        authorQuery += `LOWER(game.authors) LIKE :${author.toLowerCase()} OR `;
-        values[author.toLowerCase()] = `%${author.toLowerCase()}%`;
-      });
-      authorQuery = authorQuery.slice(0, -3) + ')';
-
-      query.andWhere(authorQuery, values);
+      const [authorsQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(authors, 'game.authors');
+      query.andWhere(authorsQuery, values);
     }
 
     if (publishers) {
-      let publisherQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((publisher) => {
-        publisherQuery += `LOWER(game.publishers) LIKE :${publisher.toLowerCase()} OR `;
-        values[publisher.toLowerCase()] = `%${publisher.toLowerCase()}%`;
-      });
-      publisherQuery = publisherQuery.slice(0, -3) + ')';
-
-      query.andWhere(publisherQuery, values);
+      const [publishersQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(
+          publishers,
+          'game.publishers',
+        );
+      query.andWhere(publishersQuery, values);
     }
 
     if (gameMode) {
-      let gameModeQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((mode) => {
-        gameModeQuery += `LOWER(game."gameMode") LIKE :${mode.toLowerCase()} OR `;
-        values[mode.toLowerCase()] = `%${mode.toLowerCase()}%`;
-      });
-      gameModeQuery = gameModeQuery.slice(0, -3) + ')';
-
+      const [gameModeQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(
+          publishers,
+          'game."gameMode"',
+        );
       query.andWhere(gameModeQuery, values);
     }
 
     if (gears) {
-      let gearQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((gear) => {
-        gearQuery += `LOWER(game.gear) LIKE :${gear.toLowerCase()} OR `;
-        values[gear.toLowerCase()] = `%${gear.toLowerCase()}%`;
-      });
-      gearQuery = gearQuery.slice(0, -3) + ')';
-
+      const [gearQuery, values] = prepareMultipleNestedAndQueryForStringField(
+        publishers,
+        'game.gear',
+      );
       query.andWhere(gearQuery, values);
     }
 

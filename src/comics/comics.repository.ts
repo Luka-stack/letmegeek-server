@@ -1,8 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { ComicsFilterDto } from './dto/comics-filter.dto';
 
 import Comic from './entities/comic.entity';
+import { ComicsFilterDto } from './dto/comics-filter.dto';
+import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Comic)
 export class ComicsRepository extends Repository<Comic> {
@@ -19,28 +20,26 @@ export class ComicsRepository extends Repository<Comic> {
     }
 
     if (genres) {
-      let genreQuery = '(';
-      const values = {};
-
-      genres.split(',').forEach((genre) => {
-        genreQuery += `LOWER(comic.genres) LIKE :${genre.toLowerCase()} OR `;
-        values[genre.toLowerCase()] = `%${genre.toLowerCase()}%`;
-      });
-      genreQuery = genreQuery.slice(0, -3) + ')';
-
+      const [genreQuery, values] = prepareMultipleNestedAndQueryForStringField(
+        genres,
+        'comic.genres',
+      );
       query.andWhere(genreQuery, values);
     }
 
     if (authors) {
-      query.andWhere('LOWER(comic.authors) LIKE :author', {
-        author: `%${authors.toLowerCase()}%`,
-      });
+      const [authorsQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(authors, 'comic.authors');
+      query.andWhere(authorsQuery, values);
     }
 
     if (publishers) {
-      query.andWhere('LOWER(comic.publishers) LIKE :publisher', {
-        publisher: `%${publishers.toLowerCase()}%`,
-      });
+      const [publishersQuery, values] =
+        prepareMultipleNestedAndQueryForStringField(
+          publishers,
+          'comic.publishers',
+        );
+      query.andWhere(publishersQuery, values);
     }
 
     if (issues) {
