@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import Game from './entities/game.entity';
-import { CreateGameDto } from './dto/create-game.dto';
+import { GameDto } from './dto/game.dto';
 import { GamesRepository } from './games.repository';
 import { UpdateGameDto } from './dto/update-game.dto';
+import { GamesFilterDto } from './dto/games-filter.dto';
 
 @Injectable()
 export class GamesService {
@@ -13,38 +18,50 @@ export class GamesService {
     private readonly gamesRepository: GamesRepository,
   ) {}
 
-  createGame(createGameDto: CreateGameDto): Promise<Game> {
-    return this.gamesRepository.createGame(createGameDto);
+  async createGame(gameDto: GameDto): Promise<Game> {
+    const game = this.gamesRepository.create(gameDto);
+    game.createdAt = new Date();
+
+    await this.gamesRepository.save(game).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
+    return game;
   }
 
-  async getGames(): Promise<Array<Game>> {
-    return this.gamesRepository.find();
+  getGames(filterDto: GamesFilterDto): Promise<Array<Game>> {
+    return this.gamesRepository.getGames(filterDto);
   }
 
   async updateGame(
     identifier: string,
+    slug: string,
     updateGameDto: UpdateGameDto,
   ): Promise<Game> {
-    const game = await this.gamesRepository.findOne({ identifier });
+    const game = await this.gamesRepository.findOne({ identifier, slug });
 
     if (!game) {
       throw new NotFoundException('Game not found');
     }
 
-    game.title = updateGameDto.title || game.title;
-    game.studio = updateGameDto.studio || game.studio;
-    game.description = updateGameDto.description || game.description;
-    game.publisher = updateGameDto.publisher || game.publisher;
-    game.premiered = updateGameDto.premiered || game.premiered;
-    game.draft = updateGameDto.draft || game.draft;
+    game.mapDtoToEntity(updateGameDto);
+    if (updateGameDto.draft != null && updateGameDto.draft) {
+      game.createdAt = new Date();
+    }
 
-    await this.gamesRepository.save(game);
+    await this.gamesRepository.save(game).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
 
     return game;
   }
 
-  async deleteGame(identifier: string): Promise<void> {
-    const result = await this.gamesRepository.delete({ identifier });
+  async deleteGame(identifier: string, slug: string): Promise<void> {
+    const result = await this.gamesRepository.delete({ identifier, slug });
 
     if (result.affected === 0) {
       throw new NotFoundException('Game not found');

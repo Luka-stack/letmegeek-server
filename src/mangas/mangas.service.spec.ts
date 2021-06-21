@@ -1,43 +1,33 @@
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
 
 import Manga from './entities/manga.entity';
-import { makeId, slugify } from '../utils/helpers';
+import { slugify } from '../utils/helpers';
 import { MangasRepository } from './mangas.repository';
 import { MangasService } from './mangas.service';
-import { NotFoundException } from '@nestjs/common';
-
-type MockType<T> = {
-  [P in keyof T]?: jest.Mock<any>;
-};
 
 const mockMangasRepository = () => ({
-  createManga: jest.fn((dto) => ({
-    id: '643790b4-ad59-49dc-baec-f5617e700bac',
-    slug: slugify(dto.title),
-    identifier: makeId(7),
-    ...dto,
-  })),
+  create: jest.fn(),
   save: jest.fn(),
-  find: jest.fn(),
   findOne: jest.fn(),
+  getMangas: jest.fn(),
   delete: jest.fn(),
 });
 
 const mockManga = {
   id: '643790b4-ad59-49dc-baec-f5617e700bac',
-  slug: 'test-slug',
+  slug: 'title_test',
   identifier: '80Vni9G',
-  title: 'Title',
-  author: 'Author',
-  publisher: 'Publisher',
-  premiered: new Date(),
+  title: 'Title test',
+  volumes: 55,
+  createdAt: new Date(),
+  updatedAt: new Date(),
   draft: false,
 };
 
 describe('MangasService', () => {
   let mangasService: MangasService;
-  let mangasRepository: MockType<Repository<Manga>>;
+  let mangasRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -52,72 +42,177 @@ describe('MangasService', () => {
   });
 
   describe('createManga', () => {
-    it('calls MangasRepository.createManga, creates one and return newly created comic', async () => {
-      const dtoManga = {
-        title: 'Title',
-        author: 'Author',
-        description: 'Description',
-        publisher: 'Publisher',
-        premiered: new Date(),
-        draft: false,
-      };
+    it('calls MangasRepository.create and save, creates one and return newly created manga', async () => {
+      // given
+      mockManga.createdAt = null;
 
-      const result = await mangasService.createManga(dtoManga);
+      mangasRepository.create.mockReturnValue(mockManga);
+      mangasRepository.save.mockResolvedValue({});
 
+      // when
+      const result = await mangasService.createManga(mockManga);
+
+      // then
       expect(result).toEqual({
         id: expect.any(String),
         identifier: expect.any(String),
-        slug: slugify(dtoManga.title),
-        ...dtoManga,
+        slug: slugify(mockManga.title),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        title: mockManga.title,
+        draft: mockManga.draft,
+        volumes: mockManga.volumes,
       });
+    });
+
+    it('calls MangasRepository.create and save, returns 409 since Title is not unique', async () => {
+      // given
+      mangasRepository.create.mockReturnValue(mockManga);
+      mangasRepository.save.mockRejectedValue({ code: 23505 });
+
+      // when, then
+      expect(mangasService.createManga(mockManga)).rejects.toThrowError(
+        ConflictException,
+      );
     });
   });
 
   describe('getMangas', () => {
-    it('calls MangasRepository.find, returns array of mangas', async () => {
-      mangasRepository.find.mockResolvedValue([mockManga]);
+    it('calls MangasRepository.getMangas, returns array of mangas', async () => {
+      // gien
+      mangasRepository.getMangas.mockResolvedValue([mockManga]);
 
-      const result = await mangasService.getMangas();
+      // when
+      const result = await mangasService.getMangas({});
+
+      // then
       expect(result).toEqual([mockManga]);
     });
   });
 
   describe('updateManga', () => {
-    it('calls MangasRepository.findOne and throw NotFoundException', async () => {
+    it('calls MangasRepository.findOne and return 404', async () => {
+      // given
       mangasRepository.findOne.mockResolvedValue(null);
 
-      expect(mangasService.updateManga('someId', {})).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(
+        mangasService.updateManga('someId', 'someSlug', {}),
+      ).rejects.toThrowError(NotFoundException);
     });
 
-    it('class MangasRepsitory.findOne, finds Manga then calls MangasRepsitory.save, updates Manga and returns it', async () => {
-      mangasRepository.findOne.mockResolvedValue(mockManga);
+    it('calls MangasRepository.findOne, finds Manga then calls MangasRepository.save, updates Manga and returns Manga', async () => {
+      // given
+      const mockMangaClass = new Manga();
+      mockMangaClass.title = mockManga.title;
 
+      mangasRepository.findOne.mockResolvedValue(mockMangaClass);
+      mangasRepository.save.mockResolvedValue(mockMangaClass);
+
+      // when
       const updateManga = {
-        title: 'Updated',
-        author: 'Updated',
+        title: 'updatedTitle',
+        volumes: 999,
+        premiered: new Date(),
+      };
+      const result = await mangasService.updateManga(
+        mockManga.identifier,
+        mockManga.slug,
+        updateManga,
+      );
+
+      // then
+      expect(result).toEqual({
+        title: updateManga.title,
+        volumes: updateManga.volumes,
+        premiered: updateManga.premiered,
+      });
+    });
+
+    it('calls MangasRepository.findOne, finds Manga then calls MangasRepository.save, updates draft to true and updates timestamp', async () => {
+      // given
+      const date = new Date();
+      date.setFullYear(2000);
+
+      const mockMangaClass = new Manga();
+      mockMangaClass.title = mockManga.title;
+      mockMangaClass.createdAt = date;
+
+      mangasRepository.findOne.mockResolvedValue(mockMangaClass);
+      mangasRepository.save.mockResolvedValue(mockMangaClass);
+
+      // when
+      const updatedManga = {
         draft: true,
       };
-      const result = await mangasService.updateManga('someId', updateManga);
+      const result = await mangasService.updateManga(
+        mockManga.identifier,
+        mockManga.slug,
+        updatedManga,
+      );
 
-      expect(result).toEqual({ ...mockManga, ...updateManga });
+      // then
+      expect(result.createdAt).not.toEqual(date);
+    });
+
+    it('calls MangasRepository.findOne, finds Manga then calls MangasRepository.save, draft and timestamp doesnt change', async () => {
+      // given
+      const date = new Date();
+      date.setFullYear(2000);
+
+      const mockMangaClass = new Manga();
+      mockMangaClass.title = mockManga.title;
+      mockMangaClass.createdAt = date;
+
+      mangasRepository.findOne.mockResolvedValue(mockMangaClass);
+      mangasRepository.save.mockResolvedValue(mockMangaClass);
+
+      // when
+      const updatedManga = {
+        volumes: 23,
+      };
+      const result = await mangasService.updateManga(
+        mockManga.identifier,
+        mockManga.slug,
+        updatedManga,
+      );
+
+      // then
+      expect(result.createdAt).toEqual(date);
+    });
+
+    it('calls MangasRepository.findOne, finds Manga then calls MangasRepository.save and throw 409 due to not unique Title', async () => {
+      // given
+      const mockMangaClass = new Manga();
+      mockMangaClass.title = mockManga.title;
+
+      mangasRepository.findOne.mockResolvedValue(mockMangaClass);
+      mangasRepository.save.mockRejectedValue({ code: 23505 });
+
+      // when, then
+      expect(
+        mangasService.updateManga(mockManga.identifier, mockManga.slug, {}),
+      ).rejects.toThrowError(ConflictException);
     });
   });
 
   describe('deleteManga', () => {
-    it('calls MangasRepository.delete, throws NotFoundExcpetion', async () => {
+    it('calls MangasRepository.delete, throws 404', async () => {
+      // given
       mangasRepository.delete.mockResolvedValue({ affected: 0 });
 
-      expect(mangasService.deleteManga('someId')).rejects.toThrow(
+      // when then
+      expect(mangasService.deleteManga('someId', 'someSlug')).rejects.toThrow(
         NotFoundException,
       );
     });
 
     it('calls MangasRepsitory.delete, delets Manga and returns void', async () => {
+      // given
       mangasRepository.delete.mockResolvedValue({ affected: 1 });
 
-      expect(mangasService.deleteManga('someId')).resolves.toBeCalled();
+      // when then
+      expect(mangasService.deleteManga('someId', 'someSlug')).resolves
+        .toHaveBeenCalled;
     });
   });
 });

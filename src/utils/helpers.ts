@@ -29,3 +29,20 @@ export function slugify(str: string): string {
     .replace(/-+$/, '') // trim - from end of text
     .replace(/-/g, '_');
 }
+
+export function prepareMultipleNestedAndQueryForStringField(
+  filter: string,
+  field: string,
+): [string, Record<string, unknown>] {
+  let query = '(';
+  const values = {};
+
+  filter.split(',').forEach((value) => {
+    const lowerCaseValue = value.toLowerCase();
+    query += `LOWER(${field}) LIKE :${lowerCaseValue} AND `;
+    values[lowerCaseValue] = `%${lowerCaseValue}%`;
+  });
+  query = query.slice(0, -4) + ')';
+
+  return [query, values];
+}

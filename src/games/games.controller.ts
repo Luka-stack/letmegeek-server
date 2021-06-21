@@ -7,38 +7,44 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import Game from './entities/game.entity';
-import { CreateGameDto } from './dto/create-game.dto';
 import { GamesService } from './games.service';
 import { UpdateGameDto } from './dto/update-game.dto';
+import { GameDto } from './dto/game.dto';
+import { GamesFilterDto } from './dto/games-filter.dto';
 
 @Controller('api/games')
 export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
   @Post()
-  createGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
-    return this.gamesService.createGame(createGameDto);
+  createGame(@Body() gameDto: GameDto): Promise<Game> {
+    return this.gamesService.createGame(gameDto);
   }
 
   @Get()
-  getGames(): Promise<Array<Game>> {
-    return this.gamesService.getGames();
+  getGames(@Query() filterDto: GamesFilterDto): Promise<Array<Game>> {
+    return this.gamesService.getGames(filterDto);
   }
 
-  @Patch('/:identifier')
+  @Patch('/:identifier/:slug')
   updateGame(
     @Param('identifier') identifier: string,
+    @Param('slug') slug: string,
     @Body() updateGameDto: UpdateGameDto,
   ): Promise<Game> {
-    return this.gamesService.updateGame(identifier, updateGameDto);
+    return this.gamesService.updateGame(identifier, slug, updateGameDto);
   }
 
-  @Delete('/:identifier')
+  @Delete('/:identifier/slug')
   @HttpCode(204)
-  deleteGame(@Param('identifier') identifier: string): Promise<void> {
-    return this.gamesService.deleteGame(identifier);
+  deleteGame(
+    @Param('identifier') identifier: string,
+    @Param('slug') slug: string,
+  ): Promise<void> {
+    return this.gamesService.deleteGame(identifier, slug);
   }
 }

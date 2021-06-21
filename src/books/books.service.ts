@@ -1,14 +1,15 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 
 import Book from './entities/book.entity';
-import { CreateBookDto } from './dto/create-book.dto';
+import { BookDto } from './dto/book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BooksRepository } from './books.repository';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { BooksFilterDto } from './dto/books-filter.dto';
 
 @Injectable()
 export class BooksService {
@@ -17,51 +18,51 @@ export class BooksService {
     private readonly booksRepository: BooksRepository,
   ) {}
 
-  createBook(createBookDto: CreateBookDto): Promise<Book> {
-    if (createBookDto.genres) {
-      const regex = /^[a-zA-Z]+$/;
-      const genres = createBookDto.genres.split(' ');
-      genres.forEach((genre) => {
-        if (!regex.test(genre.trim())) {
-          throw new BadRequestException(
-            'Genres can contain only letters. Multiple genres have to be separate with a space',
-          );
-        }
-      });
-    }
+  async createBook(bookDto: BookDto): Promise<Book> {
+    const book = this.booksRepository.create(bookDto);
+    book.createdAt = new Date();
 
-    return this.booksRepository.createBook(createBookDto);
+    await this.booksRepository.save(book).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
+    return book;
   }
 
-  async getBooks(): Promise<Array<Book>> {
-    return this.booksRepository.find();
+  getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
+    return this.booksRepository.getBooks(filterDto);
+    // return this.booksRepository.getBooks(filterDto);
   }
 
   async updateBook(
     identifier: string,
+    slug: string,
     updateBookDto: UpdateBookDto,
-  ): Promise<Book> {
-    const book = await this.booksRepository.findOne({ identifier });
+  ): Promise<Book | undefined> {
+    const book = await this.booksRepository.findOne({ identifier, slug });
 
     if (!book) {
       throw new NotFoundException('Book not found');
     }
 
-    book.title = updateBookDto.title || book.title;
-    book.series = updateBookDto.series || book.series;
-    book.author = updateBookDto.author || book.author;
-    book.description = updateBookDto.description || book.description;
-    book.publisher = updateBookDto.publisher || book.publisher;
-    book.premiered = updateBookDto.premiered || book.premiered;
-    book.draft = updateBookDto.draft || book.draft;
+    book.updateFields(updateBookDto);
+    if (updateBookDto.draft != null && updateBookDto.draft) {
+      book.createdAt = new Date();
+    }
 
-    await this.booksRepository.save(book);
+    await this.booksRepository.save(book).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
 
     return book;
   }
 
-  async deleteBook(identifier: string): Promise<void> {
-    const result = await this.booksRepository.delete({ identifier });
+  async deleteBook(identifier: string, slug: string): Promise<void> {
+    const result = await this.booksRepository.delete({ identifier, slug });
 
     if (result.affected === 0) {
       throw new NotFoundException('Book not found');

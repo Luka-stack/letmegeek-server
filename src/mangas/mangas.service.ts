@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateMangaDto } from './dto/create-manga.dto';
-import { UpdateMangaDto } from './dto/update-manga.dto';
+
 import Manga from './entities/manga.entity';
+import { UpdateMangaDto } from './dto/update-manga.dto';
 import { MangasRepository } from './mangas.repository';
+import { MangaDto } from './dto/manga.dto';
+import { MangasFilterDto } from './dto/mangas-filter.dto';
 
 @Injectable()
 export class MangasService {
@@ -12,37 +18,50 @@ export class MangasService {
     private readonly mangasRepository: MangasRepository,
   ) {}
 
-  createManga(createMangaDto: CreateMangaDto): Promise<Manga> {
-    return this.mangasRepository.createManga(createMangaDto);
+  async createManga(mangaDto: MangaDto): Promise<Manga> {
+    const manga = this.mangasRepository.create(mangaDto);
+    manga.createdAt = new Date();
+
+    await this.mangasRepository.save(manga).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
+    return manga;
   }
 
-  async getMangas(): Promise<Array<Manga>> {
-    return await this.mangasRepository.find();
+  getMangas(filterDto: MangasFilterDto): Promise<Array<Manga>> {
+    return this.mangasRepository.getMangas(filterDto);
   }
 
   async updateManga(
     identifier: string,
+    slug: string,
     updateMangaDto: UpdateMangaDto,
   ): Promise<Manga> {
-    const manga = await this.mangasRepository.findOne({ identifier });
+    const manga = await this.mangasRepository.findOne({ identifier, slug });
 
     if (!manga) {
       throw new NotFoundException('Manga not found');
     }
 
-    manga.title = updateMangaDto.title || manga.title;
-    manga.author = updateMangaDto.author || manga.author;
-    manga.description = updateMangaDto.description || manga.description;
-    manga.publisher = updateMangaDto.publisher || manga.publisher;
-    manga.premiered = updateMangaDto.premiered || manga.premiered;
-    manga.draft = updateMangaDto.draft || manga.draft;
+    manga.mapDtoToEntity(updateMangaDto);
+    if (updateMangaDto.draft != null && updateMangaDto.draft) {
+      manga.createdAt = new Date();
+    }
 
-    await this.mangasRepository.save(manga);
+    await this.mangasRepository.save(manga).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
     return manga;
   }
 
-  async deleteManga(identifier: string): Promise<void> {
-    const result = await this.mangasRepository.delete({ identifier });
+  async deleteManga(identifier: string, slug): Promise<void> {
+    const result = await this.mangasRepository.delete({ identifier, slug });
 
     if (result.affected === 0) {
       throw new NotFoundException('Manga not found');

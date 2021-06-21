@@ -1,35 +1,29 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { makeId, slugify } from '../utils/helpers';
+import Game from './entities/game.entity';
+import { slugify } from '../utils/helpers';
 import { GamesRepository } from './games.repository';
 import { GamesService } from './games.service';
 
 const mockGamesRepository = () => ({
-  createGame: jest.fn((dto) => ({
-    id: '643790b4-ad59-49dc-baec-f5617e700bac',
-    slug: slugify(dto.title),
-    identifier: makeId(7),
-    ...dto,
-  })),
+  create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
-  find: jest.fn(),
+  getGames: jest.fn(),
   delete: jest.fn(),
 });
 
-const mockGames = [
-  {
-    id: '643790b4-ad59-49dc-baec-f5617e700bac',
-    slug: 'test-slug',
-    identifier: '80Vni9G',
-    title: 'Title',
-    studio: 'Studio',
-    publisher: 'Publisher',
-    premiered: new Date(),
-    draft: false,
-  },
-];
+const mockGame = {
+  id: '643790b4-ad59-49dc-baec-f5617e700bac',
+  slug: 'test-slug',
+  identifier: '80Vni9G',
+  title: 'Title Slug',
+  gears: 'PlayStation 5',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  draft: false,
+};
 
 describe('GamesService', () => {
   let gamesService: GamesService;
@@ -48,71 +42,177 @@ describe('GamesService', () => {
   });
 
   describe('createGame', () => {
-    it('calls GamesRepository.createGame, creates one and return newly created game', async () => {
-      const dtoGame = {
-        title: 'Title',
-        studio: 'Studio',
-        description: 'Description',
-        publisher: 'Publisher',
-        premiered: new Date(),
-        draft: false,
-      };
+    it('calls GamesRepository.create and save, creates one and return newly created Game', async () => {
+      // given
+      mockGame.createdAt = null;
 
-      const result = await gamesService.createGame(dtoGame);
+      gamesRepository.create.mockReturnValue(mockGame);
+      gamesRepository.save.mockResolvedValue({});
 
+      // when
+      const result = await gamesService.createGame(mockGame);
+
+      // then
       expect(result).toEqual({
         id: expect.any(String),
         identifier: expect.any(String),
-        slug: slugify(dtoGame.title),
-        ...dtoGame,
+        slug: slugify(mockGame.title),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        title: mockGame.title,
+        draft: mockGame.draft,
+        gears: mockGame.gears,
       });
+    });
+
+    it('calls GamesRepository.create and save, returns 409 since Title is not unique', async () => {
+      // given
+      gamesRepository.create.mockReturnValue(mockGame);
+      gamesRepository.save.mockRejectedValue({ code: 23505 });
+
+      // when, then
+      expect(gamesService.createGame(mockGame)).rejects.toThrowError(
+        ConflictException,
+      );
     });
   });
 
-  describe('getGames', () => {
-    it('calls GamesRepository.find, return arrray of books', async () => {
-      gamesRepository.find.mockResolvedValue(mockGames);
-      const result = await gamesService.getGames();
+  describe('getMangas', () => {
+    it('calls GamesRepository.getGames, returns array of games', async () => {
+      // gien
+      gamesRepository.getMangas.mockResolvedValue([mockGame]);
 
-      expect(result).toEqual(mockGames);
+      // when
+      const result = await gamesService.getGames({});
+
+      // then
+      expect(result).toEqual([mockGame]);
     });
   });
 
   describe('updateGame', () => {
-    it('calls GamesRespository.findOne and throw NotFoundException', async () => {
+    it('calls GamesRepository.findOne and return 404', async () => {
+      // given
       gamesRepository.findOne.mockResolvedValue(null);
 
-      expect(gamesService.updateGame('someId', {})).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(
+        gamesService.updateGame('someId', 'someSlug', {}),
+      ).rejects.toThrowError(NotFoundException);
     });
 
-    it('calls GamesRepository.findOne, find game then calls GamesRepository.save, updates game and return it', async () => {
-      gamesRepository.findOne.mockResolvedValue(mockGames[0]);
+    it('calls GamesRepository.findOne, finds Game then calls GamesRepository.save, updates Manga and returns Game', async () => {
+      // given
+      const mockGameClass = new Game();
+      mockGameClass.title = mockGame.title;
 
-      const updatedGame = {
-        draft: true,
-        title: 'UpdatedTitle',
+      gamesRepository.findOne.mockResolvedValue(mockGameClass);
+      gamesRepository.save.mockResolvedValue(mockGameClass);
+
+      // when
+      const updateGame = {
+        title: 'updatedTitle',
+        volumes: 999,
+        premiered: new Date(),
       };
-      const result = await gamesService.updateGame('someId', updatedGame);
+      const result = await gamesService.updateGame(
+        mockGame.identifier,
+        mockGame.slug,
+        updateGame,
+      );
 
-      expect(result).toEqual({ ...mockGames[0], ...updatedGame });
+      // then
+      expect(result).toEqual({
+        title: updateGame.title,
+        volumes: updateGame.volumes,
+        premiered: updateGame.premiered,
+      });
+    });
+
+    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save, updates draft to true and updates timestamp', async () => {
+      // given
+      const date = new Date();
+      date.setFullYear(2000);
+
+      const mockGameClass = new Game();
+      mockGameClass.title = mockGame.title;
+      mockGameClass.createdAt = date;
+
+      gamesRepository.findOne.mockResolvedValue(mockGameClass);
+      gamesRepository.save.mockResolvedValue(mockGameClass);
+
+      // when
+      const updateGame = {
+        draft: true,
+      };
+      const result = await gamesService.updateGame(
+        mockGame.identifier,
+        mockGame.slug,
+        updateGame,
+      );
+
+      // then
+      expect(result.createdAt).not.toEqual(date);
+    });
+
+    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save, draft and timestamp doesnt change', async () => {
+      // given
+      const date = new Date();
+      date.setFullYear(2000);
+
+      const mockGameClass = new Game();
+      mockGameClass.title = mockGame.title;
+      mockGameClass.createdAt = date;
+
+      gamesRepository.findOne.mockResolvedValue(mockGameClass);
+      gamesRepository.save.mockResolvedValue(mockGameClass);
+
+      // when
+      const updateGame = {
+        completeTime: 23,
+      };
+      const result = await gamesService.updateGame(
+        mockGame.identifier,
+        mockGame.slug,
+        updateGame,
+      );
+
+      // then
+      expect(result.createdAt).toEqual(date);
+    });
+
+    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save and throw 409 due to not unique Title', async () => {
+      // given
+      const mockGameClass = new Game();
+      mockGameClass.title = mockGame.title;
+
+      gamesRepository.findOne.mockResolvedValue(mockGameClass);
+      gamesRepository.save.mockRejectedValue({ code: 23505 });
+
+      // when, then
+      expect(
+        gamesService.updateGame(mockGame.identifier, mockGame.slug, {}),
+      ).rejects.toThrowError(ConflictException);
     });
   });
 
-  describe('deleteGame', () => {
-    it('calls GamesRepository.delete, throw NotFoundException', async () => {
+  describe('deleteManga', () => {
+    it('calls GamesRepository.delete, throws 404', async () => {
+      // given
       gamesRepository.delete.mockResolvedValue({ affected: 0 });
 
-      expect(gamesService.deleteGame('someId')).rejects.toThrow(
+      // when then
+      expect(gamesService.deleteGame('someId', 'someSlug')).rejects.toThrow(
         NotFoundException,
       );
     });
 
-    it('calls GamesRepository.delete, deletes Game and return void', async () => {
+    it('calls GamesRepository.delete, delets Manga and returns void', async () => {
+      // given
       gamesRepository.delete.mockResolvedValue({ affected: 1 });
 
-      expect(gamesService.deleteGame('someId')).resolves.toBeCalled();
+      // when then
+      expect(gamesService.deleteGame('someId', 'someSlug')).resolves
+        .toHaveBeenCalled;
     });
   });
 });

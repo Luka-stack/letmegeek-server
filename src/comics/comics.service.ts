@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import Comic from './entities/comic.entity';
+import { ComicDto } from './dto/comic.dto';
 import { ComicsRepository } from './comics.repository';
-import { CreateComicDto } from './dto/create-comic.dto';
 import { UpdateComicDto } from './dto/update-comic.dto';
+import { ComicsFilterDto } from './dto/comics-filter.dto';
 
 @Injectable()
 export class ComicsService {
@@ -13,38 +18,50 @@ export class ComicsService {
     private readonly comicsRepository: ComicsRepository,
   ) {}
 
-  createComic(createComicDto: CreateComicDto): Promise<Comic> {
-    return this.comicsRepository.createComic(createComicDto);
+  async createComic(comicDto: ComicDto): Promise<Comic> {
+    const comic = this.comicsRepository.create(comicDto);
+    comic.createdAt = new Date();
+
+    await this.comicsRepository.save(comic).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
+    return comic;
   }
 
-  async getComics(): Promise<Array<Comic>> {
-    return await this.comicsRepository.find();
+  async getComics(filterDto: ComicsFilterDto): Promise<Array<Comic>> {
+    return await this.comicsRepository.getComics(filterDto);
   }
 
   async updateComic(
     identifier: string,
+    slug: string,
     updateComicDto: UpdateComicDto,
   ): Promise<Comic> {
-    const comic = await this.comicsRepository.findOne({ identifier });
+    const comic = await this.comicsRepository.findOne({ identifier, slug });
 
     if (!comic) {
       throw new NotFoundException('Comic not found');
     }
 
-    comic.title = updateComicDto.title || comic.title;
-    comic.author = updateComicDto.author || comic.author;
-    comic.series = updateComicDto.series || comic.series;
-    comic.description = updateComicDto.description || comic.description;
-    comic.publisher = updateComicDto.publisher || comic.publisher;
-    comic.premiered = updateComicDto.premiered || comic.premiered;
-    comic.draft = updateComicDto.draft || comic.draft;
+    comic.mapDtoToEntity(updateComicDto);
+    if (updateComicDto.draft != null && updateComicDto.draft) {
+      comic.createdAt = new Date();
+    }
 
-    await this.comicsRepository.save(comic);
+    await this.comicsRepository.save(comic).catch((err) => {
+      if (err.code == 23505) {
+        throw new ConflictException('Title has to be unique');
+      }
+    });
+
     return comic;
   }
 
-  async deleteComic(identifier: string): Promise<void> {
-    const result = await this.comicsRepository.delete({ identifier });
+  async deleteComic(identifier: string, slug: string): Promise<void> {
+    const result = await this.comicsRepository.delete({ identifier, slug });
 
     if (result.affected === 0) {
       throw new NotFoundException('Comic not found');

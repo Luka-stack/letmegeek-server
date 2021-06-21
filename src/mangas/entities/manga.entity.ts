@@ -1,53 +1,35 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
-import { makeId, slugify } from '../../utils/helpers';
+import Article from '../../shared/entities/article.entity';
+import { UpdateMangaDto } from '../dto/update-manga.dto';
 
 @Entity('mangas')
-export default class Manga {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Index()
-  @Column()
-  identifier: string;
-
-  @Column()
-  slug: string;
-
-  @Index()
-  @Column()
-  title: string;
-
-  @Column()
-  author: string;
-
-  @Column({ nullable: true, type: 'text' })
-  description: string;
+export default class Manga extends Article {
+  @Column({ nullable: true })
+  volumes: number;
 
   @Column({ nullable: true })
-  genres: string;
+  chapters: number;
 
-  @Column()
-  publisher: string;
-
-  @Column()
+  @Column({ nullable: true })
   premiered: Date;
 
   @Column({ nullable: true })
-  imageUrn: string;
+  finished: Date;
 
-  @Column()
-  draft: boolean;
+  mapDtoToEntity(updateMangaDto: UpdateMangaDto) {
+    this.title = updateMangaDto.title || this.title;
+    this.premiered = updateMangaDto.premiered || this.premiered;
+    this.finished = updateMangaDto.finished || this.finished;
+    this.chapters = updateMangaDto.chapters || this.chapters;
+    this.volumes = updateMangaDto.volumes || this.volumes;
+    this.authors = updateMangaDto.authors || this.authors;
+    this.description = updateMangaDto.description || this.description;
+    this.publishers = updateMangaDto.publishers || this.publishers;
+    this.genres = updateMangaDto.genres || this.genres;
 
-  @BeforeInsert()
-  makeIdAndSlug() {
-    this.identifier = makeId(7);
-    this.slug = slugify(this.title);
+    if (updateMangaDto.draft != null) {
+      this.draft = updateMangaDto.draft;
+    }
   }
 }
