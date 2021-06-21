@@ -1,6 +1,7 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 import ArticleDto from '../../shared/dto/article.dto';
+import { IsCommaSeparatedGameMode } from '../../utils/game-mode.validator';
 
 export class GameDto extends ArticleDto {
   @IsOptional()
@@ -8,7 +9,7 @@ export class GameDto extends ArticleDto {
   completeTime?: number;
 
   @IsOptional()
-  @IsString()
+  @IsCommaSeparatedGameMode()
   gameMode?: string;
 
   @IsOptional()
