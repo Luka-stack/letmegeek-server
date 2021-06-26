@@ -33,7 +33,6 @@ export class BooksService {
 
   getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
     return this.booksRepository.getBooks(filterDto);
-    // return this.booksRepository.getBooks(filterDto);
   }
 
   async updateBook(

@@ -8,5 +8,6 @@ import { MangasService } from './mangas.service';
   imports: [TypeOrmModule.forFeature([MangasRepository])],
   controllers: [MangasController],
   providers: [MangasService],
+  exports: [TypeOrmModule],
 })
 export class MangasModule {}

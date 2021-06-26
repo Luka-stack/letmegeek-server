@@ -7,7 +7,7 @@ import {
 export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
     const message =
-      'Value can contain only letters and numbers. Multiple values have to be separate with a space';
+      'Genre can contain only letters and numbers. Multiple values have to be separate with a space';
 
     const validate = function (value: any, _args: ValidationArguments) {
       let result = true;

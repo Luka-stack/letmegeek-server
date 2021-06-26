@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { IsCommaSeparatedString } from '../../utils/genre.validator';
+import { IsCommaSeparatedString } from '../../utils/validators/comma-separated-string.validator';
 
 export default abstract class ArticleDto {
   @IsNotEmpty()

@@ -1,5 +1,8 @@
+import { Exclude, Expose } from 'class-transformer';
+import { Column, Entity, OneToMany } from 'typeorm';
+
 import Article from '../../shared/entities/article.entity';
-import { Column, Entity } from 'typeorm';
+import WallsBook from '../../walls/walls-books/entities/walls-book.entity';
 import { UpdateBookDto } from '../dto/update-book.dto';
 
 @Entity('books')
@@ -15,6 +18,18 @@ export default class Book extends Article {
 
   @Column({ nullable: true })
   volume: number;
+
+  @Exclude()
+  @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, { eager: true })
+  wallsBooks: Array<WallsBook>;
+
+  @Expose()
+  get userScore(): number {
+    return (
+      this.wallsBooks?.reduce((prev, curr) => prev + curr.score, 0) /
+      this.wallsBooks?.length
+    );
+  }
 
   // sequel
   // prequel One-To-One Book-Book

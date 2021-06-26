@@ -6,6 +6,9 @@ import { BooksModule } from './books/books.module';
 import { GamesModule } from './games/games.module';
 import { ComicsModule } from './comics/comics.module';
 import { MangasModule } from './mangas/mangas.module';
+import { UsersModule } from './users/users.module';
+import { WallsModule } from './walls/walls.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { MangasModule } from './mangas/mangas.module';
     GamesModule,
     ComicsModule,
     MangasModule,
+    UsersModule,
+    WallsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

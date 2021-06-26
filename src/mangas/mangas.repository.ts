@@ -8,14 +8,28 @@ import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 @EntityRepository(Manga)
 export class MangasRepository extends Repository<Manga> {
   async getMangas(filterDto: MangasFilterDto): Promise<Array<Manga>> {
-    const { name, volumes, finished, genres, authors, publishers, premiered } =
-      filterDto;
+    const {
+      name,
+      volumes,
+      finished,
+      genres,
+      authors,
+      publishers,
+      premiered,
+      type,
+    } = filterDto;
     const query = this.createQueryBuilder('manga');
     query.where('1=1');
 
     if (name) {
       query.andWhere('LOWER(manga.title) LIKE :name', {
         name: `%${name.toLowerCase()}%`,
+      });
+    }
+
+    if (type) {
+      query.andWhere('LOWER(manga.type) LIKE :type', {
+        type: name.toLowerCase(),
       });
     }
 

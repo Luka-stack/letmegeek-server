@@ -1,6 +1,9 @@
-import { Column, Entity } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import WallsManga from 'src/walls/walls-mangas/entities/walls-manga.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import Article from '../../shared/entities/article.entity';
+import { MangaType } from './manga-type';
 import { UpdateMangaDto } from '../dto/update-manga.dto';
 
 @Entity('mangas')
@@ -17,6 +20,15 @@ export default class Manga extends Article {
   @Column({ nullable: true })
   finished: Date;
 
+  @Column({ nullable: true })
+  type: MangaType;
+
+  @Exclude()
+  @OneToMany(() => WallsManga, (wallsManga) => wallsManga.manga, {
+    eager: false,
+  })
+  wallsGames: Array<WallsManga>;
+
   mapDtoToEntity(updateMangaDto: UpdateMangaDto) {
     this.title = updateMangaDto.title || this.title;
     this.premiered = updateMangaDto.premiered || this.premiered;
@@ -27,6 +39,7 @@ export default class Manga extends Article {
     this.description = updateMangaDto.description || this.description;
     this.publishers = updateMangaDto.publishers || this.publishers;
     this.genres = updateMangaDto.genres || this.genres;
+    this.type = updateMangaDto.type || this.type;
 
     if (updateMangaDto.draft != null) {
       this.draft = updateMangaDto.draft;

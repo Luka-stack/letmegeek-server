@@ -3,30 +3,23 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { allGameModes } from 'src/games/entities/game-mode';
+import { allWallArticleStatusesModes } from 'src/walls/entities/wall-article-status';
 
-export function IsCommaSeparatedGameMode(
-  validationOptions?: ValidationOptions,
-) {
+export function IsWallArticleStatus(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
-    const gamesModes = allGameModes().join(', ');
-    const message = `Value has to be a comma separated list of Game Modes. Possible Game Modes are: ${gamesModes}`;
+    const wallStatuses = allWallArticleStatusesModes().join(', ');
+    const message = `Provided wrong status. Possible Statuses are: ${wallStatuses}`;
 
     const validate = function (value: any, _args: ValidationArguments) {
       if (typeof value !== 'string') {
         return false;
       }
 
-      let result = true;
-      const modes = value.split(' ');
-      modes.forEach((mode: string) => {
-        if (!gamesModes.includes(mode)) {
-          result = false;
-          return;
-        }
-      });
+      if (!wallStatuses.includes(value.toUpperCase())) {
+        return false;
+      }
 
-      return result;
+      return true;
     };
 
     const defaultMessage = () => {
@@ -34,7 +27,7 @@ export function IsCommaSeparatedGameMode(
     };
 
     registerDecorator({
-      name: 'isCommaSeparatedGameMode',
+      name: 'isWallArticleStatus',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,

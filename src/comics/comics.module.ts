@@ -9,5 +9,6 @@ import { ComicsService } from './comics.service';
   imports: [TypeOrmModule.forFeature([ComicsRepository])],
   controllers: [ComicsController],
   providers: [ComicsService],
+  exports: [TypeOrmModule],
 })
 export class ComicsModule {}

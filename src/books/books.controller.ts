@@ -26,8 +26,11 @@ export class BooksController {
   }
 
   @Get()
-  getBooks(@Query() filterDto: BooksFilterDto): Promise<Array<Book>> {
-    return this.booksService.getBooks(filterDto);
+  async getBooks(@Query() filterDto: BooksFilterDto): Promise<Array<Book>> {
+    const books = await this.booksService.getBooks(filterDto);
+    // console.log(books[0]);
+
+    return books;
   }
 
   @Patch('/:identifier/:slug')

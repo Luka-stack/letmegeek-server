@@ -55,6 +55,8 @@ export class BooksRepository extends Repository<Book> {
       );
     }
 
+    query.leftJoinAndSelect('book.wallsBooks', 'WallsBook');
+
     try {
       const books = await query.getMany();
       return books;
