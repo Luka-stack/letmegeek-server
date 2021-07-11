@@ -75,10 +75,4 @@ export class AuthController {
 
     return { message: 'User logged out' };
   }
-
-  @Get('/test')
-  test(): void {
-    this.authService.cleanDBFromOldUnconfirmedUsers();
-    return null;
-  }
 }
