@@ -46,3 +46,10 @@ export function prepareMultipleNestedAndQueryForStringField(
 
   return [query, values];
 }
+
+export function removeSpacesFromCommaSeparatedString(values: string): string {
+  return values
+    .split(',')
+    .map((v) => v.trim())
+    .join(',');
+}

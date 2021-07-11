@@ -1,6 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Exclude, Expose } from 'class-transformer';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 import Article from '../../shared/entities/article.entity';
+import WallsGame from '../../walls/walls-games/entities/walls-game.entity';
 import { UpdateGameDto } from '../dto/update-game.dto';
 
 @Entity('games')
@@ -16,6 +18,13 @@ export default class Game extends Article {
 
   @Column({ nullable: true })
   gears: string;
+
+  @Exclude()
+  @OneToMany(() => WallsGame, (wallsGame) => wallsGame.game, { eager: false })
+  wallsGames: Array<WallsGame>;
+
+  @Expose()
+  userWallsGame: WallsGame;
 
   mapDtoToEntity(updateGameDto: UpdateGameDto) {
     this.title = updateGameDto.title || this.title;

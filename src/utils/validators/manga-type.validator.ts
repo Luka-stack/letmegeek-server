@@ -3,30 +3,20 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { allGameModes } from 'src/games/entities/game-mode';
 
-export function IsCommaSeparatedGameMode(
-  validationOptions?: ValidationOptions,
-) {
+import { allMangaTypes } from '../../mangas/entities/manga-type';
+
+export function IsMangaType(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
-    const gamesModes = allGameModes().join(', ');
-    const message = `Value has to be a comma separated list of Game Modes. Possible Game Modes are: ${gamesModes}`;
+    const gamesModes = allMangaTypes().join(', ');
+    const message = `Provided wrong Manga Type. Possible types are: ${allMangaTypes}`;
 
     const validate = function (value: any, _args: ValidationArguments) {
       if (typeof value !== 'string') {
         return false;
       }
 
-      let result = true;
-      const modes = value.split(' ');
-      modes.forEach((mode: string) => {
-        if (!gamesModes.includes(mode)) {
-          result = false;
-          return;
-        }
-      });
-
-      return result;
+      return gamesModes.includes(value.toUpperCase()) ? true : false;
     };
 
     const defaultMessage = () => {
@@ -34,7 +24,7 @@ export function IsCommaSeparatedGameMode(
     };
 
     registerDecorator({
-      name: 'isCommaSeparatedGameMode',
+      name: 'isMangaType',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,

@@ -3,13 +3,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import Book from './entities/book.entity';
+import User from '../users/entities/user.entity';
 import { BookDto } from './dto/book.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { BooksRepository } from './books.repository';
+import { UserRole } from '../auth/entities/user-role';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { BooksFilterDto } from './dto/books-filter.dto';
+import { BooksRepository } from './books.repository';
+import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
 
 @Injectable()
 export class BooksService {
@@ -18,7 +21,25 @@ export class BooksService {
     private readonly booksRepository: BooksRepository,
   ) {}
 
-  async createBook(bookDto: BookDto): Promise<Book> {
+  async createBook(bookDto: BookDto, user: User): Promise<Book> {
+    if (user.role === UserRole.USER) {
+      bookDto.draft = true;
+    }
+
+    if (bookDto.authors) {
+      bookDto.authors = removeSpacesFromCommaSeparatedString(bookDto.authors);
+    }
+
+    if (bookDto.publishers) {
+      bookDto.publishers = removeSpacesFromCommaSeparatedString(
+        bookDto.publishers,
+      );
+    }
+
+    if (bookDto.genres) {
+      bookDto.genres = removeSpacesFromCommaSeparatedString(bookDto.genres);
+    }
+
     const book = this.booksRepository.create(bookDto);
     book.createdAt = new Date();
 
@@ -31,9 +52,48 @@ export class BooksService {
     return book;
   }
 
-  getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
-    return this.booksRepository.getBooks(filterDto);
-    // return this.booksRepository.getBooks(filterDto);
+  async getBooks(filterDto: BooksFilterDto, user: User): Promise<Array<Book>> {
+    const books = await this.booksRepository
+      .getBooks(filterDto)
+      .then((result: Array<Book>) => {
+        if (user) {
+          result.map((book: Book) => {
+            const wall = book.wallsBooks.find(
+              (wall) => wall.username === user.username,
+            );
+            book.userWallsBook = wall;
+          });
+        }
+
+        return result;
+      });
+
+    return books;
+  }
+
+  async getOneBook(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Book> {
+    const book = await this.booksRepository
+      .getCompleteBook(identifier, slug, user)
+      .then((result: Book) => {
+        if (!result) {
+          throw new NotFoundException('Book not found');
+        }
+
+        if (user) {
+          const wall = result.wallsBooks.find(
+            (wall) => wall.username === user.username,
+          );
+          result.userWallsBook = wall;
+        }
+
+        return result;
+      });
+
+    return book;
   }
 
   async updateBook(
@@ -45,6 +105,24 @@ export class BooksService {
 
     if (!book) {
       throw new NotFoundException('Book not found');
+    }
+
+    if (updateBookDto.authors) {
+      updateBookDto.authors = removeSpacesFromCommaSeparatedString(
+        updateBookDto.authors,
+      );
+    }
+
+    if (updateBookDto.publishers) {
+      updateBookDto.publishers = removeSpacesFromCommaSeparatedString(
+        updateBookDto.publishers,
+      );
+    }
+
+    if (updateBookDto.genres) {
+      updateBookDto.genres = removeSpacesFromCommaSeparatedString(
+        updateBookDto.genres,
+      );
     }
 
     book.updateFields(updateBookDto);
@@ -62,10 +140,16 @@ export class BooksService {
   }
 
   async deleteBook(identifier: string, slug: string): Promise<void> {
-    const result = await this.booksRepository.delete({ identifier, slug });
+    // const result = await this.booksRepository.delete({ identifier, slug });
 
-    if (result.affected === 0) {
-      throw new NotFoundException('Book not found');
-    }
+    // if (result.affected === 0) {
+    //   throw new NotFoundException('Book not found');
+    // }
+
+    await this.booksRepository.delete({ identifier, slug }).then((result) => {
+      if (result.affected === 0) {
+        throw new NotFoundException('Book not found');
+      }
+    });
   }
 }

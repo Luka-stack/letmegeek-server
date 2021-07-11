@@ -3,18 +3,24 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
+import { allGameModes } from '../../games/entities/game-mode';
 
-export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
+export function IsCommaSeparatedGameMode(
+  validationOptions?: ValidationOptions,
+) {
   return function (object: unknown, propertyName: string) {
-    const message =
-      'Value can contain only letters and numbers. Multiple values have to be separate with a space';
+    const gamesModes = allGameModes().join(', ');
+    const message = `GameMode has to be a comma separated list of Game Modes. Possible Game Modes are: ${gamesModes}`;
 
     const validate = function (value: any, _args: ValidationArguments) {
+      if (typeof value !== 'string') {
+        return false;
+      }
+
       let result = true;
-      const regex = /^[a-zA-Z0-9]+$/;
-      const genres = value.split(' ');
-      genres.forEach((genre: string) => {
-        if (!regex.test(genre)) {
+      const modes = value.split(' ');
+      modes.forEach((mode: string) => {
+        if (!gamesModes.includes(mode)) {
           result = false;
           return;
         }
@@ -23,12 +29,12 @@ export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
       return result;
     };
 
-    const defaultMessage = function () {
+    const defaultMessage = () => {
       return message;
     };
 
     registerDecorator({
-      name: 'isCommaSeparatedString',
+      name: 'isCommaSeparatedGameMode',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,

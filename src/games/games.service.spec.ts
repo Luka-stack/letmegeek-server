@@ -2,6 +2,9 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import Game from './entities/game.entity';
+import User from '../users/entities/user.entity';
+import WallsGame from '../walls/walls-games/entities/walls-game.entity';
+import { UserRole } from '../auth/entities/user-role';
 import { slugify } from '../utils/helpers';
 import { GamesRepository } from './games.repository';
 import { GamesService } from './games.service';
@@ -11,18 +14,30 @@ const mockGamesRepository = () => ({
   save: jest.fn(),
   findOne: jest.fn(),
   getGames: jest.fn(),
+  getCompleteGame: jest.fn(),
   delete: jest.fn(),
 });
 
-const mockGame = {
-  id: '643790b4-ad59-49dc-baec-f5617e700bac',
-  slug: 'test-slug',
-  identifier: '80Vni9G',
-  title: 'Title Slug',
-  gears: 'PlayStation 5',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  draft: false,
+const mockGame = () => {
+  return {
+    id: '643790b4-ad59-49dc-baec-f5617e700bac',
+    slug: 'title_slug',
+    identifier: '80Vni9G',
+    title: 'Title Slug',
+    gears: 'PlayStation 5',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    draft: false,
+    wallsGames: [],
+  };
+};
+
+const mockUser = () => {
+  const user = new User();
+  user.email = 'test@test.com';
+  user.username = 'TestUser';
+  user.role = UserRole.USER;
+  return user;
 };
 
 describe('GamesService', () => {
@@ -42,56 +57,145 @@ describe('GamesService', () => {
   });
 
   describe('createGame', () => {
-    it('calls GamesRepository.create and save, creates one and return newly created Game', async () => {
+    it('call GamesRepository.create as a normal user; save, create and return Game', async () => {
       // given
-      mockGame.createdAt = null;
-
-      gamesRepository.create.mockReturnValue(mockGame);
+      const game = mockGame();
+      game.createdAt = null;
+      gamesRepository.create.mockReturnValue(game);
       gamesRepository.save.mockResolvedValue({});
 
       // when
-      const result = await gamesService.createGame(mockGame);
+      const result = await gamesService.createGame(game, mockUser());
 
       // then
       expect(result).toEqual({
         id: expect.any(String),
         identifier: expect.any(String),
-        slug: slugify(mockGame.title),
+        slug: slugify(game.title),
         createdAt: expect.any(Date),
         updatedAt: expect.any(Date),
-        title: mockGame.title,
-        draft: mockGame.draft,
-        gears: mockGame.gears,
+        title: game.title,
+        draft: true,
+        gears: game.gears,
+        wallsGames: [],
+      });
+    });
+
+    it('call GamesRepository.create as a normal admin; save, create and return Game', async () => {
+      // given
+      const game = mockGame();
+      game.createdAt = null;
+      gamesRepository.create.mockReturnValue(game);
+      gamesRepository.save.mockResolvedValue({});
+
+      // when
+      const result = await gamesService.createGame(game, mockUser());
+
+      // then
+      expect(result).toEqual({
+        id: expect.any(String),
+        identifier: expect.any(String),
+        slug: slugify(game.title),
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
+        title: game.title,
+        draft: game.draft,
+        gears: game.gears,
+        wallsGames: [],
       });
     });
 
     it('calls GamesRepository.create and save, returns 409 since Title is not unique', async () => {
       // given
-      gamesRepository.create.mockReturnValue(mockGame);
+      gamesRepository.create.mockReturnValue(mockGame());
       gamesRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
-      expect(gamesService.createGame(mockGame)).rejects.toThrowError(
+      expect(gamesService.createGame(mockGame(), null)).rejects.toThrowError(
         ConflictException,
       );
     });
   });
 
   describe('getMangas', () => {
-    it('calls GamesRepository.getGames, returns array of games', async () => {
+    const user = mockUser();
+    const game = mockGame();
+    const wallsGame = new WallsGame();
+    wallsGame.username = user.username;
+    wallsGame.score = 5;
+    game.wallsGames = [wallsGame];
+
+    it('call GamesRepository.getGames, return array of games', async () => {
       // gien
-      gamesRepository.getMangas.mockResolvedValue([mockGame]);
+      gamesRepository.getGames.mockResolvedValue([game]);
 
       // when
-      const result = await gamesService.getGames({});
+      const result = await gamesService.getGames(null, null);
 
       // then
-      expect(result).toEqual([mockGame]);
+      expect(result).toEqual([game]);
+    });
+
+    it('call GamesRepository.getGames as a user, return array of games with users wallsGame', async () => {
+      // gien
+      gamesRepository.getGames.mockResolvedValue([game]);
+
+      // when
+      const result = await gamesService.getGames(null, user);
+
+      // then
+      expect(result).toEqual([game]);
+      expect(result[0].userWallsGame).toEqual(wallsGame);
+    });
+  });
+
+  describe('getOneBook', () => {
+    const game = mockGame();
+    const user = mockUser();
+    const wallsGame = new WallsGame();
+    wallsGame.username = user.username;
+    wallsGame.score = 5;
+    game.wallsGames = [wallsGame];
+
+    it('call GamesRepository.getOneGame, return book', async () => {
+      // given
+      gamesRepository.getCompleteGame.mockResolvedValue(game);
+
+      // when
+      const result = await gamesService.getOneGame('identifier', 'slug', null);
+
+      // then
+      expect(result).toEqual(game);
+    });
+
+    it('call GamesRepository.getOneGame as a user, return game with users wallsgame', async () => {
+      // given
+      gamesRepository.getCompleteGame.mockResolvedValue(game);
+
+      // when
+      const result = await gamesService.getOneGame('identifier', 'slug', user);
+
+      // then
+      expect(result).toEqual(game);
+      expect(result.userWallsGame).toEqual(wallsGame);
+    });
+
+    it('call GamesRepository.getOneGame, return 404', async () => {
+      // given
+      gamesRepository.getCompleteGame.mockResolvedValue(null);
+
+      // when, then
+      expect(
+        gamesService.getOneGame('someId', 'slug', null),
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 
   describe('updateGame', () => {
-    it('calls GamesRepository.findOne and return 404', async () => {
+    const game = mockGame();
+    const gameClass = new Game();
+
+    it('call GamesRepository.findOne and return 404', async () => {
       // given
       gamesRepository.findOne.mockResolvedValue(null);
 
@@ -100,53 +204,47 @@ describe('GamesService', () => {
       ).rejects.toThrowError(NotFoundException);
     });
 
-    it('calls GamesRepository.findOne, finds Game then calls GamesRepository.save, updates Manga and returns Game', async () => {
+    it('call GamesRepository.findOne, find Game then call GamesRepository.save, update and return Game', async () => {
       // given
-      const mockGameClass = new Game();
-      mockGameClass.title = mockGame.title;
-
-      gamesRepository.findOne.mockResolvedValue(mockGameClass);
-      gamesRepository.save.mockResolvedValue(mockGameClass);
+      gameClass.title = game.title;
+      gamesRepository.findOne.mockResolvedValue(gameClass);
+      gamesRepository.save.mockResolvedValue(gameClass);
 
       // when
       const updateGame = {
         title: 'updatedTitle',
-        volumes: 999,
         premiered: new Date(),
       };
       const result = await gamesService.updateGame(
-        mockGame.identifier,
-        mockGame.slug,
+        game.identifier,
+        game.slug,
         updateGame,
       );
 
       // then
       expect(result).toEqual({
         title: updateGame.title,
-        volumes: updateGame.volumes,
         premiered: updateGame.premiered,
       });
     });
 
-    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save, updates draft to true and updates timestamp', async () => {
+    it('call GamesRepository.findOne, find Game then call GamesRepository.save, update draft to true and update timestamp', async () => {
       // given
       const date = new Date();
       date.setFullYear(2000);
 
-      const mockGameClass = new Game();
-      mockGameClass.title = mockGame.title;
-      mockGameClass.createdAt = date;
-
-      gamesRepository.findOne.mockResolvedValue(mockGameClass);
-      gamesRepository.save.mockResolvedValue(mockGameClass);
+      gameClass.title = game.title;
+      gameClass.createdAt = date;
+      gamesRepository.findOne.mockResolvedValue(gameClass);
+      gamesRepository.save.mockResolvedValue(gameClass);
 
       // when
       const updateGame = {
         draft: true,
       };
       const result = await gamesService.updateGame(
-        mockGame.identifier,
-        mockGame.slug,
+        game.identifier,
+        game.slug,
         updateGame,
       );
 
@@ -154,25 +252,23 @@ describe('GamesService', () => {
       expect(result.createdAt).not.toEqual(date);
     });
 
-    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save, draft and timestamp doesnt change', async () => {
+    it('call GamesRepository.findOne, find Game then call GamesRepository.save, draft and timestamp doesnt change', async () => {
       // given
       const date = new Date();
       date.setFullYear(2000);
 
-      const mockGameClass = new Game();
-      mockGameClass.title = mockGame.title;
-      mockGameClass.createdAt = date;
-
-      gamesRepository.findOne.mockResolvedValue(mockGameClass);
-      gamesRepository.save.mockResolvedValue(mockGameClass);
+      gameClass.title = game.title;
+      gameClass.createdAt = date;
+      gamesRepository.findOne.mockResolvedValue(gameClass);
+      gamesRepository.save.mockResolvedValue(gameClass);
 
       // when
       const updateGame = {
         completeTime: 23,
       };
       const result = await gamesService.updateGame(
-        mockGame.identifier,
-        mockGame.slug,
+        game.identifier,
+        game.slug,
         updateGame,
       );
 
@@ -180,23 +276,21 @@ describe('GamesService', () => {
       expect(result.createdAt).toEqual(date);
     });
 
-    it('calls GamesRepository.findOne, finds Manga then calls GamesRepository.save and throw 409 due to not unique Title', async () => {
+    it('call GamesRepository.findOne, find Game then call GamesRepository.save and throw 409 due to not unique Title', async () => {
       // given
-      const mockGameClass = new Game();
-      mockGameClass.title = mockGame.title;
-
-      gamesRepository.findOne.mockResolvedValue(mockGameClass);
+      gameClass.title = game.title;
+      gamesRepository.findOne.mockResolvedValue(gameClass);
       gamesRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
       expect(
-        gamesService.updateGame(mockGame.identifier, mockGame.slug, {}),
+        gamesService.updateGame(game.identifier, game.slug, {}),
       ).rejects.toThrowError(ConflictException);
     });
   });
 
-  describe('deleteManga', () => {
-    it('calls GamesRepository.delete, throws 404', async () => {
+  describe('deleteGame', () => {
+    it('call GamesRepository.delete, throws 404', async () => {
       // given
       gamesRepository.delete.mockResolvedValue({ affected: 0 });
 
@@ -206,7 +300,7 @@ describe('GamesService', () => {
       );
     });
 
-    it('calls GamesRepository.delete, delets Manga and returns void', async () => {
+    it('call GamesRepository.delete, delet Manga and return void', async () => {
       // given
       gamesRepository.delete.mockResolvedValue({ affected: 1 });
 

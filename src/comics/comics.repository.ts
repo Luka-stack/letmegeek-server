@@ -1,6 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 
+import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
 import { ComicsFilterDto } from './dto/comics-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
@@ -46,7 +47,7 @@ export class ComicsRepository extends Repository<Comic> {
       query.andWhere('comic.issues <= :issues', { issues });
     }
 
-    if (finished) {
+    if (finished == 'true') {
       query.andWhere('comic.finished IS NOT NULL');
     }
 
@@ -57,9 +58,32 @@ export class ComicsRepository extends Repository<Comic> {
       );
     }
 
+    query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
+
     try {
       const comics = await query.getMany();
       return comics;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteComic(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Comic> {
+    const query = this.createQueryBuilder('comic');
+    query.where('comic.identifier = :identifier', { identifier });
+    query.andWhere('comic.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
+    }
+
+    try {
+      const comic = await query.getOne();
+      return comic;
     } catch (error) {
       throw new InternalServerErrorException();
     }

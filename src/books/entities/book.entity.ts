@@ -1,5 +1,8 @@
+import { Exclude, Expose } from 'class-transformer';
+import { Column, Entity, OneToMany } from 'typeorm';
+
 import Article from '../../shared/entities/article.entity';
-import { Column, Entity } from 'typeorm';
+import WallsBook from '../../walls/walls-books/entities/walls-book.entity';
 import { UpdateBookDto } from '../dto/update-book.dto';
 
 @Entity('books')
@@ -16,20 +19,14 @@ export default class Book extends Article {
   @Column({ nullable: true })
   volume: number;
 
-  // sequel
-  // prequel One-To-One Book-Book
+  @Exclude()
+  @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, {
+    eager: true,
+  })
+  wallsBooks: Array<WallsBook>;
 
-  /*
-   * TODO
-   * to be defined after creating Rating Entity
-   */
-  // ratings
-
-  /*
-   * TODO
-   * to be defined after creating Comment Entity
-   */
-  // comments
+  @Expose()
+  userWallsBook: WallsBook;
 
   updateFields(updateBookDto: UpdateBookDto) {
     this.title = updateBookDto.title || this.title;

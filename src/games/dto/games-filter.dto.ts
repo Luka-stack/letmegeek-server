@@ -9,7 +9,7 @@ export class GamesFilterDto extends ArticleFitlerDto {
 
   @IsOptional()
   @IsString()
-  gameMode?: boolean;
+  gameMode?: string;
 
   @IsOptional()
   @IsString()
