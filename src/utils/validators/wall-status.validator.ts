@@ -3,7 +3,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { allWallArticleStatusesModes } from 'src/walls/entities/wall-article-status';
+import { allWallArticleStatusesModes } from '../../walls/entities/wall-article-status';
 
 export function IsWallArticleStatus(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {

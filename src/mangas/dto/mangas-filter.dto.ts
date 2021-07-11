@@ -14,7 +14,7 @@ export class MangasFilterDto extends ArticleFitlerDto {
 
   @IsOptional()
   @IsBooleanString()
-  finished?: boolean;
+  finished?: string;
 
   @IsOptional()
   @IsString()

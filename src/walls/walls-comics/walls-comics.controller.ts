@@ -8,27 +8,33 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+
+import User from '../../users/entities/user.entity';
+import WallsComic from './entities/walls-comic.entity';
+import { WallsComicDto } from './dto/walls-comic.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsComicDto } from './dto/update-walls-comic.dto';
-import { WallsComicDto } from './dto/walls-comic.dto';
-import WallsComic from './entities/walls-comic.entity';
 import { WallsComicsService } from './walls-comics.service';
+import { GetUser } from '../..//auth/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('api/wallscomics')
 export class WallsComicsController {
   constructor(private readonly wallsComicsService: WallsComicsService) {}
 
-  @Post('/:username/comic/:comicIdentifier')
+  @UseGuards(JwtAuthGuard)
+  @Post('/comic/:comicIdentifier')
   createRecord(
-    @Param('username') username: string,
     @Param('comicIdentifier') comicIdentifier: string,
     @Body() wallsComicDto: WallsComicDto,
+    @GetUser() user: User,
   ): Promise<WallsComic> {
     return this.wallsComicsService.createRecord(
-      username,
       comicIdentifier,
       wallsComicDto,
+      user,
     );
   }
 
@@ -40,25 +46,27 @@ export class WallsComicsController {
     return this.wallsComicsService.getRecordsByUser(username, fitlerDto);
   }
 
-  @Patch('/:username/comic/:comicIdentifier')
+  @UseGuards(JwtAuthGuard)
+  @Patch('/comic/:comicIdentifier')
   updateRecord(
-    @Param('username') username: string,
     @Param('comicIdentifier') identifier: string,
     @Body() updateWallsComicDto: UpdateWallsComicDto,
+    @GetUser() user: User,
   ): Promise<WallsComic> {
     return this.wallsComicsService.updateRecord(
-      username,
       identifier,
       updateWallsComicDto,
+      user,
     );
   }
 
-  @Delete('/:username/comic/:comicIdentifier')
+  @UseGuards(JwtAuthGuard)
+  @Delete('/comic/:comicIdentifier')
   @HttpCode(204)
   deleteRecord(
-    @Param('username') username: string,
     @Param('comicIdentifier') identifier: string,
+    @GetUser() user: User,
   ): Promise<void> {
-    return this.wallsComicsService.deleteRecord(username, identifier);
+    return this.wallsComicsService.deleteRecord(identifier, user);
   }
 }

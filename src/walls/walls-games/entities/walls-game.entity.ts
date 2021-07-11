@@ -21,17 +21,19 @@ export default class WallsGame extends Wall {
   @ManyToOne(() => User, (user) => user.wallsGames, {
     nullable: false,
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 
-  @ManyToOne(() => Game, { eager: true, nullable: false })
+  @ManyToOne(() => Game, { eager: true, nullable: false, onDelete: 'CASCADE' })
   game: Game;
 
   updateFields(updateWallsGameDto: UpdateWallsGameDto) {
+    this.score = updateWallsGameDto.score || this.score;
     this.status = updateWallsGameDto.status || this.status;
-    this.hoursPlayed = updateWallsGameDto.hoursPlayed || this.hoursPlayed;
     this.startedAt = updateWallsGameDto.startedAt || this.startedAt;
     this.finishedAt = updateWallsGameDto.finishedAt || this.finishedAt;
+    this.hoursPlayed = updateWallsGameDto.hoursPlayed || this.hoursPlayed;
   }
 }

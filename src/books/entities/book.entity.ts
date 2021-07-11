@@ -20,31 +20,13 @@ export default class Book extends Article {
   volume: number;
 
   @Exclude()
-  @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, { eager: true })
+  @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, {
+    eager: true,
+  })
   wallsBooks: Array<WallsBook>;
 
   @Expose()
-  get userScore(): number {
-    return (
-      this.wallsBooks?.reduce((prev, curr) => prev + curr.score, 0) /
-      this.wallsBooks?.length
-    );
-  }
-
-  // sequel
-  // prequel One-To-One Book-Book
-
-  /*
-   * TODO
-   * to be defined after creating Rating Entity
-   */
-  // ratings
-
-  /*
-   * TODO
-   * to be defined after creating Comment Entity
-   */
-  // comments
+  userWallsBook: WallsBook;
 
   updateFields(updateBookDto: UpdateBookDto) {
     this.title = updateBookDto.title || this.title;

@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { GamesModule } from 'src/games/games.module';
-import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from '../../auth/auth.module';
+import { GamesModule } from '../../games/games.module';
 import { WallsGamesService } from './walls-games.service';
 import { WallsGamesController } from './walls-games.controller';
 import { WallsGamesRepository } from './walls-games.repository';
 
 @Module({
   imports: [
-    UsersModule,
+    AuthModule,
     GamesModule,
     TypeOrmModule.forFeature([WallsGamesRepository]),
   ],

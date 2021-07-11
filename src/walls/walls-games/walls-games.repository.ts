@@ -32,4 +32,20 @@ export class WallsGamesRepository extends Repository<WallsGame> {
       throw new InternalServerErrorException();
     }
   }
+
+  async findUserRecordByGame(
+    identifier: string,
+    username: string,
+  ): Promise<WallsGame> {
+    const query = this.createQueryBuilder('wallsGame')
+      .innerJoin('wallsGame.game', 'game')
+      .where('username = :username', { username })
+      .andWhere('game.identifier = :identifier', { identifier });
+
+    try {
+      return query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
 }

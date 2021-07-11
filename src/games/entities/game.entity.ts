@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import Article from '../../shared/entities/article.entity';
@@ -22,6 +22,9 @@ export default class Game extends Article {
   @Exclude()
   @OneToMany(() => WallsGame, (wallsGame) => wallsGame.game, { eager: false })
   wallsGames: Array<WallsGame>;
+
+  @Expose()
+  userWallsGame: WallsGame;
 
   mapDtoToEntity(updateGameDto: UpdateGameDto) {
     this.title = updateGameDto.title || this.title;

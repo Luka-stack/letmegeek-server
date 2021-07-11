@@ -9,5 +9,5 @@ export class ComicsFilterDto extends ArticleFitlerDto {
 
   @IsOptional()
   @IsBooleanString()
-  finished?: boolean;
+  finished?: string;
 }

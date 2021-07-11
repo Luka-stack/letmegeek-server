@@ -21,6 +21,7 @@ export default class WallsBook extends Wall {
   @ManyToOne(() => User, (user) => user.wallsBooks, {
     nullable: false,
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
@@ -28,6 +29,7 @@ export default class WallsBook extends Wall {
   @ManyToOne(() => Book, {
     eager: false,
     nullable: false,
+    onDelete: 'CASCADE',
   })
   book: Book;
 
@@ -36,5 +38,6 @@ export default class WallsBook extends Wall {
     this.pages = updateWallsBookDto.pages || this.pages;
     this.startedAt = updateWallsBookDto.startedAt || this.startedAt;
     this.finishedAt = updateWallsBookDto.finishedAt || this.finishedAt;
+    this.score = updateWallsBookDto.score || this.score;
   }
 }

@@ -3,7 +3,7 @@ import {
   ValidationArguments,
   ValidationOptions,
 } from 'class-validator';
-import { allGameModes } from 'src/games/entities/game-mode';
+import { allGameModes } from '../../games/entities/game-mode';
 
 export function IsCommaSeparatedGameMode(
   validationOptions?: ValidationOptions,

@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 
 import WallsBook from './entities/walls-book.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
+import User from 'src/users/entities/user.entity';
 
 @EntityRepository(WallsBook)
 export class WallsBooksRepository extends Repository<WallsBook> {
@@ -28,6 +29,22 @@ export class WallsBooksRepository extends Repository<WallsBook> {
     try {
       const result = query.getMany();
       return result;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findUserRecordByBook(
+    identifier: string,
+    username: string,
+  ): Promise<WallsBook> {
+    const query = this.createQueryBuilder('wallsBook')
+      .innerJoin('wallsBook.book', 'book')
+      .where('username = :username', { username })
+      .andWhere('book.identifier = :identifier', { identifier });
+
+    try {
+      return query.getOne();
     } catch (error) {
       throw new InternalServerErrorException();
     }

@@ -21,14 +21,16 @@ export default class WallsComic extends Wall {
   @ManyToOne(() => User, (user) => user.wallsComics, {
     nullable: false,
     eager: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 
-  @ManyToOne(() => Comic, { eager: true, nullable: false })
+  @ManyToOne(() => Comic, { eager: true, nullable: false, onDelete: 'CASCADE' })
   comic: Comic;
 
   updateFields(updateWallsComicDto: UpdateWallsComicDto) {
+    this.score = updateWallsComicDto.score || this.score;
     this.status = updateWallsComicDto.status || this.status;
     this.issues = updateWallsComicDto.issues || this.issues;
     this.startedAt = updateWallsComicDto.startedAt || this.startedAt;

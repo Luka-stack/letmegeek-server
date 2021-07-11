@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import Article from '../../shared/entities/article.entity';
@@ -17,10 +17,11 @@ export default class Comic extends Article {
   premiered: Date;
 
   @Exclude()
-  @OneToMany(() => WallsComic, (wallsComic) => wallsComic.comic, {
-    eager: false,
-  })
+  @OneToMany(() => WallsComic, (wallsComic) => wallsComic.comic)
   wallsComics: Array<WallsComic>;
+
+  @Expose()
+  userWallsComic: WallsComic;
 
   mapDtoToEntity(updateComicDto: UpdateComicDto) {
     this.title = updateComicDto.title || this.title;

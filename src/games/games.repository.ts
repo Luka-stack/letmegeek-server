@@ -4,6 +4,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import Game from './entities/game.entity';
 import { GamesFilterDto } from './dto/games-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
+import User from 'src/users/entities/user.entity';
 
 @EntityRepository(Game)
 export class GamesRepository extends Repository<Game> {
@@ -53,7 +54,7 @@ export class GamesRepository extends Repository<Game> {
     if (gameMode) {
       const [gameModeQuery, values] =
         prepareMultipleNestedAndQueryForStringField(
-          publishers,
+          gameMode,
           'game."gameMode"',
         );
       query.andWhere(gameModeQuery, values);
@@ -61,8 +62,8 @@ export class GamesRepository extends Repository<Game> {
 
     if (gears) {
       const [gearQuery, values] = prepareMultipleNestedAndQueryForStringField(
-        publishers,
-        'game.gear',
+        gears,
+        'game.gears',
       );
       query.andWhere(gearQuery, values);
     }
@@ -78,9 +79,34 @@ export class GamesRepository extends Repository<Game> {
       );
     }
 
+    query.leftJoinAndSelect('game.wallsGames', 'WallsGames');
+
     try {
       const mangas = await query.getMany();
       return mangas;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteGame(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Game> {
+    const query = this.createQueryBuilder('game');
+    query.where('game.identifier = :identifier', { identifier });
+    query.andWhere('game.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('game.wallsGames', 'WallsGame');
+      query.andWhere('WallsGame.username = :username', {
+        username: user.username,
+      });
+    }
+
+    try {
+      return await query.getOne();
     } catch (error) {
       throw new InternalServerErrorException();
     }

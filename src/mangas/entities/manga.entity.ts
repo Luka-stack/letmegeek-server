@@ -1,8 +1,8 @@
-import { Exclude } from 'class-transformer';
-import WallsManga from 'src/walls/walls-mangas/entities/walls-manga.entity';
+import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
 import Article from '../../shared/entities/article.entity';
+import WallsManga from '../../walls/walls-mangas/entities/walls-manga.entity';
 import { MangaType } from './manga-type';
 import { UpdateMangaDto } from '../dto/update-manga.dto';
 
@@ -27,7 +27,10 @@ export default class Manga extends Article {
   @OneToMany(() => WallsManga, (wallsManga) => wallsManga.manga, {
     eager: false,
   })
-  wallsGames: Array<WallsManga>;
+  wallsMangas: Array<WallsManga>;
+
+  @Expose()
+  userWallsManga: WallsManga;
 
   mapDtoToEntity(updateMangaDto: UpdateMangaDto) {
     this.title = updateMangaDto.title || this.title;

@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -9,10 +10,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { UserRole } from '../../auth/entities/user-role';
 import WallsGame from '../../walls/walls-games/entities/walls-game.entity';
 import WallsBook from '../../walls/walls-books/entities/walls-book.entity';
 import WallsComic from '../../walls/walls-comics/entities/walls-comic.entity';
-import WallsManga from 'src/walls/walls-mangas/entities/walls-manga.entity';
+import WallsManga from '../../walls/walls-mangas/entities/walls-manga.entity';
 
 @Entity('users')
 export default class User {
@@ -54,8 +56,8 @@ export default class User {
   })
   wallsMangas: Array<WallsManga>;
 
-  @Column({ nullable: true })
-  role: string;
+  @Column()
+  role: UserRole;
 
   @Column()
   blocked: boolean;
@@ -63,9 +65,20 @@ export default class User {
   @Column()
   enabled: boolean;
 
+  @Exclude()
+  @Column({ nullable: true })
+  confirmationToken: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @BeforeInsert()
+  setRoleAndDisableAndUnblock() {
+    this.role = UserRole.USER;
+    this.enabled = false;
+    this.blocked = false;
+  }
 }

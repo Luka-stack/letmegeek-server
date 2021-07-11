@@ -7,29 +7,34 @@ import {
   Delete,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Controller } from '@nestjs/common';
 
+import User from '../../users/entities/user.entity';
 import WallsBook from './entities/walls-book.entity';
 import { WallsBookDto } from './dto/walls-book.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { WallsBooksService } from './walls-books.service';
 import { UpdateWallsBookDto } from './dto/update-walls-book.dto';
+import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('api/wallsbooks')
 export class WallsBooksController {
   constructor(private readonly wallsBooksService: WallsBooksService) {}
 
-  @Post('/:username/book/:bookIdentifier')
+  @UseGuards(JwtAuthGuard)
+  @Post('/book/:bookIdentifier')
   createRecord(
-    @Param('username') username: string,
     @Param('bookIdentifier') bookIdentifier: string,
     @Body() wallsBookDto: WallsBookDto,
+    @GetUser() user: User,
   ): Promise<WallsBook> {
     return this.wallsBooksService.createRecord(
-      username,
       bookIdentifier,
       wallsBookDto,
+      user,
     );
   }
 
@@ -41,25 +46,27 @@ export class WallsBooksController {
     return this.wallsBooksService.getRecordsByUser(username, filterDto);
   }
 
-  @Patch('/:username/book/:identifier')
+  @UseGuards(JwtAuthGuard)
+  @Patch('/book/:identifier')
   updateRecord(
-    @Param('username') username: string,
     @Param('identifier') identifier: string,
     @Body() updateWallsBookDto: UpdateWallsBookDto,
+    @GetUser() user: User,
   ): Promise<WallsBook> {
     return this.wallsBooksService.updateRecord(
-      username,
       identifier,
       updateWallsBookDto,
+      user,
     );
   }
 
-  @Delete('/:username/book/:identifier')
+  @UseGuards(JwtAuthGuard)
+  @Delete('/book/:identifier')
   @HttpCode(204)
   deleteRecord(
-    @Param('username') username: string,
     @Param('identifier') identifier: string,
+    @GetUser() user: User,
   ): Promise<void> {
-    return this.wallsBooksService.deleteRecord(username, identifier);
+    return this.wallsBooksService.deleteRecord(identifier, user);
   }
 }

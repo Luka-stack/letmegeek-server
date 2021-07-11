@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { IsNumber } from 'class-validator';
-import { IsWallArticleStatus } from 'src/utils/validators/wall-status.validator';
+import { IsWallArticleStatus } from '../../utils/validators/wall-status.validator';
 import {
   Column,
   Index,
@@ -19,7 +19,7 @@ export default abstract class Wall {
   @IsWallArticleStatus()
   status: WallArticleStatus;
 
-  @Column()
+  @Column({ nullable: true })
   @IsNumber()
   score: number;
 

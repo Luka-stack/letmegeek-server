@@ -1,14 +1,17 @@
-import { SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import Manga from '../../mangas/entities/manga.entity';
+import User from '../../users/entities/user.entity';
 import WallsManga from './entities/walls-manga.entity';
 import { WallsMangaDto } from './dto/walls-manga.dto';
-import { WallArticleStatus } from '../entities/wall-article-status';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
-import { UsersRepository } from '../../users/users.repository';
-import { MangasRepository } from '../../mangas/mangas.repository';
 import { UpdateWallsMangaDto } from './dto/update-walls-manga.dto';
+import { MangasRepository } from '../../mangas/mangas.repository';
 import { WallsMangasRepository } from './walls-mangas.repository';
 
 @Injectable()
@@ -16,28 +19,39 @@ export class WallsMangasService {
   constructor(
     @InjectRepository(WallsMangasRepository)
     private readonly wallsMangasRepository: WallsMangasRepository,
-    @InjectRepository(UsersRepository)
-    private readonly usersRepository: UsersRepository,
     @InjectRepository(MangasRepository)
     private readonly mangasRepository: MangasRepository,
   ) {}
 
   async createRecord(
-    username: string,
     mangaIdentifier: string,
     wallsMangaDto: WallsMangaDto,
+    user: User,
   ): Promise<WallsManga> {
-    const user = await this.usersRepository.findOne({ username });
-    const manga = await this.mangasRepository.findOne({
-      identifier: mangaIdentifier,
-    });
+    const manga = await this.mangasRepository
+      .findOne({
+        identifier: mangaIdentifier,
+      })
+      .then((result: Manga) => {
+        if (!result) {
+          throw new NotFoundException('Manga not found');
+        }
+
+        return result;
+      });
+
+    await this.wallsMangasRepository
+      .findOne({ username: user.username, manga })
+      .then((result: WallsManga) => {
+        if (result) {
+          throw new ConflictException('Manga already exists in users wall');
+        }
+      });
 
     const wallsManga = this.wallsMangasRepository.create({
       user,
       manga,
-      status: WallArticleStatus.COMPLETED,
-      chapters: wallsMangaDto.chapters,
-      volumes: wallsMangaDto.volumes,
+      ...wallsMangaDto,
     });
 
     await this.wallsMangasRepository.save(wallsManga);
@@ -46,17 +60,14 @@ export class WallsMangasService {
   }
 
   async updateRecord(
-    username: string,
     identifier: string,
     updateWallsMangaDto: UpdateWallsMangaDto,
+    user: User,
   ): Promise<WallsManga> {
-    const wallsManga = await this.wallsMangasRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsManga>) => {
-        book
-          .where('WallsManga_manga.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+    const wallsManga = await this.wallsMangasRepository.findUserRecordByManga(
+      identifier,
+      user.username,
+    );
 
     if (!wallsManga) {
       throw new NotFoundException('Manga not found in users wall');
@@ -68,14 +79,11 @@ export class WallsMangasService {
     return response;
   }
 
-  async deleteRecord(username: string, identifier: string): Promise<void> {
-    const wallsManga = await this.wallsMangasRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsManga>) => {
-        book
-          .where('WallsManga_manga.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+  async deleteRecord(identifier: string, user: User): Promise<void> {
+    const wallsManga = await this.wallsMangasRepository.findUserRecordByManga(
+      identifier,
+      user.username,
+    );
 
     if (!wallsManga) {
       throw new NotFoundException('Manga not found in users wall');

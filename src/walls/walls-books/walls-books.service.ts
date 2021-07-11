@@ -1,13 +1,16 @@
-import { SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import Book from '../../books/entities/book.entity';
+import User from '../../users/entities/user.entity';
 import WallsBook from './entities/walls-book.entity';
 import { WallsBookDto } from './dto/walls-book.dto';
-import { WallArticleStatus } from '../entities/wall-article-status';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { BooksRepository } from '../../books/books.repository';
-import { UsersRepository } from '../../users/users.repository';
 import { WallsBooksRepository } from './walls-books.repository';
 import { UpdateWallsBookDto } from './dto/update-walls-book.dto';
 
@@ -16,21 +19,36 @@ export class WallsBooksService {
   constructor(
     @InjectRepository(WallsBooksRepository)
     private readonly wallsBooksRepository: WallsBooksRepository,
-    @InjectRepository(UsersRepository)
-    private readonly usersRepository: UsersRepository,
     @InjectRepository(BooksRepository)
     private readonly booksRepository: BooksRepository,
   ) {}
 
   async createRecord(
-    username: string,
     bookIdentifier: string,
     wallsBookDto: WallsBookDto,
+    user: User,
   ): Promise<WallsBook> {
-    const user = await this.usersRepository.findOne({ username });
-    const book = await this.booksRepository.findOne({
-      identifier: bookIdentifier,
-    });
+    const book = await this.booksRepository
+      .findOne({
+        identifier: bookIdentifier,
+      })
+      .then((result: Book) => {
+        if (!result) {
+          throw new NotFoundException('Book not found');
+        }
+        return result;
+      });
+
+    await this.wallsBooksRepository
+      .findOne({
+        username: user.username,
+        book,
+      })
+      .then((result) => {
+        if (result) {
+          throw new ConflictException('Book already exists in users wall');
+        }
+      });
 
     const wallsBook = this.wallsBooksRepository.create({
       user,
@@ -44,17 +62,14 @@ export class WallsBooksService {
   }
 
   async updateRecord(
-    username: string,
     identifier: string,
     updateWallsBookDto: UpdateWallsBookDto,
+    user: User,
   ): Promise<WallsBook> {
-    const wallsBook = await this.wallsBooksRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsBook>) => {
-        book
-          .where('WallsBook_book.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+    const wallsBook = await this.wallsBooksRepository.findUserRecordByBook(
+      identifier,
+      user.username,
+    );
 
     if (!wallsBook) {
       throw new NotFoundException('Book not found in users wall');
@@ -66,14 +81,11 @@ export class WallsBooksService {
     return response;
   }
 
-  async deleteRecord(username: string, identifier: string): Promise<void> {
-    const wallsBook = await this.wallsBooksRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsBook>) => {
-        book
-          .where('WallsBook_book.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+  async deleteRecord(identifier: string, user: User): Promise<void> {
+    const wallsBook = await this.wallsBooksRepository.findUserRecordByBook(
+      identifier,
+      user.username,
+    );
 
     if (!wallsBook) {
       throw new NotFoundException('Book not found in users wall');

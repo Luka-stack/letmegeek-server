@@ -6,10 +6,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import Game from './entities/game.entity';
+import User from '../users/entities/user.entity';
 import { GameDto } from './dto/game.dto';
-import { GamesRepository } from './games.repository';
+import { UserRole } from '../auth/entities/user-role';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesFilterDto } from './dto/games-filter.dto';
+import { GamesRepository } from './games.repository';
+import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
 
 @Injectable()
 export class GamesService {
@@ -18,7 +21,29 @@ export class GamesService {
     private readonly gamesRepository: GamesRepository,
   ) {}
 
-  async createGame(gameDto: GameDto): Promise<Game> {
+  async createGame(gameDto: GameDto, user: User): Promise<Game> {
+    if (user.role === UserRole.USER) {
+      gameDto.draft = true;
+    }
+
+    if (gameDto.authors) {
+      gameDto.authors = removeSpacesFromCommaSeparatedString(gameDto.authors);
+    }
+
+    if (gameDto.gears) {
+      gameDto.gears = removeSpacesFromCommaSeparatedString(gameDto.gears);
+    }
+
+    if (gameDto.publishers) {
+      gameDto.publishers = removeSpacesFromCommaSeparatedString(
+        gameDto.publishers,
+      );
+    }
+
+    if (gameDto.genres) {
+      gameDto.genres = removeSpacesFromCommaSeparatedString(gameDto.genres);
+    }
+
     const game = this.gamesRepository.create(gameDto);
     game.createdAt = new Date();
 
@@ -31,8 +56,41 @@ export class GamesService {
     return game;
   }
 
-  getGames(filterDto: GamesFilterDto): Promise<Array<Game>> {
-    return this.gamesRepository.getGames(filterDto);
+  getGames(filterDto: GamesFilterDto, user: User): Promise<Array<Game>> {
+    return this.gamesRepository
+      .getGames(filterDto)
+      .then((result: Array<Game>) => {
+        if (user) {
+          result.map((game: Game) => {
+            const wall = game.wallsGames.find(
+              (wall) => wall.username === user.username,
+            );
+            game.userWallsGame = wall;
+          });
+        }
+
+        return result;
+      });
+  }
+
+  async getOneGame(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Game> {
+    return await this.gamesRepository
+      .getCompleteGame(identifier, slug, user)
+      .then((result: Game) => {
+        if (!result) {
+          throw new NotFoundException('Game not found');
+        }
+
+        if (user) {
+          result.userWallsGame = result.wallsGames[0];
+        }
+
+        return result;
+      });
   }
 
   async updateGame(
@@ -44,6 +102,30 @@ export class GamesService {
 
     if (!game) {
       throw new NotFoundException('Game not found');
+    }
+
+    if (updateGameDto.authors) {
+      updateGameDto.authors = removeSpacesFromCommaSeparatedString(
+        updateGameDto.authors,
+      );
+    }
+
+    if (updateGameDto.publishers) {
+      updateGameDto.publishers = removeSpacesFromCommaSeparatedString(
+        updateGameDto.publishers,
+      );
+    }
+
+    if (updateGameDto.genres) {
+      updateGameDto.genres = removeSpacesFromCommaSeparatedString(
+        updateGameDto.genres,
+      );
+    }
+
+    if (updateGameDto.gears) {
+      updateGameDto.gears = removeSpacesFromCommaSeparatedString(
+        updateGameDto.gears,
+      );
     }
 
     game.mapDtoToEntity(updateGameDto);

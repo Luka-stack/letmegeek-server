@@ -1,42 +1,58 @@
 import { SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import Game from '../../games/entities/game.entity';
+import User from '../../users/entities/user.entity';
 import WallsGame from './entities/walls-game.entity';
 import { WallsGameDto } from './dto/walls-game.dto';
-import { WallArticleStatus } from '../entities/wall-article-status';
-import { GamesRepository } from '../../games/games.repository';
-import { UsersRepository } from '../../users/users.repository';
-import { UpdateWallsGameDto } from './dto/update-walls-game.dto';
-import { WallsGamesRepository } from './walls-games.repository';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
+import { UpdateWallsGameDto } from './dto/update-walls-game.dto';
+import { GamesRepository } from '../../games/games.repository';
+import { WallsGamesRepository } from './walls-games.repository';
 
 @Injectable()
 export class WallsGamesService {
   constructor(
     @InjectRepository(WallsGamesRepository)
     private readonly wallsGamesRepository: WallsGamesRepository,
-    @InjectRepository(UsersRepository)
-    private readonly usersRepository: UsersRepository,
     @InjectRepository(GamesRepository)
     private readonly gamesRepository: GamesRepository,
   ) {}
 
   async createRecord(
-    username: string,
     gameIdentifier: string,
     wallsGameDto: WallsGameDto,
+    user: User,
   ): Promise<WallsGame> {
-    const user = await this.usersRepository.findOne({ username });
-    const game = await this.gamesRepository.findOne({
-      identifier: gameIdentifier,
-    });
+    const game = await this.gamesRepository
+      .findOne({
+        identifier: gameIdentifier,
+      })
+      .then((result: Game) => {
+        if (!result) {
+          throw new NotFoundException('Game not found');
+        }
+
+        return result;
+      });
+
+    await this.wallsGamesRepository
+      .findOne({ username: user.username, game })
+      .then((result) => {
+        if (result) {
+          throw new ConflictException('Game already exsits in users wall');
+        }
+      });
 
     const wallsGame = this.wallsGamesRepository.create({
       user,
       game,
-      status: WallArticleStatus.COMPLETED,
-      hoursPlayed: wallsGameDto.hoursPlayed,
+      ...wallsGameDto,
     });
 
     await this.wallsGamesRepository.save(wallsGame);
@@ -45,17 +61,14 @@ export class WallsGamesService {
   }
 
   async updateRecord(
-    username: string,
     identifier: string,
     updateWallsGameDto: UpdateWallsGameDto,
+    user: User,
   ): Promise<WallsGame> {
-    const wallsGame = await this.wallsGamesRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsGame>) => {
-        book
-          .where('WallsGame_game.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+    const wallsGame = await this.wallsGamesRepository.findUserRecordByGame(
+      identifier,
+      user.username,
+    );
 
     if (!wallsGame) {
       throw new NotFoundException('Game not found in users wall');
@@ -67,14 +80,11 @@ export class WallsGamesService {
     return response;
   }
 
-  async deleteRecord(username: string, identifier: string): Promise<void> {
-    const wallsGame = await this.wallsGamesRepository.findOne({
-      where: (book: SelectQueryBuilder<WallsGame>) => {
-        book
-          .where('WallsGame_game.identifier = :identifier', { identifier })
-          .andWhere('username = :username', { username });
-      },
-    });
+  async deleteRecord(identifier: string, user: User): Promise<void> {
+    const wallsGame = await this.wallsGamesRepository.findUserRecordByGame(
+      identifier,
+      user.username,
+    );
 
     if (!wallsGame) {
       throw new NotFoundException('Game not found in users wall');

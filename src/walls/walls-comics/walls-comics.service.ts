@@ -1,63 +1,80 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import Comic from '../../comics/entities/comic.entity';
+import User from '../../users/entities/user.entity';
 import WallsComic from './entities/walls-comic.entity';
 import { WallsComicDto } from './dto/walls-comic.dto';
-import { WallArticleStatus } from '../entities/wall-article-status';
-import { UsersRepository } from '../../users/users.repository';
-import { ComicsRepository } from '../../comics/comics.repository';
-import { UpdateWallsComicDto } from './dto/update-walls-comic.dto';
-import { WallsComicsRepository } from './walls-comics.repository';
-import { SelectQueryBuilder } from 'typeorm';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
+import { UpdateWallsComicDto } from './dto/update-walls-comic.dto';
+import { ComicsRepository } from '../../comics/comics.repository';
+import { WallsComicsRepository } from './walls-comics.repository';
 
 @Injectable()
 export class WallsComicsService {
   constructor(
     @InjectRepository(WallsComicsRepository)
     private readonly wallsComicsRepository: WallsComicsRepository,
-    @InjectRepository(UsersRepository)
-    private readonly usersRepository: UsersRepository,
     @InjectRepository(ComicsRepository)
     private readonly comicsRepository: ComicsRepository,
   ) {}
 
   async createRecord(
-    username: string,
     comicIdentifier: string,
     wallsComicDto: WallsComicDto,
+    user: User,
   ): Promise<WallsComic> {
-    const user = await this.usersRepository.findOne({ username });
-    const comic = await this.comicsRepository.findOne({
-      identifier: comicIdentifier,
-    });
+    const comic = await this.comicsRepository
+      .findOne({
+        identifier: comicIdentifier,
+      })
+      .then((result: Comic) => {
+        if (!result) {
+          throw new NotFoundException('Comic book not found');
+        }
 
-    const wallsBook = this.wallsComicsRepository.create({
+        return result;
+      });
+
+    await this.wallsComicsRepository
+      .findOne({
+        username: user.username,
+        comic,
+      })
+      .then((result) => {
+        if (result) {
+          throw new ConflictException(
+            'Comic book already exists in users wall',
+          );
+        }
+      });
+
+    const wallsComic = this.wallsComicsRepository.create({
       user,
       comic,
-      status: WallArticleStatus.COMPLETED,
-      issues: wallsComicDto.issues,
+      ...wallsComicDto,
     });
-    await this.wallsComicsRepository.save(wallsBook);
+    await this.wallsComicsRepository.save(wallsComic);
 
-    return wallsBook;
+    return wallsComic;
   }
 
   async updateRecord(
-    username: string,
     identifier: string,
     updateWallsComicDto: UpdateWallsComicDto,
+    user: User,
   ): Promise<WallsComic> {
-    const wallsComic = await this.wallsComicsRepository.findOne({
-      where: (comic: SelectQueryBuilder<WallsComic>) => {
-        comic
-          .where('WallsComic_comic.identifier = :identifier', { identifier })
-          .where('username = :username', { username });
-      },
-    });
+    const wallsComic = await this.wallsComicsRepository.findUserRecordByComic(
+      identifier,
+      user.username,
+    );
 
     if (!wallsComic) {
-      throw new NotFoundException('Comic not found in users wall');
+      throw new NotFoundException('Comic book not found in users wall');
     }
 
     wallsComic.updateFields(updateWallsComicDto);
@@ -66,17 +83,14 @@ export class WallsComicsService {
     return response;
   }
 
-  async deleteRecord(username: string, identifier: string): Promise<void> {
-    const wallsComic = await this.wallsComicsRepository.findOne({
-      where: (comic: SelectQueryBuilder<WallsComic>) => {
-        comic
-          .where('WallsComic_comic.identifier = :identifier', { identifier })
-          .where('username = :username', { username });
-      },
-    });
+  async deleteRecord(identifier: string, user: User): Promise<void> {
+    const wallsComic = await this.wallsComicsRepository.findUserRecordByComic(
+      identifier,
+      user.username,
+    );
 
     if (!wallsComic) {
-      throw new NotFoundException('Comic not found in users wall');
+      throw new NotFoundException('Comic book not found in users wall');
     }
 
     await this.wallsComicsRepository.delete({ id: wallsComic.id });

@@ -1,8 +1,9 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 
-import { BooksFilterDto } from './dto/books-filter.dto';
 import Book from './entities/book.entity';
+import User from 'src/users/entities/user.entity';
+import { BooksFilterDto } from './dto/books-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Book)
@@ -60,6 +61,27 @@ export class BooksRepository extends Repository<Book> {
     try {
       const books = await query.getMany();
       return books;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteBook(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Book> {
+    const query = this.createQueryBuilder('book');
+    query.where('book.identifier = :identifier', { identifier });
+    query.andWhere('book.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('book.wallsBooks', 'WallsBook');
+    }
+
+    try {
+      const book = await query.getOne();
+      return book;
     } catch (error) {
       throw new InternalServerErrorException();
     }

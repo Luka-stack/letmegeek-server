@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 
 import User from './entities/user.entity';
+import { UserFilterDto } from './dto/user-filter.dto';
 import { UsersService } from './users.service';
 
 @Controller('api/users')
@@ -8,8 +9,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  getUsers(@Query() username: string): Promise<Array<User>> {
-    return this.usersService.getUsers(username);
+  getUsers(@Query() userFilterDto: UserFilterDto): Promise<Array<User>> {
+    return this.usersService.getUsers(userFilterDto);
   }
 
   @Get('/:username')

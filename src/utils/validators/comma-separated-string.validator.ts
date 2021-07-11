@@ -6,13 +6,14 @@ import {
 
 export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
-    const message =
-      'Genre can contain only letters and numbers. Multiple values have to be separate with a space';
+    const message = `${propertyName.replace(/^\w/, (c) =>
+      c.toUpperCase(),
+    )} can contain only letters and numbers. Multiple values have to be separate with a comma`;
 
     const validate = function (value: any, _args: ValidationArguments) {
       let result = true;
-      const regex = /^[a-zA-Z0-9]+$/;
-      const genres = value.split(' ');
+      const regex = /^[a-zA-Z0-9\s.()-]+$/;
+      const genres = value.split(',').map((v: string) => v.trim());
       genres.forEach((genre: string) => {
         if (!regex.test(genre)) {
           result = false;

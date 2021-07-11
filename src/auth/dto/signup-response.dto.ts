@@ -1,4 +1,5 @@
-export class SignupResponseDto {
+export interface SignupResponseDto {
   email: string;
-  expireDate: Date;
+  message: string;
+  expireDate: string;
 }
