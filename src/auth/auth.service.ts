@@ -83,7 +83,7 @@ export class AuthService {
       throw new BadRequestException('Account is not confirmed');
     }
 
-    if (!user.blocked) {
+    if (user.blocked) {
       throw new BadRequestException('Account is blocked');
     }
 

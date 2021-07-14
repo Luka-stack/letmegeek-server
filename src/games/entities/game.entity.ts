@@ -19,6 +19,17 @@ export default class Game extends Article {
   @Column({ nullable: true })
   gears: string;
 
+  @Column({ nullable: true })
+  @Exclude()
+  imageUrn: string;
+
+  @Expose()
+  get imageUrl(): string {
+    return this.imageUrn
+      ? `${process.env.APP_URL}/images/${this.imageUrn}`
+      : 'https://via.placeholder.com/225x320';
+  }
+
   @Exclude()
   @OneToMany(() => WallsGame, (wallsGame) => wallsGame.game, { eager: false })
   wallsGames: Array<WallsGame>;

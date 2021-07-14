@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { BooksModule } from './books/books.module';
 import { GamesModule } from './games/games.module';
@@ -9,9 +10,8 @@ import { MangasModule } from './mangas/mangas.module';
 import { UsersModule } from './users/users.module';
 import { WallsModule } from './walls/walls.module';
 import { AuthModule } from './auth/auth.module';
-import { configValidationSchema } from './config.schema';
 import { MailModule } from './mail/mail.module';
-import { ScheduleModule } from '@nestjs/schedule';
+import { configValidationSchema } from './config.schema';
 
 @Module({
   imports: [

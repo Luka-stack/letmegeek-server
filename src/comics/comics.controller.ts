@@ -8,8 +8,11 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { diskStorage } from 'multer';
 
 import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
@@ -22,6 +25,19 @@ import { HasRoles } from '../auth/decorators/has-roles.decorator';
 import { UserRole } from '../auth/entities/user-role';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { editFilename, imageFileFilter } from '../utils/file-uploads';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+const multerOptions = {
+  limits: {
+    fileSize: 80000,
+  },
+  storage: diskStorage({
+    destination: 'public/images',
+    filename: editFilename,
+  }),
+  fileFilter: imageFileFilter,
+};
 
 @Controller('api/comics')
 export class ComicsController {
@@ -73,5 +89,17 @@ export class ComicsController {
     @Param('slug') slug: string,
   ): Promise<void> {
     return this.comicsService.deleteComic(identifier, slug);
+  }
+
+  @HasRoles(UserRole.ADMIN, UserRole.MODERATOR)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('/:identifier/:slug/upload')
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('identifier') identifier: string,
+    @Param('slug') slug: string,
+  ): Promise<Comic> {
+    return this.comicsService.uploadImage(file, identifier, slug);
   }
 }

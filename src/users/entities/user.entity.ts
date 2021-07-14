@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import {
   BeforeInsert,
   Column,
@@ -33,6 +33,17 @@ export default class User {
   @Column()
   @Exclude()
   password: string;
+
+  @Column({ nullable: true })
+  @Exclude()
+  imageUrn: string;
+
+  @Expose()
+  get imageUrl(): string {
+    return this.imageUrn
+      ? `${process.env.APP_URL}/profileImages/${this.imageUrn}`
+      : 'https://via.placeholder.com/225x188';
+  }
 
   @Exclude()
   @OneToMany(() => WallsBook, (wallsBook) => wallsBook.user, { eager: false })

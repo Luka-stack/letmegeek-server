@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
 
 import Book from './entities/book.entity';
 import User from '../users/entities/user.entity';
@@ -151,5 +152,28 @@ export class BooksService {
         throw new NotFoundException('Book not found');
       }
     });
+  }
+
+  async uploadImage(
+    file: Express.Multer.File,
+    identifier: string,
+    slug: string,
+  ): Promise<Book> {
+    const book = await this.booksRepository.findOne({ identifier, slug });
+
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
+
+    const oldImage = book.imageUrn || '';
+    book.imageUrn = file.filename;
+
+    await this.booksRepository.save(book);
+
+    if (oldImage !== '') {
+      fs.unlinkSync(`public\\images\\${oldImage}`);
+    }
+
+    return book;
   }
 }

@@ -19,6 +19,17 @@ export default class Book extends Article {
   @Column({ nullable: true })
   volume: number;
 
+  @Column({ nullable: true })
+  @Exclude()
+  imageUrn: string;
+
+  @Expose()
+  get imageUrl(): string {
+    return this.imageUrn
+      ? `${process.env.APP_URL}/images/${this.imageUrn}`
+      : 'https://via.placeholder.com/225x320';
+  }
+
   @Exclude()
   @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, {
     eager: true,

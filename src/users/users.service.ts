@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
 
 import User from './entities/user.entity';
 import { UserFilterDto } from './dto/user-filter.dto';
@@ -21,6 +22,22 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async uploadProfileImage(
+    file: Express.Multer.File,
+    user: User,
+  ): Promise<User> {
+    const oldImage = user.imageUrn || '';
+    user.imageUrn = file.filename;
+
+    await this.usersRepository.save(user);
+
+    if (oldImage !== '') {
+      fs.unlinkSync(`public\\profileImages\\${oldImage}`);
     }
 
     return user;

@@ -16,6 +16,17 @@ export default class Comic extends Article {
   @Column({ nullable: true })
   premiered: Date;
 
+  @Column({ nullable: true })
+  @Exclude()
+  imageUrn: string;
+
+  @Expose()
+  get imageUrl(): string {
+    return this.imageUrn
+      ? `${process.env.APP_URL}/images/${this.imageUrn}`
+      : 'https://via.placeholder.com/225x320';
+  }
+
   @Exclude()
   @OneToMany(() => WallsComic, (wallsComic) => wallsComic.comic)
   wallsComics: Array<WallsComic>;

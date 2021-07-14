@@ -8,8 +8,12 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import User from '../users/entities/user.entity';
 import Game from './entities/game.entity';
@@ -22,6 +26,18 @@ import { HasRoles } from '../auth/decorators/has-roles.decorator';
 import { UserRole } from '../auth/entities/user-role';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { editFilename, imageFileFilter } from '../utils/file-uploads';
+
+const multerOptions = {
+  limits: {
+    fileSize: 80000,
+  },
+  storage: diskStorage({
+    destination: 'public/images',
+    filename: editFilename,
+  }),
+  fileFilter: imageFileFilter,
+};
 
 @Controller('api/games')
 export class GamesController {
@@ -70,5 +86,17 @@ export class GamesController {
     @Param('slug') slug: string,
   ): Promise<void> {
     return this.gamesService.deleteGame(identifier, slug);
+  }
+
+  @HasRoles(UserRole.ADMIN, UserRole.MODERATOR)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('/:identifier/:slug/upload')
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('identifier') identifier: string,
+    @Param('slug') slug: string,
+  ): Promise<Game> {
+    return this.gamesService.uploadImage(file, identifier, slug);
   }
 }

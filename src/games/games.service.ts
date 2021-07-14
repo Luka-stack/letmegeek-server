@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
 
 import Game from './entities/game.entity';
 import User from '../users/entities/user.entity';
@@ -86,7 +87,10 @@ export class GamesService {
         }
 
         if (user) {
-          result.userWallsGame = result.wallsGames[0];
+          const wall = result.wallsGames.find(
+            (wall) => wall.username === user.username,
+          );
+          result.userWallsGame = wall;
         }
 
         return result;
@@ -148,5 +152,28 @@ export class GamesService {
     if (result.affected === 0) {
       throw new NotFoundException('Game not found');
     }
+  }
+
+  async uploadImage(
+    file: Express.Multer.File,
+    identifier: string,
+    slug: string,
+  ): Promise<Game> {
+    const game = await this.gamesRepository.findOne({ identifier, slug });
+
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    const oldImage = game.imageUrn || '';
+    game.imageUrn = file.filename;
+
+    await this.gamesRepository.save(game);
+
+    if (oldImage !== '') {
+      fs.unlinkSync(`public\\images\\${oldImage}`);
+    }
+
+    return game;
   }
 }

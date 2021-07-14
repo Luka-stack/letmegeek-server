@@ -23,6 +23,17 @@ export default class Manga extends Article {
   @Column({ nullable: true })
   type: MangaType;
 
+  @Column({ nullable: true })
+  @Exclude()
+  imageUrn: string;
+
+  @Expose()
+  get imageUrl(): string {
+    return this.imageUrn
+      ? `${process.env.APP_URL}/images/${this.imageUrn}`
+      : 'https://via.placeholder.com/225x320';
+  }
+
   @Exclude()
   @OneToMany(() => WallsManga, (wallsManga) => wallsManga.manga, {
     eager: false,

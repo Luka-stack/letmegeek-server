@@ -100,9 +100,6 @@ export class GamesRepository extends Repository<Game> {
 
     if (user) {
       query.leftJoinAndSelect('game.wallsGames', 'WallsGame');
-      query.andWhere('WallsGame.username = :username', {
-        username: user.username,
-      });
     }
 
     try {

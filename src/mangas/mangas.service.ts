@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
 
 import User from '../users/entities/user.entity';
 import Manga from './entities/manga.entity';
@@ -137,5 +138,28 @@ export class MangasService {
     if (result.affected === 0) {
       throw new NotFoundException('Manga not found');
     }
+  }
+
+  async uploadImage(
+    file: Express.Multer.File,
+    identifier: string,
+    slug: string,
+  ): Promise<Manga> {
+    const manga = await this.mangasRepository.findOne({ identifier, slug });
+
+    if (!manga) {
+      throw new NotFoundException('Manga not found');
+    }
+
+    const oldImage = manga.imageUrn || '';
+    manga.imageUrn = file.filename;
+
+    await this.mangasRepository.save(manga);
+
+    if (oldImage !== '') {
+      fs.unlinkSync(`public\\images\\${oldImage}`);
+    }
+
+    return manga;
   }
 }
