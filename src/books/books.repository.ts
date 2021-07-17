@@ -1,14 +1,34 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import Book from './entities/book.entity';
-import User from 'src/users/entities/user.entity';
+import User from '../users/entities/user.entity';
 import { BooksFilterDto } from './dto/books-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
   async getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
+    try {
+      return await this.createFilterQuery(filterDto)
+        .leftJoinAndSelect('book.wallsBooks', 'WallsBook')
+        .offset((filterDto.page - 1) * filterDto.limit)
+        .limit(filterDto.limit)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getFilterCount(filterDto: BooksFilterDto): Promise<number> {
+    try {
+      return await this.createFilterQuery(filterDto).getCount();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  createFilterQuery(filterDto: BooksFilterDto): SelectQueryBuilder<Book> {
     const { name, genres, authors, publishers, pages, premiered } = filterDto;
     const query = this.createQueryBuilder('book');
     query.where('1=1');
@@ -56,14 +76,7 @@ export class BooksRepository extends Repository<Book> {
       );
     }
 
-    query.leftJoinAndSelect('book.wallsBooks', 'WallsBook');
-
-    try {
-      const books = await query.getMany();
-      return books;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    return query;
   }
 
   async getCompleteBook(

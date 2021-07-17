@@ -14,6 +14,7 @@ import { UpdateMangaDto } from './dto/update-manga.dto';
 import { MangasFilterDto } from './dto/mangas-filter.dto';
 import { MangasRepository } from './mangas.repository';
 import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
+import { PaginatedMangasDto } from './dto/paginated-mangas.dto';
 
 @Injectable()
 export class MangasService {
@@ -53,8 +54,15 @@ export class MangasService {
     return manga;
   }
 
-  getMangas(filterDto: MangasFilterDto, user: User): Promise<Array<Manga>> {
-    return this.mangasRepository
+  async getMangas(
+    filterDto: MangasFilterDto,
+    user: User,
+  ): Promise<PaginatedMangasDto> {
+    filterDto.limit = Number(filterDto.limit);
+    filterDto.page = Number(filterDto.page);
+
+    const totalCount = await this.mangasRepository.getFilterCount(filterDto);
+    const mangas = await this.mangasRepository
       .getMangas(filterDto)
       .then((result: Array<Manga>) => {
         if (result) {
@@ -68,6 +76,24 @@ export class MangasService {
 
         return result;
       });
+
+    const apiQuery = this.createQuery(filterDto);
+
+    const nextPage = `http://localhost:5000/api/mangas?${apiQuery}page=${
+      filterDto.page + 1
+    }&limit=${filterDto.limit}`;
+    const prevPage = `http://localhost:5000/api/mangas?${apiQuery}page=${
+      filterDto.page - 1
+    }&limit=${filterDto.limit}`;
+
+    return {
+      totalCount,
+      page: filterDto.page,
+      limit: filterDto.limit,
+      data: mangas,
+      nextPage: filterDto.page * filterDto.limit < totalCount ? nextPage : '',
+      prevPage: filterDto.page >= 2 ? prevPage : '',
+    };
   }
 
   getOneManga(identifier: string, slug: string, user: User): Promise<Manga> {
@@ -161,5 +187,43 @@ export class MangasService {
     }
 
     return manga;
+  }
+
+  createQuery(filterDto: MangasFilterDto): string {
+    let query = '';
+
+    if (filterDto.finished) {
+      query += `finished=${filterDto.finished}&`;
+    }
+
+    if (filterDto.type) {
+      query += `type=${filterDto.type}&`;
+    }
+
+    if (filterDto.volumes) {
+      query += `volumes=${filterDto.volumes}&`;
+    }
+
+    if (filterDto.authors) {
+      query += `authors=${filterDto.authors}&`;
+    }
+
+    if (filterDto.genres) {
+      query += `genres=${filterDto.genres}&`;
+    }
+
+    if (filterDto.name) {
+      query += `name=${filterDto.name}&`;
+    }
+
+    if (filterDto.premiered) {
+      query += `premiered=${filterDto.premiered}&`;
+    }
+
+    if (filterDto.publishers) {
+      query += `publishers=${filterDto.publishers}&`;
+    }
+
+    return query;
   }
 }

@@ -1,6 +1,8 @@
 import { IsNumberString, IsOptional, IsString, Length } from 'class-validator';
 
-export class ArticleFitlerDto {
+import { PaginationDto } from './pagination.dto';
+
+export class ArticleFitlerDto extends PaginationDto {
   @IsOptional()
   @IsString()
   name?: string;

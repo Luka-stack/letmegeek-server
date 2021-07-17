@@ -12,6 +12,7 @@ import { WallsModule } from './walls/walls.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { configValidationSchema } from './config.schema';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { configValidationSchema } from './config.schema';
     WallsModule,
     AuthModule,
     MailModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

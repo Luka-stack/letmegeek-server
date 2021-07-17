@@ -27,6 +27,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { editFilename, imageFileFilter } from '../utils/file-uploads';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PaginatedMangasDto } from './dto/paginated-mangas.dto';
 
 const multerOptions = {
   limits: {
@@ -56,7 +57,7 @@ export class MangasController {
   getMangas(
     @Query() filterDto: MangasFilterDto,
     @GetUser() user: User,
-  ): Promise<Array<Manga>> {
+  ): Promise<PaginatedMangasDto> {
     return this.mangasService.getMangas(filterDto, user);
   }
 

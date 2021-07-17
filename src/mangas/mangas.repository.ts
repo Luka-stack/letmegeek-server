@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common/exceptions';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import User from '../users/entities/user.entity';
 import Manga from './entities/manga.entity';
@@ -9,6 +9,46 @@ import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 @EntityRepository(Manga)
 export class MangasRepository extends Repository<Manga> {
   async getMangas(filterDto: MangasFilterDto): Promise<Array<Manga>> {
+    try {
+      return await this.createFilterQuery(filterDto)
+        .leftJoinAndSelect('manga.wallsMangas', 'WallsManga')
+        .offset((filterDto.page - 1) * filterDto.limit)
+        .limit(filterDto.limit)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getFilterCount(filterDto: MangasFilterDto): Promise<number> {
+    try {
+      return await this.createFilterQuery(filterDto).getCount();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteManga(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Manga> {
+    const query = this.createQueryBuilder('manga');
+    query.where('manga.identifier = :identifier', { identifier });
+    query.andWhere('manga.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('manga.wallsMangas', 'WallsManga');
+    }
+
+    try {
+      return await query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  createFilterQuery(filterDto: MangasFilterDto): SelectQueryBuilder<Manga> {
     const {
       name,
       volumes,
@@ -72,33 +112,6 @@ export class MangasRepository extends Repository<Manga> {
       );
     }
 
-    query.leftJoinAndSelect('manga.wallsMangas', 'WallsManga');
-
-    try {
-      const mangas = await query.getMany();
-      return mangas;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getCompleteManga(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Manga> {
-    const query = this.createQueryBuilder('manga');
-    query.where('manga.identifier = :identifier', { identifier });
-    query.andWhere('manga.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('manga.wallsMangas', 'WallsManga');
-    }
-
-    try {
-      return await query.getOne();
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    return query;
   }
 }

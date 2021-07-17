@@ -13,6 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
@@ -26,7 +27,7 @@ import { UserRole } from '../auth/entities/user-role';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { editFilename, imageFileFilter } from '../utils/file-uploads';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { PaginatedComicsDto } from './dto/paginated-comics.dto';
 
 const multerOptions = {
   limits: {
@@ -56,7 +57,7 @@ export class ComicsController {
   getComics(
     @Query() filterDto: ComicsFilterDto,
     @GetUser() user: User,
-  ): Promise<Array<Comic>> {
+  ): Promise<PaginatedComicsDto> {
     return this.comicsService.getComics(filterDto, user);
   }
 

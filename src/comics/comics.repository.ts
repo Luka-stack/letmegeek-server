@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
@@ -9,6 +9,47 @@ import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 @EntityRepository(Comic)
 export class ComicsRepository extends Repository<Comic> {
   async getComics(filterDto: ComicsFilterDto): Promise<Array<Comic>> {
+    try {
+      return await this.createFilterQuery(filterDto)
+        .leftJoinAndSelect('comic.wallsComics', 'WallsComic')
+        .offset((filterDto.page - 1) * filterDto.limit)
+        .limit(filterDto.limit)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getFilterCount(filterDto: ComicsFilterDto): Promise<number> {
+    try {
+      return await this.createFilterQuery(filterDto).getCount();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteComic(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Comic> {
+    const query = this.createQueryBuilder('comic');
+    query.where('comic.identifier = :identifier', { identifier });
+    query.andWhere('comic.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
+    }
+
+    try {
+      const comic = await query.getOne();
+      return comic;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  createFilterQuery(filterDto: ComicsFilterDto): SelectQueryBuilder<Comic> {
     const { name, issues, finished, genres, authors, publishers, premiered } =
       filterDto;
     const query = this.createQueryBuilder('comic');
@@ -58,34 +99,6 @@ export class ComicsRepository extends Repository<Comic> {
       );
     }
 
-    query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
-
-    try {
-      const comics = await query.getMany();
-      return comics;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getCompleteComic(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Comic> {
-    const query = this.createQueryBuilder('comic');
-    query.where('comic.identifier = :identifier', { identifier });
-    query.andWhere('comic.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
-    }
-
-    try {
-      const comic = await query.getOne();
-      return comic;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    return query;
   }
 }

@@ -14,6 +14,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { BooksFilterDto } from './dto/books-filter.dto';
 import { BooksRepository } from './books.repository';
 import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
+import { PaginatedBooksDto } from './dto/paginated-books.dto';
 
 @Injectable()
 export class BooksService {
@@ -53,7 +54,14 @@ export class BooksService {
     return book;
   }
 
-  async getBooks(filterDto: BooksFilterDto, user: User): Promise<Array<Book>> {
+  async getBooks(
+    filterDto: BooksFilterDto,
+    user: User,
+  ): Promise<PaginatedBooksDto> {
+    filterDto.limit = Number(filterDto.limit);
+    filterDto.page = Number(filterDto.page);
+
+    const totalCount = await this.booksRepository.getFilterCount(filterDto);
     const books = await this.booksRepository
       .getBooks(filterDto)
       .then((result: Array<Book>) => {
@@ -69,7 +77,23 @@ export class BooksService {
         return result;
       });
 
-    return books;
+    const apiQuery = this.createQuery(filterDto);
+
+    const nextPage = `http://localhost:5000/api/books?${apiQuery}page=${
+      filterDto.page + 1
+    }&limit=${filterDto.limit}`;
+    const prevPage = `http://localhost:5000/api/books?${apiQuery}page=${
+      filterDto.page - 1
+    }&limit=${filterDto.limit}`;
+
+    return {
+      totalCount,
+      page: filterDto.page,
+      limit: filterDto.limit,
+      data: books,
+      nextPage: filterDto.page * filterDto.limit < totalCount ? nextPage : '',
+      prevPage: filterDto.page >= 2 ? prevPage : '',
+    };
   }
 
   async getOneBook(
@@ -175,5 +199,35 @@ export class BooksService {
     }
 
     return book;
+  }
+
+  createQuery(filterDto: BooksFilterDto): string {
+    let query = '';
+
+    if (filterDto.pages) {
+      query += `page=${filterDto.pages}&`;
+    }
+
+    if (filterDto.authors) {
+      query += `authors=${filterDto.authors}&`;
+    }
+
+    if (filterDto.genres) {
+      query += `genres=${filterDto.genres}&`;
+    }
+
+    if (filterDto.name) {
+      query += `name=${filterDto.name}&`;
+    }
+
+    if (filterDto.premiered) {
+      query += `premiered=${filterDto.premiered}&`;
+    }
+
+    if (filterDto.publishers) {
+      query += `publishers=${filterDto.publishers}&`;
+    }
+
+    return query;
   }
 }

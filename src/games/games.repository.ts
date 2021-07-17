@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import Game from './entities/game.entity';
 import { GamesFilterDto } from './dto/games-filter.dto';
@@ -9,6 +9,46 @@ import User from 'src/users/entities/user.entity';
 @EntityRepository(Game)
 export class GamesRepository extends Repository<Game> {
   async getGames(filterDto: GamesFilterDto): Promise<Array<Game>> {
+    try {
+      return await this.createFilterQuery(filterDto)
+        .leftJoinAndSelect('game.wallsGames', 'WallsGames')
+        .offset((filterDto.page - 1) * filterDto.limit)
+        .limit(filterDto.limit)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getFilterCount(filterDto: GamesFilterDto): Promise<number> {
+    try {
+      return await this.createFilterQuery(filterDto).getCount();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getCompleteGame(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Game> {
+    const query = this.createQueryBuilder('game');
+    query.where('game.identifier = :identifier', { identifier });
+    query.andWhere('game.slug = :slug', { slug });
+
+    if (user) {
+      query.leftJoinAndSelect('game.wallsGames', 'WallsGame');
+    }
+
+    try {
+      return await query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  createFilterQuery(filterDto: GamesFilterDto): SelectQueryBuilder<Game> {
     const {
       name,
       completeTime,
@@ -79,33 +119,6 @@ export class GamesRepository extends Repository<Game> {
       );
     }
 
-    query.leftJoinAndSelect('game.wallsGames', 'WallsGames');
-
-    try {
-      const mangas = await query.getMany();
-      return mangas;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getCompleteGame(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Game> {
-    const query = this.createQueryBuilder('game');
-    query.where('game.identifier = :identifier', { identifier });
-    query.andWhere('game.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('game.wallsGames', 'WallsGame');
-    }
-
-    try {
-      return await query.getOne();
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
+    return query;
   }
 }

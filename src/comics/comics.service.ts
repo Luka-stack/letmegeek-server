@@ -14,6 +14,7 @@ import { UpdateComicDto } from './dto/update-comic.dto';
 import { ComicsFilterDto } from './dto/comics-filter.dto';
 import { ComicsRepository } from './comics.repository';
 import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
+import { PaginatedComicsDto } from './dto/paginated-comics.dto';
 
 @Injectable()
 export class ComicsService {
@@ -56,8 +57,12 @@ export class ComicsService {
   async getComics(
     filterDto: ComicsFilterDto,
     user: User,
-  ): Promise<Array<Comic>> {
-    return await this.comicsRepository
+  ): Promise<PaginatedComicsDto> {
+    filterDto.limit = Number(filterDto.limit);
+    filterDto.page = Number(filterDto.page);
+
+    const totalCount = await this.comicsRepository.getFilterCount(filterDto);
+    const comics = await this.comicsRepository
       .getComics(filterDto)
       .then((result: Array<Comic>) => {
         if (user) {
@@ -71,6 +76,24 @@ export class ComicsService {
 
         return result;
       });
+
+    const apiQuery = this.createQuery(filterDto);
+
+    const nextPage = `http://localhost:5000/api/comics?${apiQuery}page=${
+      filterDto.page + 1
+    }&limit=${filterDto.limit}`;
+    const prevPage = `http://localhost:5000/api/comics?${apiQuery}page=${
+      filterDto.page - 1
+    }&limit=${filterDto.limit}`;
+
+    return {
+      totalCount,
+      page: filterDto.page,
+      limit: filterDto.limit,
+      data: comics,
+      nextPage: filterDto.page * filterDto.limit < totalCount ? nextPage : '',
+      prevPage: filterDto.page >= 2 ? prevPage : '',
+    };
   }
 
   async getOneComic(
@@ -168,5 +191,39 @@ export class ComicsService {
     }
 
     return comic;
+  }
+
+  createQuery(filterDto: ComicsFilterDto): string {
+    let query = '';
+
+    if (filterDto.finished) {
+      query += `finished=${filterDto.finished}&`;
+    }
+
+    if (filterDto.issues) {
+      query += `issues=${filterDto.issues}&`;
+    }
+
+    if (filterDto.authors) {
+      query += `authors=${filterDto.authors}&`;
+    }
+
+    if (filterDto.genres) {
+      query += `genres=${filterDto.genres}&`;
+    }
+
+    if (filterDto.name) {
+      query += `name=${filterDto.name}&`;
+    }
+
+    if (filterDto.premiered) {
+      query += `premiered=${filterDto.premiered}&`;
+    }
+
+    if (filterDto.publishers) {
+      query += `publishers=${filterDto.publishers}&`;
+    }
+
+    return query;
   }
 }

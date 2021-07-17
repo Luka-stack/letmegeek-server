@@ -27,6 +27,7 @@ import { UserRole } from '../auth/entities/user-role';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { editFilename, imageFileFilter } from '../utils/file-uploads';
+import { PaginatedGamesDto } from './dto/paginated-games.dto';
 
 const multerOptions = {
   limits: {
@@ -53,7 +54,7 @@ export class GamesController {
   getGames(
     @Query() filterDto: GamesFilterDto,
     @GetUser() user: User,
-  ): Promise<Array<Game>> {
+  ): Promise<PaginatedGamesDto> {
     return this.gamesService.getGames(filterDto, user);
   }
 

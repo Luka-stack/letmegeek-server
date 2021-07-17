@@ -14,6 +14,7 @@ import { UpdateGameDto } from './dto/update-game.dto';
 import { GamesFilterDto } from './dto/games-filter.dto';
 import { GamesRepository } from './games.repository';
 import { removeSpacesFromCommaSeparatedString } from '../utils/helpers';
+import { PaginatedGamesDto } from './dto/paginated-games.dto';
 
 @Injectable()
 export class GamesService {
@@ -57,8 +58,15 @@ export class GamesService {
     return game;
   }
 
-  getGames(filterDto: GamesFilterDto, user: User): Promise<Array<Game>> {
-    return this.gamesRepository
+  async getGames(
+    filterDto: GamesFilterDto,
+    user: User,
+  ): Promise<PaginatedGamesDto> {
+    filterDto.limit = Number(filterDto.limit);
+    filterDto.page = Number(filterDto.page);
+
+    const totalCount = await this.gamesRepository.getFilterCount(filterDto);
+    const games = await this.gamesRepository
       .getGames(filterDto)
       .then((result: Array<Game>) => {
         if (user) {
@@ -72,6 +80,24 @@ export class GamesService {
 
         return result;
       });
+
+    const apiQuery = this.createQuery(filterDto);
+
+    const nextPage = `http://localhost:5000/api/games?${apiQuery}page=${
+      filterDto.page + 1
+    }&limit=${filterDto.limit}`;
+    const prevPage = `http://localhost:5000/api/games?${apiQuery}page=${
+      filterDto.page - 1
+    }&limit=${filterDto.limit}`;
+
+    return {
+      totalCount,
+      page: filterDto.page,
+      limit: filterDto.limit,
+      data: games,
+      nextPage: filterDto.page * filterDto.limit < totalCount ? nextPage : '',
+      prevPage: filterDto.page >= 2 ? prevPage : '',
+    };
   }
 
   async getOneGame(
@@ -175,5 +201,43 @@ export class GamesService {
     }
 
     return game;
+  }
+
+  createQuery(filterDto: GamesFilterDto): string {
+    let query = '';
+
+    if (filterDto.completeTime) {
+      query += `completeTime=${filterDto.completeTime}&`;
+    }
+
+    if (filterDto.gameMode) {
+      query += `gameMode=${filterDto.gameMode}&`;
+    }
+
+    if (filterDto.gears) {
+      query += `gears=${filterDto.gears}&`;
+    }
+
+    if (filterDto.authors) {
+      query += `authors=${filterDto.authors}&`;
+    }
+
+    if (filterDto.genres) {
+      query += `genres=${filterDto.genres}&`;
+    }
+
+    if (filterDto.name) {
+      query += `name=${filterDto.name}&`;
+    }
+
+    if (filterDto.premiered) {
+      query += `premiered=${filterDto.premiered}&`;
+    }
+
+    if (filterDto.publishers) {
+      query += `publishers=${filterDto.publishers}&`;
+    }
+
+    return query;
   }
 }
