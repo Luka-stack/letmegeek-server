@@ -43,7 +43,7 @@ yarn test:e2e:watch # run 2e2 tests with a live reload
 ## Postman
 All of the endpoints were also tested using Postman. The tests can be found here [postman.tests]().
 
-## [Click here to view SQL Schema]
+## [Click here to view SQL Schema]()
 
 ## Helpful Sources
 1. [NestJS Documentation](https://docs.nestjs.com/)
