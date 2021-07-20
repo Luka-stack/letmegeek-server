@@ -13,6 +13,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { configValidationSchema } from './config.schema';
 import { CommentsModule } from './comments/comments.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CommentsModule } from './comments/comments.module';
     AuthModule,
     MailModule,
     CommentsModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}
