@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 
@@ -21,6 +22,7 @@ export class BooksService {
   constructor(
     @InjectRepository(BooksRepository)
     private readonly booksRepository: BooksRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async createBook(bookDto: BookDto, user: User): Promise<Book> {
@@ -79,12 +81,16 @@ export class BooksService {
 
     const apiQuery = this.createQuery(filterDto);
 
-    const nextPage = `http://localhost:5000/api/books?${apiQuery}page=${
-      filterDto.page + 1
-    }&limit=${filterDto.limit}`;
-    const prevPage = `http://localhost:5000/api/books?${apiQuery}page=${
-      filterDto.page - 1
-    }&limit=${filterDto.limit}`;
+    const nextPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/books?${apiQuery}page=${filterDto.page + 1}&limit=${
+      filterDto.limit
+    }`;
+    const prevPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/books?${apiQuery}page=${filterDto.page - 1}&limit=${
+      filterDto.limit
+    }`;
 
     return {
       totalCount,
@@ -165,12 +171,6 @@ export class BooksService {
   }
 
   async deleteBook(identifier: string, slug: string): Promise<void> {
-    // const result = await this.booksRepository.delete({ identifier, slug });
-
-    // if (result.affected === 0) {
-    //   throw new NotFoundException('Book not found');
-    // }
-
     await this.booksRepository.delete({ identifier, slug }).then((result) => {
       if (result.affected === 0) {
         throw new NotFoundException('Book not found');

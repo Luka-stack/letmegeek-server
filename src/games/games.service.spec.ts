@@ -1,5 +1,6 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import Game from './entities/game.entity';
 import User from '../users/entities/user.entity';
@@ -8,14 +9,16 @@ import { UserRole } from '../auth/entities/user-role';
 import { slugify } from '../utils/helpers';
 import { GamesRepository } from './games.repository';
 import { GamesService } from './games.service';
+import { GamesFilterDto } from './dto/games-filter.dto';
 
 const mockGamesRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
-  getGames: jest.fn(),
-  getCompleteGame: jest.fn(),
   delete: jest.fn(),
+  getGames: jest.fn(),
+  getFilterCount: jest.fn(),
+  getCompleteGame: jest.fn(),
 });
 
 const mockGame = () => {
@@ -46,6 +49,11 @@ describe('GamesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: [`.env.stage.${process.env.STAGE}`],
+        }),
+      ],
       providers: [
         GamesService,
         { provide: GamesRepository, useFactory: mockGamesRepository },
@@ -111,13 +119,15 @@ describe('GamesService', () => {
       gamesRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
-      expect(gamesService.createGame(mockGame(), null)).rejects.toThrowError(
-        ConflictException,
-      );
+      expect(
+        gamesService.createGame(mockGame(), mockUser()),
+      ).rejects.toThrowError(ConflictException);
     });
   });
 
   describe('getMangas', () => {
+    const gamesFilter = new GamesFilterDto();
+
     const user = mockUser();
     const game = mockGame();
     const wallsGame = new WallsGame();
@@ -125,27 +135,89 @@ describe('GamesService', () => {
     wallsGame.score = 5;
     game.wallsGames = [wallsGame];
 
-    it('call GamesRepository.getGames, return array of games', async () => {
-      // gien
-      gamesRepository.getGames.mockResolvedValue([game]);
+    it('return paginated data : total count 0, no prev, no next, no games', async () => {
+      gamesRepository.getFilterCount.mockResolvedValue(0);
+      gamesRepository.getGames.mockResolvedValue([]);
 
-      // when
-      const result = await gamesService.getGames(null, null);
+      gamesFilter.page = 0;
+      gamesFilter.limit = 1;
 
-      // then
-      expect(result).toEqual([game]);
+      const response = await gamesService.getGames(gamesFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 0,
+        page: gamesFilter.page,
+        limit: gamesFilter.limit,
+        data: [],
+        nextPage: '',
+        prevPage: '',
+      });
+    });
+
+    it('return paginated data : total count 2, no prev page, has next page, has games', async () => {
+      gamesRepository.getFilterCount.mockResolvedValue(2);
+      gamesRepository.getGames.mockResolvedValue([game, game]);
+
+      gamesFilter.page = 0;
+      gamesFilter.limit = 1;
+
+      const response = await gamesService.getGames(gamesFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 2,
+        page: gamesFilter.page,
+        limit: gamesFilter.limit,
+        data: [game, game],
+        nextPage: expect.any(String),
+        prevPage: '',
+      });
+
+      expect(response.nextPage).toMatch(/game/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+    });
+
+    it('return paginated data : total count 3, has prev page, has next page, has game', async () => {
+      gamesRepository.getFilterCount.mockResolvedValue(3);
+      gamesRepository.getGames.mockResolvedValue([game, game, game]);
+
+      gamesFilter.page = 2;
+      gamesFilter.limit = 1;
+
+      const response = await gamesService.getGames(gamesFilter, user);
+
+      expect(response).toEqual({
+        totalCount: 3,
+        page: gamesFilter.page,
+        limit: gamesFilter.limit,
+        data: [game, game, game],
+        nextPage: expect.any(String),
+        prevPage: expect.any(String),
+      });
+
+      expect(response.nextPage).toMatch(/games/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+
+      expect(response.prevPage).toMatch(/games/);
+      expect(response.prevPage).toMatch(/page/);
+      expect(response.prevPage).toMatch(/limit/);
     });
 
     it('call GamesRepository.getGames as a user, return array of games with users wallsGame', async () => {
-      // gien
+      gamesFilter.page = 1;
+      gamesFilter.limit = 1;
+
+      // given
+      gamesRepository.getFilterCount.mockResolvedValue(1);
       gamesRepository.getGames.mockResolvedValue([game]);
 
       // when
-      const result = await gamesService.getGames(null, user);
+      const result = await gamesService.getGames(gamesFilter, user);
 
       // then
-      expect(result).toEqual([game]);
-      expect(result[0].userWallsGame).toEqual(wallsGame);
+      expect(result.data).toEqual([game]);
+      expect(result.data[0].userWallsGame).toEqual(wallsGame);
     });
   });
 

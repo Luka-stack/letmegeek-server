@@ -8,6 +8,7 @@ import { UsersService } from './users.service';
 const mockUsersRepository = () => ({
   findOne: jest.fn(),
   getUsers: jest.fn(),
+  getUserByUsername: jest.fn(),
 });
 
 const mockUser = () => {
@@ -37,7 +38,7 @@ describe('UsersService', () => {
     it('return list of User', async () => {
       usersRepositroy.getUsers.mockResolvedValue([mockUser()]);
 
-      const response = await usersService.getUsers('username');
+      const response = await usersService.getUsers({ username: 'username' });
 
       expect(response).toEqual([mockUser()]);
     });
@@ -45,7 +46,7 @@ describe('UsersService', () => {
 
   describe('getUserByUsername', () => {
     it('throw NotFoundException (404), user with provided username doesnt exsit', async () => {
-      usersRepositroy.findOne.mockResolvedValue(null);
+      usersRepositroy.getUserByUsername.mockResolvedValue(null);
 
       expect(usersService.getUserByUsername('username')).rejects.toThrowError(
         NotFoundException,
@@ -53,7 +54,7 @@ describe('UsersService', () => {
     });
 
     it('return user associated with provided username', async () => {
-      usersRepositroy.findOne.mockResolvedValue(mockUser());
+      usersRepositroy.getUserByUsername.mockResolvedValue(mockUser());
 
       const response = await usersService.getUserByUsername('usernmae');
 

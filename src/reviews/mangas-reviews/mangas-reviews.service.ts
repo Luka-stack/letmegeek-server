@@ -4,14 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import User from '../../users/entities/user.entity';
 import MangasReview from './entities/mangas-review.entity';
 import { UserRole } from '../../auth/entities/user-role';
+import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { MangasReviewDto } from './dto/mangas-review.dto';
 import { UpdateMangasReviewDto } from './dto/update-mangas-review.dto';
 import { MangasRepository } from '../../mangas/mangas.repository';
+import { WallsMangasRepository } from '../../walls/walls-mangas/walls-mangas.repository';
 import { MangasReviewsRepository } from './mangas-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { PaginatedMangasReviewsDto } from './dto/paginated-mangas-reviews.dto';
@@ -21,8 +24,14 @@ export class MangasReviewsService {
   constructor(
     @InjectRepository(MangasReviewsRepository)
     private readonly mangasReviewsRepository: MangasReviewsRepository,
+
     @InjectRepository(MangasRepository)
     private readonly mangasRepository: MangasRepository,
+
+    @InjectRepository(WallsMangasRepository)
+    private readonly wallsMangasRepository: WallsMangasRepository,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async createReview(
@@ -33,6 +42,22 @@ export class MangasReviewsService {
     const manga = await this.mangasRepository.findOne({ identifier });
     if (!manga) {
       throw new NotFoundException('Manga not found');
+    }
+
+    const hasCorrectStatus =
+      await this.wallsMangasRepository.checkUserHasStatusesOnManga(
+        user.username,
+        manga,
+        [
+          WallArticleStatus.IN_PROGRESS,
+          WallArticleStatus.COMPLETED,
+          WallArticleStatus.DROPPED,
+        ],
+      );
+    if (!hasCorrectStatus) {
+      throw new ConflictException(
+        'To create review Users must have the title on their wall',
+      );
     }
 
     const review = await this.mangasReviewsRepository.findOne({
@@ -101,10 +126,10 @@ export class MangasReviewsService {
     );
 
     let reviews: Array<MangasReview>;
-    let nextPage = 'http://localhost:5000/api/mangasreviews/';
-    let prevPage = 'http://localhost:5000/api/mangasreviews/';
+    let nextPage = `${this.configService.get('APP_URL')}/api/mangasreviews/`;
+    let prevPage = `${this.configService.get('APP_URL')}/api/mangasreviews/`;
     if (identifier) {
-      reviews = await this.mangasReviewsRepository.getReviewsForComic(
+      reviews = await this.mangasReviewsRepository.getReviewsForManga(
         identifier,
         skippedItems,
         limit,

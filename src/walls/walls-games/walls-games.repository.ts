@@ -3,6 +3,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 
 import WallsGame from './entities/walls-game.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
+import Game from 'src/games/entities/game.entity';
 
 @EntityRepository(WallsGame)
 export class WallsGamesRepository extends Repository<WallsGame> {
@@ -44,6 +45,25 @@ export class WallsGamesRepository extends Repository<WallsGame> {
 
     try {
       return query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async checkUserHasStatusesOnGame(
+    username: string,
+    game: Game,
+    statuses: Array<string>,
+  ): Promise<boolean> {
+    try {
+      const recordCount = await this.createQueryBuilder('wallsGame')
+        .where('username = :username', { username })
+        .andWhere('"gameId" = :game', { game: game.id })
+        .andWhere('status IN (:...statuses)', { statuses })
+        .limit(1)
+        .getCount();
+
+      return recordCount > 0;
     } catch (error) {
       throw new InternalServerErrorException();
     }

@@ -15,5 +15,6 @@ import { WallsBooksRepository } from './walls-books.repository';
   ],
   providers: [WallsBooksService],
   controllers: [WallsBooksController],
+  exports: [TypeOrmModule],
 })
 export class WallsBooksModule {}

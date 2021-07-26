@@ -12,11 +12,13 @@ import { MangasService } from './mangas.service';
 import { MangasController } from './mangas.controller';
 import { MangasRepository } from './mangas.repository';
 import { UserMiddleware } from 'src/auth/middlewares/user.middleware';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule,
     TypeOrmModule.forFeature([MangasRepository]),
   ],
   controllers: [MangasController],

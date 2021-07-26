@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersRepository } from 'src/users/users.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import User from '../users/entities/user.entity';
 import Comment from './entities/comment.entity';
+import { UserRole } from '../auth/entities/user-role';
 import { CommentDto } from './dto/comment.dto';
+import { UsersRepository } from '../users/users.repository';
+import { CommentsRepository } from './comments.repository';
 import { PaginationDto } from '../shared/dto/pagination.dto';
 import { PaginatedCommentsDto } from './dto/paginated-comments.dto';
-import { CommentsRepository } from './comments.repository';
-import { UserRole } from 'src/auth/entities/user-role';
 
 @Injectable()
 export class CommentsService {
@@ -17,6 +18,7 @@ export class CommentsService {
     private readonly commentsRepository: CommentsRepository,
     @InjectRepository(UsersRepository)
     private readonly usersRepository: UsersRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async createComment(
@@ -54,12 +56,12 @@ export class CommentsService {
       limit,
     );
 
-    const nextPage = `http://localhost:5000/api/comments/${username}?page=${
-      page + 1
-    }&limit=${limit}`;
-    const prevPage = `http://localhost:5000/api/comments/${username}?page=${
-      page - 1
-    }&limit=${limit}`;
+    const nextPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/comments/${username}?page=${page + 1}&limit=${limit}`;
+    const prevPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/comments/${username}?page=${page - 1}&limit=${limit}`;
 
     return {
       totalCount,

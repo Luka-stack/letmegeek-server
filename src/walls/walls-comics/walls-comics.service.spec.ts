@@ -17,6 +17,7 @@ const mockWallsComicsRepository = () => ({
   save: jest.fn(),
   delete: jest.fn(),
   getRecords: jest.fn(),
+  findUserRecordByComic: jest.fn(),
 });
 
 const mockComicsRepository = () => ({
@@ -131,7 +132,7 @@ describe('WallsComicsService', () => {
         finishedAt: new Date(),
       };
 
-      wallsComicsRepository.findOne.mockResolvedValue(wallsComic);
+      wallsComicsRepository.findUserRecordByComic.mockResolvedValue(wallsComic);
       wallsComicsRepository.save.mockImplementation((saved) => {
         return saved;
       });

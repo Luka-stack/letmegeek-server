@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
@@ -11,12 +12,13 @@ import { UsersModule } from '../users/users.module';
 import { ComicsService } from './comics.service';
 import { ComicsController } from './comics.controller';
 import { ComicsRepository } from './comics.repository';
-import { UserMiddleware } from 'src/auth/middlewares/user.middleware';
+import { UserMiddleware } from '../auth/middlewares/user.middleware';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule,
     TypeOrmModule.forFeature([ComicsRepository]),
   ],
   controllers: [ComicsController],

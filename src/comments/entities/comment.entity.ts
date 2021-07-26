@@ -1,5 +1,4 @@
 import { Exclude, Expose } from 'class-transformer';
-import { makeId } from 'src/utils/helpers';
 import {
   BeforeInsert,
   Column,
@@ -13,6 +12,7 @@ import {
 } from 'typeorm';
 
 import User from '../../users/entities/user.entity';
+import { makeId } from '../../utils/helpers';
 
 @Entity('comments')
 export default class Comment {

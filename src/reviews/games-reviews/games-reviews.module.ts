@@ -6,11 +6,15 @@ import { GamesModule } from '../../games/games.module';
 import { GamesReviewsService } from './games-reviews.service';
 import { GamesReviewsController } from './games-reviews.controller';
 import { GamesReviewsRepository } from './games-reviews.repository';
+import { WallsGamesModule } from '../../walls/walls-games/walls-games.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     GamesModule,
+    ConfigModule,
+    WallsGamesModule,
     TypeOrmModule.forFeature([GamesReviewsRepository]),
   ],
   providers: [GamesReviewsService],

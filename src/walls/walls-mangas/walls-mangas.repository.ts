@@ -1,8 +1,9 @@
 import { EntityRepository, Repository } from 'typeorm';
+import { InternalServerErrorException } from '@nestjs/common';
 
+import Manga from '../../mangas/entities/manga.entity';
 import WallsManga from './entities/walls-manga.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
-import { InternalServerErrorException } from '@nestjs/common';
 
 @EntityRepository(WallsManga)
 export class WallsMangasRepository extends Repository<WallsManga> {
@@ -44,6 +45,25 @@ export class WallsMangasRepository extends Repository<WallsManga> {
 
     try {
       return query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async checkUserHasStatusesOnManga(
+    username: string,
+    manga: Manga,
+    statuses: Array<string>,
+  ): Promise<boolean> {
+    try {
+      const recordCount = await this.createQueryBuilder('wallsManga')
+        .where('username = :username', { username })
+        .andWhere('"mangaId" = :manga', { manga: manga.id })
+        .andWhere('status IN (:...statuses)', { statuses })
+        .limit(1)
+        .getCount();
+
+      return recordCount > 0;
     } catch (error) {
       throw new InternalServerErrorException();
     }

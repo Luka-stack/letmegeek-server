@@ -23,7 +23,7 @@ export class MangasReviewsRepository extends Repository<MangasReview> {
     }
   }
 
-  async getReviewsForComic(
+  async getReviewsForManga(
     identifier: string,
     skippedItems: number,
     limit: number,

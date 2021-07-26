@@ -1,22 +1,25 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import Manga from './entities/manga.entity';
 import User from '../users/entities/user.entity';
+import WallsManga from '../walls/walls-mangas/entities/walls-manga.entity';
 import { UserRole } from '../auth/entities/user-role';
 import { MangaType } from './entities/manga-type';
-import WallsManga from '../walls/walls-mangas/entities/walls-manga.entity';
-import { slugify } from '../utils/helpers';
-import { MangasRepository } from './mangas.repository';
 import { MangasService } from './mangas.service';
+import { MangasRepository } from './mangas.repository';
+import { slugify } from '../utils/helpers';
+import { MangasFilterDto } from './dto/mangas-filter.dto';
 
 const mockMangasRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
-  getMangas: jest.fn(),
-  getCompleteManga: jest.fn(),
   delete: jest.fn(),
+  getMangas: jest.fn(),
+  getFilterCount: jest.fn(),
+  getCompleteManga: jest.fn(),
 });
 
 const mockManga = () => {
@@ -48,6 +51,11 @@ describe('MangasService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: [`.env.stage.${process.env.STAGE}`],
+        }),
+      ],
       providers: [
         MangasService,
         { provide: MangasRepository, useFactory: mockMangasRepository },
@@ -116,13 +124,15 @@ describe('MangasService', () => {
       mangasRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
-      expect(mangasService.createManga(mockManga(), null)).rejects.toThrowError(
-        ConflictException,
-      );
+      expect(
+        mangasService.createManga(mockManga(), mockUser()),
+      ).rejects.toThrowError(ConflictException);
     });
   });
 
   describe('getMangas', () => {
+    const mangasFilter = new MangasFilterDto();
+
     const user = mockUser();
     const manga = mockManga();
     const wallsManga = new WallsManga();
@@ -130,27 +140,88 @@ describe('MangasService', () => {
     wallsManga.score = 2;
     manga.wallsMangas = [wallsManga];
 
-    it('call MangasRepository.getMangas, return array of mangas', async () => {
-      // gien
-      mangasRepository.getMangas.mockResolvedValue([manga]);
+    it('return paginated data : total count 0, no prev, no next, no mangas', async () => {
+      mangasRepository.getFilterCount.mockResolvedValue(0);
+      mangasRepository.getMangas.mockResolvedValue([]);
 
-      // when
-      const result = await mangasService.getMangas({}, null);
+      mangasFilter.page = 0;
+      mangasFilter.limit = 1;
 
-      // then
-      expect(result).toEqual([manga]);
+      const response = await mangasService.getMangas(mangasFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 0,
+        page: mangasFilter.page,
+        limit: mangasFilter.limit,
+        data: [],
+        nextPage: '',
+        prevPage: '',
+      });
+    });
+
+    it('return paginated data : total count 2, no prev page, has next page, has mangas', async () => {
+      mangasRepository.getFilterCount.mockResolvedValue(2);
+      mangasRepository.getMangas.mockResolvedValue([manga, manga]);
+
+      mangasFilter.page = 0;
+      mangasFilter.limit = 1;
+
+      const response = await mangasService.getMangas(mangasFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 2,
+        page: mangasFilter.page,
+        limit: mangasFilter.limit,
+        data: [manga, manga],
+        nextPage: expect.any(String),
+        prevPage: '',
+      });
+
+      expect(response.nextPage).toMatch(/mangas/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+    });
+
+    it('return paginated data : total count 3, has prev page, has next page, has mangas', async () => {
+      mangasRepository.getFilterCount.mockResolvedValue(3);
+      mangasRepository.getMangas.mockResolvedValue([manga, manga, manga]);
+
+      mangasFilter.page = 2;
+      mangasFilter.limit = 1;
+
+      const response = await mangasService.getMangas(mangasFilter, user);
+
+      expect(response).toEqual({
+        totalCount: 3,
+        page: mangasFilter.page,
+        limit: mangasFilter.limit,
+        data: [manga, manga, manga],
+        nextPage: expect.any(String),
+        prevPage: expect.any(String),
+      });
+
+      expect(response.nextPage).toMatch(/mangas/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+
+      expect(response.prevPage).toMatch(/mangas/);
+      expect(response.prevPage).toMatch(/page/);
+      expect(response.prevPage).toMatch(/limit/);
     });
 
     it('call MangasRepository.getMangas as a user, return array of mangas with users wallsmanga', async () => {
-      // given
+      mangasFilter.page = 1;
+      mangasFilter.limit = 1;
+
+      mangasRepository.getFilterCount.mockResolvedValue(1);
       mangasRepository.getMangas.mockResolvedValue([manga]);
 
       // when
-      const result = await mangasService.getMangas(null, user);
+      const result = await mangasService.getMangas(mangasFilter, user);
 
       // then
-      expect(result).toEqual([manga]);
-      expect(result[0].userWallsManga).toEqual(wallsManga);
+      expect(result.data).toEqual([manga]);
+      expect(result.data[0].userWallsManga).toEqual(wallsManga);
     });
   });
 
@@ -313,15 +384,6 @@ describe('MangasService', () => {
       expect(mangasService.deleteManga('someId', 'someSlug')).rejects.toThrow(
         NotFoundException,
       );
-    });
-
-    it('call MangasRepsitory.delete, delet Manga and returns void', async () => {
-      // given
-      mangasRepository.delete.mockResolvedValue({ affected: 1 });
-
-      // when then
-      expect(mangasService.deleteManga('someId', 'someSlug')).resolves
-        .toHaveBeenCalled;
     });
   });
 });

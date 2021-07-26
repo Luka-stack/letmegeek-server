@@ -15,5 +15,6 @@ import { WallsGamesRepository } from './walls-games.repository';
   ],
   controllers: [WallsGamesController],
   providers: [WallsGamesService],
+  exports: [TypeOrmModule],
 })
 export class WallsGamesModule {}

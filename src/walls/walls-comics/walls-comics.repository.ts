@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import WallsComic from './entities/walls-comic.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { InternalServerErrorException } from '@nestjs/common';
+import Comic from 'src/comics/entities/comic.entity';
 
 @EntityRepository(WallsComic)
 export class WallsComicsRepository extends Repository<WallsComic> {
@@ -44,6 +45,25 @@ export class WallsComicsRepository extends Repository<WallsComic> {
 
     try {
       return query.getOne();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async checkUserHasStatusesOnComic(
+    username: string,
+    comic: Comic,
+    statuses: Array<string>,
+  ): Promise<boolean> {
+    try {
+      const recordCount = await this.createQueryBuilder('wallsComic')
+        .where('username = :username', { username })
+        .andWhere('"comicId" = :comic', { comic: comic.id })
+        .andWhere('status IN (:...statuses)', { statuses })
+        .limit(1)
+        .getCount();
+
+      return recordCount > 0;
     } catch (error) {
       throw new InternalServerErrorException();
     }

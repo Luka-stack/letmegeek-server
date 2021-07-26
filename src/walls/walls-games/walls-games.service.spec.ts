@@ -17,6 +17,7 @@ const mockWallsGameRepository = () => ({
   save: jest.fn(),
   delete: jest.fn(),
   getRecords: jest.fn(),
+  findUserRecordByGame: jest.fn(),
 });
 
 const mockGamesRepository = () => ({
@@ -133,7 +134,7 @@ describe('WallsGamesService', () => {
         finishedAt: new Date(),
       };
 
-      wallsGamesRepository.findOne.mockResolvedValue(wallsGame);
+      wallsGamesRepository.findUserRecordByGame.mockResolvedValue(wallsGame);
       wallsGamesRepository.save.mockImplementation((saved) => {
         return saved;
       });

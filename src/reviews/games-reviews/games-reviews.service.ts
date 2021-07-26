@@ -3,15 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import User from '../../users/entities/user.entity';
 import GamesReview from './entities/games-review.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { GamesReviewDto } from './dto/games-review.dto';
+import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { UpdateGamesReviewDto } from './dto/update-games-review.dto';
 import { GamesRepository } from '../../games/games.repository';
+import { WallsGamesRepository } from '../../walls/walls-games/walls-games.repository';
 import { GamesReviewsRepository } from './games-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { PaginatedGamesReviewsDto } from './dto/paginated-games.dto';
@@ -21,8 +24,14 @@ export class GamesReviewsService {
   constructor(
     @InjectRepository(GamesReviewsRepository)
     private readonly gamesReviewsRepository: GamesReviewsRepository,
+
     @InjectRepository(GamesRepository)
     private readonly gamesRepository: GamesRepository,
+
+    @InjectRepository(WallsGamesRepository)
+    private readonly wallsGamesRepository: WallsGamesRepository,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async createReview(
@@ -33,6 +42,22 @@ export class GamesReviewsService {
     const game = await this.gamesRepository.findOne({ identifier });
     if (!game) {
       throw new NotFoundException('Game not found');
+    }
+
+    const hasCorrectStatus =
+      await this.wallsGamesRepository.checkUserHasStatusesOnGame(
+        user.username,
+        game,
+        [
+          WallArticleStatus.IN_PROGRESS,
+          WallArticleStatus.COMPLETED,
+          WallArticleStatus.DROPPED,
+        ],
+      );
+    if (!hasCorrectStatus) {
+      throw new ConflictException(
+        'To create review Users must have the title on their wall',
+      );
     }
 
     const review = await this.gamesReviewsRepository.findOne({
@@ -101,8 +126,8 @@ export class GamesReviewsService {
     );
 
     let reviews: Array<GamesReview>;
-    let nextPage = 'http://localhost:5000/api/gamesreviews/';
-    let prevPage = 'http://localhost:5000/api/gamesreviews/';
+    let nextPage = `${this.configService.get('APP_URL')}/api/gamesreviews/`;
+    let prevPage = `${this.configService.get('APP_URL')}/api/gamesreviews/`;
     if (identifier) {
       reviews = await this.gamesReviewsRepository.getReviewsForGame(
         identifier,

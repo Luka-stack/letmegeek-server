@@ -15,5 +15,6 @@ import { WallsMangasRepository } from './walls-mangas.repository';
   ],
   providers: [WallsMangasService],
   controllers: [WallsMangasController],
+  exports: [TypeOrmModule],
 })
 export class WallsMangasModule {}

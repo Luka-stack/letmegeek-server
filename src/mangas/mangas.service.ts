@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 
 import User from '../users/entities/user.entity';
@@ -21,6 +22,7 @@ export class MangasService {
   constructor(
     @InjectRepository(MangasRepository)
     private readonly mangasRepository: MangasRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async createManga(mangaDto: MangaDto, user: User): Promise<Manga> {
@@ -79,12 +81,16 @@ export class MangasService {
 
     const apiQuery = this.createQuery(filterDto);
 
-    const nextPage = `http://localhost:5000/api/mangas?${apiQuery}page=${
-      filterDto.page + 1
-    }&limit=${filterDto.limit}`;
-    const prevPage = `http://localhost:5000/api/mangas?${apiQuery}page=${
-      filterDto.page - 1
-    }&limit=${filterDto.limit}`;
+    const nextPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/mangas?${apiQuery}page=${filterDto.page + 1}&limit=${
+      filterDto.limit
+    }`;
+    const prevPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/mangas?${apiQuery}page=${filterDto.page - 1}&limit=${
+      filterDto.limit
+    }`;
 
     return {
       totalCount,
@@ -96,7 +102,11 @@ export class MangasService {
     };
   }
 
-  getOneManga(identifier: string, slug: string, user: User): Promise<Manga> {
+  async getOneManga(
+    identifier: string,
+    slug: string,
+    user: User,
+  ): Promise<Manga> {
     return this.mangasRepository
       .getCompleteManga(identifier, slug, user)
       .then((result: Manga) => {

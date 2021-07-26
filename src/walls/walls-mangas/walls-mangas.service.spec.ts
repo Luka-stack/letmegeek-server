@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
 import Manga from '../../mangas/entities/manga.entity';
@@ -9,7 +10,6 @@ import { WallArticleStatus } from '../entities/wall-article-status';
 import { WallsMangaDto } from './dto/walls-manga.dto';
 import { WallsMangasRepository } from './walls-mangas.repository';
 import { WallsMangasService } from './walls-mangas.service';
-import { ConflictException, NotFoundException } from '@nestjs/common';
 
 const mockWallsMangasRepository = () => ({
   findOne: jest.fn(),
@@ -17,6 +17,7 @@ const mockWallsMangasRepository = () => ({
   save: jest.fn(),
   delete: jest.fn(),
   getRecords: jest.fn(),
+  findUserRecordByManga: jest.fn(),
 });
 
 const mockMangasRepository = () => ({
@@ -136,7 +137,7 @@ describe('WallsMangasService', () => {
       };
       const wallsManga = mockWallsManga(mockUser(), mockManga());
 
-      wallsMangasRepository.findOne.mockResolvedValue(wallsManga);
+      wallsMangasRepository.findUserRecordByManga.mockResolvedValue(wallsManga);
       wallsMangasRepository.save.mockImplementation((saved) => {
         return saved;
       });

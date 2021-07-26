@@ -4,25 +4,34 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DeleteResult } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import User from '../../users/entities/user.entity';
 import BooksReview from './entities/books-review.entity';
+import { UserRole } from '../../auth/entities/user-role';
 import { BooksReviewDto } from './dto/books-review.dto';
+import { WallArticleStatus } from '../../walls/entities/wall-article-status';
+import { UpdateBooksReviewDto } from './dto/update-books-review.dto';
 import { BooksRepository } from '../../books/books.repository';
+import { WallsBooksRepository } from '../../walls/walls-books/walls-books.repository';
 import { BooksReviewsRepository } from './books-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { PaginatedBooksReviewsDto } from './dto/paginated-books-reviews.dto';
-import { UserRole } from '../../auth/entities/user-role';
-import { UpdateBooksReviewDto } from './dto/update-books-review.dto';
 
 @Injectable()
 export class BooksReviewsService {
   constructor(
     @InjectRepository(BooksReviewsRepository)
     private readonly booksReviewsRepository: BooksReviewsRepository,
+
     @InjectRepository(BooksRepository)
     private readonly booksRepository: BooksRepository,
+
+    @InjectRepository(WallsBooksRepository)
+    private readonly wallsBooksRespitory: WallsBooksRepository,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async createReview(
@@ -33,6 +42,19 @@ export class BooksReviewsService {
     const book = await this.booksRepository.findOne({ identifier });
     if (!book) {
       throw new NotFoundException('Book not found');
+    }
+
+    const hasCorrectStatus = await this.wallsBooksRespitory
+      .checkUserHasStatusesOnBook(user.username, book, [
+        WallArticleStatus.IN_PROGRESS,
+        WallArticleStatus.COMPLETED,
+        WallArticleStatus.DROPPED,
+      ])
+      .catch((err) => console.log(err));
+    if (!hasCorrectStatus) {
+      throw new ConflictException(
+        'To create review Users must have the title on their wall',
+      );
     }
 
     const review = await this.booksReviewsRepository.findOne({
@@ -52,74 +74,6 @@ export class BooksReviewsService {
     await this.booksReviewsRepository.save(newReview);
 
     return newReview;
-  }
-
-  async getReviewsForBook(
-    identifier: string,
-    paginationDto: PaginationDto,
-  ): Promise<PaginatedBooksReviewsDto> {
-    const limit = Number(paginationDto.limit);
-    const page = Number(paginationDto.page);
-    const skippedItems = (page - 1) * limit;
-
-    const totalCount = await this.booksReviewsRepository.reviewsCount(
-      identifier,
-    );
-
-    const reviews = await this.booksReviewsRepository.getReviewsForBook(
-      identifier,
-      skippedItems,
-      limit,
-    );
-
-    const nextPage = `http://localhost:5000/api/booksreviews/book/${identifier}?page=${
-      page + 1
-    }&limit=${limit}`;
-    const prevPage = `http://localhost:5000/api/booksreviews/book/${identifier}?page=${
-      page - 1
-    }&limit=${limit}`;
-
-    return {
-      totalCount,
-      page,
-      limit,
-      data: reviews,
-      nextPage: page * limit < totalCount ? nextPage : '',
-      prevPage: page >= 2 ? prevPage : '',
-    };
-  }
-
-  async getReviewsForUser(
-    username: string,
-    paginationDto: PaginationDto,
-  ): Promise<PaginatedBooksReviewsDto> {
-    const limit = Number(paginationDto.limit);
-    const page = Number(paginationDto.page);
-    const skippedItems = (page - 1) * limit;
-
-    const totalCount = await this.booksReviewsRepository.reviewsCount(username);
-
-    const reviews = await this.booksReviewsRepository.getReviewsForUser(
-      username,
-      skippedItems,
-      limit,
-    );
-
-    const nextPage = `http://localhost:5000/api/booksreviews/user/${username}?page=${
-      page + 1
-    }&limit=${limit}`;
-    const prevPage = `http://localhost:5000/api/booksreviews/user/${username}?page=${
-      page - 1
-    }&limit=${limit}`;
-
-    return {
-      totalCount,
-      page,
-      limit,
-      data: reviews,
-      nextPage: page * limit < totalCount ? nextPage : '',
-      prevPage: page >= 2 ? prevPage : '',
-    };
   }
 
   async updateReview(
@@ -155,5 +109,53 @@ export class BooksReviewsService {
     if (result.affected === 0) {
       throw new NotFoundException('Review not found');
     }
+  }
+
+  async getReviews(
+    paginationDto: PaginationDto,
+    identifier?: string,
+    username?: string,
+  ): Promise<PaginatedBooksReviewsDto> {
+    const limit = Number(paginationDto.limit);
+    const page = Number(paginationDto.page);
+    const skippedItems = (page - 1) * limit;
+
+    const totalCount = await this.booksReviewsRepository.reviewsCount(
+      identifier,
+      username,
+    );
+
+    let reviews: Array<BooksReview>;
+    let nextPage = `${this.configService.get('APP_URL')}/api/booksreviews/`;
+    let prevPage = `${this.configService.get('APP_URL')}/api/booksreviews/`;
+    if (identifier) {
+      reviews = await this.booksReviewsRepository.getReviewsForBook(
+        identifier,
+        skippedItems,
+        limit,
+      );
+      nextPage += `book/${identifier}`;
+      prevPage += `book/${identifier}`;
+    } else {
+      reviews = await this.booksReviewsRepository.getReviewsForUser(
+        username,
+        skippedItems,
+        limit,
+      );
+      nextPage += `user/${username}`;
+      prevPage += `user/${username}`;
+    }
+
+    nextPage += `?page=${page + 1}&limit=${limit}`;
+    prevPage += `?page=${page - 1}&limit=${limit}`;
+
+    return {
+      totalCount,
+      page,
+      limit,
+      data: reviews,
+      nextPage: page * limit < totalCount ? nextPage : '',
+      prevPage: page >= 2 ? prevPage : '',
+    };
   }
 }

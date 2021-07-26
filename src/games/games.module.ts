@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
@@ -17,6 +18,7 @@ import { UserMiddleware } from '../auth/middlewares/user.middleware';
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule,
     TypeOrmModule.forFeature([GamesRepository]),
   ],
   controllers: [GamesController],

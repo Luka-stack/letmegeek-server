@@ -71,23 +71,23 @@ export class AuthService {
     };
   }
 
-  async login(signinDto: LoginDto): Promise<{
+  async login(loginDto: LoginDto): Promise<{
     user: User;
     accessToken: string;
     // refreshToken: string;
   }> {
-    const { email, password } = signinDto;
+    const { email, password } = loginDto;
     const user = await this.usersRepository.findOne({ email });
 
-    if (!user.enabled) {
-      throw new BadRequestException('Account is not confirmed');
-    }
-
-    if (user.blocked) {
-      throw new BadRequestException('Account is blocked');
-    }
-
     if (user && (await bcrypt.compare(password, user.password))) {
+      if (!user.enabled) {
+        throw new UnauthorizedException('Account is not confirmed');
+      }
+
+      if (user.blocked) {
+        throw new UnauthorizedException('Account is blocked');
+      }
+
       const payload: JwtPayload = {
         email: user.email,
       };

@@ -1,5 +1,6 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
@@ -8,14 +9,16 @@ import { UserRole } from '../auth/entities/user-role';
 import { slugify } from '../utils/helpers';
 import { ComicsRepository } from './comics.repository';
 import { ComicsService } from './comics.service';
+import { ComicsFilterDto } from './dto/comics-filter.dto';
 
 const mockComicsRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
-  getComics: jest.fn(),
-  getCompleteComic: jest.fn(),
   delete: jest.fn(),
+  getComics: jest.fn(),
+  getFilterCount: jest.fn(),
+  getCompleteComic: jest.fn(),
 });
 
 const mockComic = () => {
@@ -46,6 +49,11 @@ describe('ComicsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: [`.env.stage.${process.env.STAGE}`],
+        }),
+      ],
       providers: [
         ComicsService,
         { provide: ComicsRepository, useFactory: mockComicsRepository },
@@ -109,13 +117,15 @@ describe('ComicsService', () => {
       comicsRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
-      expect(comicsService.createComic(comic, null)).rejects.toThrowError(
+      expect(comicsService.createComic(comic, mockUser())).rejects.toThrowError(
         ConflictException,
       );
     });
   });
 
   describe('getComics', () => {
+    const comicsFilter = new ComicsFilterDto();
+
     const user = mockUser();
     const comic = mockComic();
     const wallsComic = new WallsComic();
@@ -123,29 +133,89 @@ describe('ComicsService', () => {
     wallsComic.score = 2;
     comic.wallsComics = [wallsComic];
 
-    it('call ComicsRepository.getComics, return array of comics', async () => {
-      // given
-      comicsRepository.getComics.mockResolvedValue([comic]);
+    it('return paginated data : total count 0, no prev, no next, no comica', async () => {
+      comicsRepository.getFilterCount.mockResolvedValue(0);
+      comicsRepository.getComics.mockResolvedValue([]);
 
-      // when
-      const result = await comicsService.getComics(null, null);
+      comicsFilter.page = 0;
+      comicsFilter.limit = 1;
 
-      // then
-      expect(result).toHaveLength(1);
-      expect(result).toEqual([comic]);
+      const response = await comicsService.getComics(comicsFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 0,
+        page: comicsFilter.page,
+        limit: comicsFilter.limit,
+        data: [],
+        nextPage: '',
+        prevPage: '',
+      });
+    });
+
+    it('return paginated data : total count 2, no prev page, has next page, has comics', async () => {
+      comicsRepository.getFilterCount.mockResolvedValue(2);
+      comicsRepository.getComics.mockResolvedValue([comic, comic]);
+
+      comicsFilter.page = 0;
+      comicsFilter.limit = 1;
+
+      const response = await comicsService.getComics(comicsFilter, mockUser());
+
+      expect(response).toEqual({
+        totalCount: 2,
+        page: comicsFilter.page,
+        limit: comicsFilter.limit,
+        data: [comic, comic],
+        nextPage: expect.any(String),
+        prevPage: '',
+      });
+
+      expect(response.nextPage).toMatch(/comic/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+    });
+
+    it('return paginated data : total count 3, has prev page, has next page, has comics', async () => {
+      comicsRepository.getFilterCount.mockResolvedValue(3);
+      comicsRepository.getComics.mockResolvedValue([comic, comic, comic]);
+
+      comicsFilter.page = 2;
+      comicsFilter.limit = 1;
+
+      const response = await comicsService.getComics(comicsFilter, user);
+
+      expect(response).toEqual({
+        totalCount: 3,
+        page: comicsFilter.page,
+        limit: comicsFilter.limit,
+        data: [comic, comic, comic],
+        nextPage: expect.any(String),
+        prevPage: expect.any(String),
+      });
+
+      expect(response.nextPage).toMatch(/comics/);
+      expect(response.nextPage).toMatch(/page/);
+      expect(response.nextPage).toMatch(/limit/);
+
+      expect(response.prevPage).toMatch(/comics/);
+      expect(response.prevPage).toMatch(/page/);
+      expect(response.prevPage).toMatch(/limit/);
     });
 
     it('call ComicsRepository.getComics as a user, return array of comics with users wallsComic', async () => {
+      comicsFilter.page = 1;
+      comicsFilter.limit = 1;
+
       // given
+      comicsRepository.getFilterCount.mockResolvedValue(1);
       comicsRepository.getComics.mockResolvedValue([comic]);
 
       // when
-      const result = await comicsService.getComics(null, user);
+      const result = await comicsService.getComics(comicsFilter, user);
 
       // then
-      expect(result).toHaveLength(1);
-      expect(result).toEqual([comic]);
-      expect(result[0].userWallsComic).toEqual(wallsComic);
+      expect(result.data).toEqual([comic]);
+      expect(result.data[0].userWallsComic).toEqual(wallsComic);
     });
   });
 
@@ -301,17 +371,17 @@ describe('ComicsService', () => {
     it('call ComicsRepository.delete, throw NotFoundException', async () => {
       comicsRepository.delete.mockResolvedValue({ affected: 0 });
 
-      expect(comicsService.deleteComic('someId', 'someSlug')).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('call ComicsRepository.delete, delet Comic and returns void', async () => {
-      comicsRepository.delete.mockResolvedValue({ affected: 1 });
-
       expect(
         comicsService.deleteComic('someId', 'someSlug'),
-      ).resolves.toBeCalled();
+      ).rejects.toThrowError(NotFoundException);
     });
+
+    // it('call ComicsRepository.delete, delet Comic and returns void', async () => {
+    //   comicsRepository.delete.mockResolvedValue({ affected: 1 });
+
+    //   expect(
+    //     comicsService.deleteComic('someId', 'someSlug'),
+    //   ).resolves.toBeCalled();
+    // });
   });
 });

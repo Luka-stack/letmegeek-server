@@ -17,6 +17,7 @@ const mockWallsBooksRepository = () => ({
   save: jest.fn(),
   delete: jest.fn(),
   getRecords: jest.fn(),
+  findUserRecordByBook: jest.fn(),
 });
 
 const mockBooksRepository = () => ({
@@ -125,7 +126,7 @@ describe('WallsBooksService', () => {
         pages: 5555,
       };
 
-      wallsBooksRepository.findOne.mockResolvedValue(wallsBook);
+      wallsBooksRepository.findUserRecordByBook.mockResolvedValue(wallsBook);
       wallsBooksRepository.save.mockImplementation((saved) => {
         return saved;
       });

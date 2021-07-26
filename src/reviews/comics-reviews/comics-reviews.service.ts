@@ -3,26 +3,35 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { DeleteResult } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import User from '../../users/entities/user.entity';
 import ComicsReview from './entities/comics-review.entity';
+import { UserRole } from '../../auth/entities/user-role';
+import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { ComicsReviewDto } from './dto/comics-review.dto';
 import { UpdateComicsReviewDto } from './dto/update-comics-review.dto';
 import { ComicsRepository } from '../../comics/comics.repository';
+import { WallsComicsRepository } from '../../walls/walls-comics/walls-comics.repository';
 import { ComicsReviewsRepository } from './comics-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { PaginatedComicsReviewsDto } from './dto/paginated-comics-reviews.dto';
-import { DeleteResult } from 'typeorm';
-import { UserRole } from 'src/auth/entities/user-role';
 
 @Injectable()
 export class ComicsReviewsService {
   constructor(
     @InjectRepository(ComicsReviewsRepository)
     private readonly comicsReviewsRepository: ComicsReviewsRepository,
+
     @InjectRepository(ComicsRepository)
     private readonly comicsRepository: ComicsRepository,
+
+    @InjectRepository(WallsComicsRepository)
+    private readonly wallsComicsRepository: WallsComicsRepository,
+
+    private readonly configService: ConfigService,
   ) {}
 
   async createReview(
@@ -33,6 +42,22 @@ export class ComicsReviewsService {
     const comic = await this.comicsRepository.findOne({ identifier });
     if (!comic) {
       throw new NotFoundException('Comic not found');
+    }
+
+    const hasCorrectStatus =
+      await this.wallsComicsRepository.checkUserHasStatusesOnComic(
+        user.username,
+        comic,
+        [
+          WallArticleStatus.IN_PROGRESS,
+          WallArticleStatus.COMPLETED,
+          WallArticleStatus.DROPPED,
+        ],
+      );
+    if (!hasCorrectStatus) {
+      throw new ConflictException(
+        'To create review Users must have the title on their wall',
+      );
     }
 
     const review = await this.comicsReviewsRepository.findOne({
@@ -101,8 +126,8 @@ export class ComicsReviewsService {
     );
 
     let reviews: Array<ComicsReview>;
-    let nextPage = 'http://localhost:5000/api/comicsreviews/';
-    let prevPage = 'http://localhost:5000/api/comicsreviews/';
+    let nextPage = `${this.configService.get('APP_URL')}/api/comicsreviews/`;
+    let prevPage = `${this.configService.get('APP_URL')}/api/comicsreviews/`;
     if (identifier) {
       reviews = await this.comicsReviewsRepository.getReviewsForComic(
         identifier,

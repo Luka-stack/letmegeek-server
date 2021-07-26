@@ -6,11 +6,13 @@ import { UsersModule } from '../users/users.module';
 import { CommentsService } from './comments.service';
 import { CommentsController } from './comments.controller';
 import { CommentsRepository } from './comments.repository';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule,
     TypeOrmModule.forFeature([CommentsRepository]),
   ],
   providers: [CommentsService],

@@ -15,5 +15,6 @@ import { WallsComicsRepository } from './walls-comics.repository';
   ],
   providers: [WallsComicsService],
   controllers: [WallsComicsController],
+  exports: [TypeOrmModule],
 })
 export class WallsComicsModule {}

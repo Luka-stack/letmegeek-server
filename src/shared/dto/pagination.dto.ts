@@ -1,9 +1,4 @@
-import {
-  IsNotEmpty,
-  IsNumberString,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumberString } from 'class-validator';
 
 export class PaginationDto {
   @IsNotEmpty()

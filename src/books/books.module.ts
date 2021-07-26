@@ -12,11 +12,13 @@ import { UserMiddleware } from '../auth/middlewares/user.middleware';
 import { BooksService } from './books.service';
 import { BooksController } from './books.controller';
 import { BooksRepository } from './books.repository';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule,
     TypeOrmModule.forFeature([BooksRepository]),
   ],
   controllers: [BooksController],

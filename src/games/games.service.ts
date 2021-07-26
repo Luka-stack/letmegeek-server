@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 
@@ -21,6 +22,7 @@ export class GamesService {
   constructor(
     @InjectRepository(GamesRepository)
     private readonly gamesRepository: GamesRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async createGame(gameDto: GameDto, user: User): Promise<Game> {
@@ -83,12 +85,16 @@ export class GamesService {
 
     const apiQuery = this.createQuery(filterDto);
 
-    const nextPage = `http://localhost:5000/api/games?${apiQuery}page=${
-      filterDto.page + 1
-    }&limit=${filterDto.limit}`;
-    const prevPage = `http://localhost:5000/api/games?${apiQuery}page=${
-      filterDto.page - 1
-    }&limit=${filterDto.limit}`;
+    const nextPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/games?${apiQuery}page=${filterDto.page + 1}&limit=${
+      filterDto.limit
+    }`;
+    const prevPage = `${this.configService.get(
+      'APP_URL',
+    )}/api/games?${apiQuery}page=${filterDto.page - 1}&limit=${
+      filterDto.limit
+    }`;
 
     return {
       totalCount,
