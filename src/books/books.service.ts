@@ -205,7 +205,7 @@ export class BooksService {
     let query = '';
 
     if (filterDto.pages) {
-      query += `page=${filterDto.pages}&`;
+      query += `pages=${filterDto.pages}&`;
     }
 
     if (filterDto.authors) {

@@ -1,23 +1,22 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { DeleteResult, EntityRepository, In, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  EntityRepository,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 
 import User from './entities/user.entity';
 import { UserFilterDto } from './dto/user-filter.dto';
 
 @EntityRepository(User)
 export class UsersRepository extends Repository<User> {
-  async getUsers(userFilterDto: UserFilterDto): Promise<Array<User>> {
-    const { username } = userFilterDto;
-    const query = this.createQueryBuilder('user');
-
-    if (username) {
-      query.andWhere('LOWER(user.username) LIKE :username', {
-        username: username.toLowerCase(),
-      });
-    }
-
+  async getUsers(filterDto: UserFilterDto): Promise<Array<User>> {
     try {
-      return await query.getMany();
+      return await this.createFilterQuery(filterDto)
+        .offset((filterDto.page - 1) * filterDto.limit)
+        .limit(filterDto.limit)
+        .getMany();
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -61,5 +60,37 @@ export class UsersRepository extends Repository<User> {
     } catch (error) {
       throw new InternalServerErrorException();
     }
+  }
+
+  async getFilterCount(filterDto: UserFilterDto): Promise<number> {
+    try {
+      return await this.createFilterQuery(filterDto).getCount();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  createFilterQuery(filterDto: UserFilterDto): SelectQueryBuilder<User> {
+    const { username, order, isBlocked } = filterDto;
+    const query = this.createQueryBuilder('user');
+    query.where('1=1');
+
+    if (username) {
+      query.andWhere('LOWER(user.username) LIKE :username', {
+        username: username.toLowerCase(),
+      });
+    }
+
+    if (isBlocked) {
+      query.andWhere('user.blocked = :blocked', { blocked: isBlocked });
+    }
+
+    const ordering =
+      order.toLowerCase() === 'ASC' || order.toLowerCase() === 'ASCENDING'
+        ? 'ASC'
+        : 'DESC';
+    query.orderBy('user.createdAt', ordering);
+
+    return query;
   }
 }

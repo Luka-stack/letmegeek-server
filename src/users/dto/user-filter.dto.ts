@@ -1,7 +1,16 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsBooleanString, IsOptional, IsString } from 'class-validator';
+import { PaginationDto } from '../../shared/dto/pagination.dto';
 
-export class UserFilterDto {
+export class UserFilterDto extends PaginationDto {
   @IsOptional()
   @IsString()
   username: string;
+
+  @IsOptional()
+  @IsString()
+  order: string;
+
+  @IsOptional()
+  @IsBooleanString()
+  isBlocked: string;
 }
