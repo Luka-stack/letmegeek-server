@@ -15,6 +15,7 @@ import WallsGame from '../../walls/walls-games/entities/walls-game.entity';
 import WallsBook from '../../walls/walls-books/entities/walls-book.entity';
 import WallsComic from '../../walls/walls-comics/entities/walls-comic.entity';
 import WallsManga from '../../walls/walls-mangas/entities/walls-manga.entity';
+import { UserStatsDto } from '../dto/user-stats.dto';
 
 @Entity('users')
 export default class User {
@@ -37,6 +38,9 @@ export default class User {
   @Column({ nullable: true })
   @Exclude()
   imageUrn: string;
+
+  @Expose()
+  statistics: Array<UserStatsDto>;
 
   @Expose()
   get imageUrl(): string {

@@ -7,7 +7,6 @@ import {
   Param,
   Post,
   Query,
-  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -25,6 +24,8 @@ import { HasRoles } from '../auth/decorators/has-roles.decorator';
 import { UserRole } from '../auth/entities/user-role';
 import { UserUpdateStatusDto, UserUpdateRoleDto } from './dto/user-update.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
+import { UserStatsFilterDto } from './dto/user-stats-filter.dto';
+import { UserDetailsFilterDto } from './dto/user-details-filter.dto';
 
 const multerOptions = {
   limits: {
@@ -47,8 +48,19 @@ export class UsersController {
   }
 
   @Get('/:username')
-  getUserByUsername(@Param('username') username: string) {
-    return this.usersService.getUserByUsername(username);
+  getUserByUsername(
+    @Query() userDetailsFilter: UserDetailsFilterDto,
+    @Param('username') username: string,
+  ) {
+    return this.usersService.getUserByUsername(username, userDetailsFilter);
+  }
+
+  @Get('/:username/stats')
+  getUsersStats(
+    @Param('username') username: string,
+    @Query() userStatsFilter: UserStatsFilterDto,
+  ) {
+    return this.usersService.getUsersArticleStats(username, userStatsFilter);
   }
 
   @UseGuards(JwtAuthGuard)

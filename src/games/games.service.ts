@@ -68,20 +68,10 @@ export class GamesService {
     filterDto.page = Number(filterDto.page);
 
     const totalCount = await this.gamesRepository.getFilterCount(filterDto);
-    const games = await this.gamesRepository
-      .getGames(filterDto)
-      .then((result: Array<Game>) => {
-        if (user) {
-          result.map((game: Game) => {
-            const wall = game.wallsGames.find(
-              (wall) => wall.username === user.username,
-            );
-            game.userWallsGame = wall;
-          });
-        }
-
-        return result;
-      });
+    const games = await this.gamesRepository.getGames(
+      filterDto,
+      user?.username,
+    );
 
     const apiQuery = this.createQuery(filterDto);
 
@@ -106,27 +96,18 @@ export class GamesService {
     };
   }
 
-  async getOneGame(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Game> {
-    return await this.gamesRepository
-      .getCompleteGame(identifier, slug, user)
-      .then((result: Game) => {
-        if (!result) {
-          throw new NotFoundException('Game not found');
-        }
+  async getOneGame(identifier: string, slug: string, user: User): Promise<any> {
+    const game = await this.gamesRepository.getGame(
+      identifier,
+      slug,
+      user?.username,
+    );
 
-        if (user) {
-          const wall = result.wallsGames.find(
-            (wall) => wall.username === user.username,
-          );
-          result.userWallsGame = wall;
-        }
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
 
-        return result;
-      });
+    return game;
   }
 
   async updateGame(

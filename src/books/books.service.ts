@@ -64,20 +64,10 @@ export class BooksService {
     filterDto.page = Number(filterDto.page);
 
     const totalCount = await this.booksRepository.getFilterCount(filterDto);
-    const books = await this.booksRepository
-      .getBooks(filterDto)
-      .then((result: Array<Book>) => {
-        if (user) {
-          result.map((book: Book) => {
-            const wall = book.wallsBooks.find(
-              (wall) => wall.username === user.username,
-            );
-            book.userWallsBook = wall;
-          });
-        }
-
-        return result;
-      });
+    const books = await this.booksRepository.getBooks(
+      filterDto,
+      user?.username,
+    );
 
     const apiQuery = this.createQuery(filterDto);
 
@@ -102,27 +92,16 @@ export class BooksService {
     };
   }
 
-  async getOneBook(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Book> {
-    const book = await this.booksRepository
-      .getCompleteBook(identifier, slug, user)
-      .then((result: Book) => {
-        if (!result) {
-          throw new NotFoundException('Book not found');
-        }
+  async getOneBook(identifier: string, slug: string, user: User): Promise<any> {
+    const book = await this.booksRepository.getBook(
+      identifier,
+      slug,
+      user?.username,
+    );
 
-        if (user) {
-          const wall = result.wallsBooks.find(
-            (wall) => wall.username === user.username,
-          );
-          result.userWallsBook = wall;
-        }
-
-        return result;
-      });
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
 
     return book;
   }

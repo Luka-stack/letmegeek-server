@@ -2,19 +2,89 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import Book from './entities/book.entity';
-import User from '../users/entities/user.entity';
+import BookStats from './entities/book-stats.viewentity';
+import WallsBook from '../walls/walls-books/entities/walls-book.entity';
 import { BooksFilterDto } from './dto/books-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
-  async getBooks(filterDto: BooksFilterDto): Promise<Array<Book>> {
+  async getBooks(
+    filterDto: BooksFilterDto,
+    username: string,
+  ): Promise<Array<any>> {
+    const { orderBy, ordering } = filterDto;
+    const query = this.createFilterQuery(filterDto).leftJoin(
+      BookStats,
+      'bookStats',
+      'book.id = bookStats.bookId',
+    );
+
+    if (username) {
+      query
+        .leftJoin(
+          WallsBook,
+          'wallBook',
+          'wallBook.username = :username AND wallBook.bookId = book.id',
+          {
+            username,
+          },
+        )
+        .addSelect('wallBook.score')
+        .addSelect('wallBook.status');
+    }
+
+    query
+      .addSelect('bookStats.members')
+      .addSelect('bookStats.avgScore')
+      .addSelect('bookStats.countScore');
+
+    if (orderBy) {
+      query.orderBy(
+        `bookStats.${orderBy} IS NOT NULL`,
+        ordering && ordering === 'ASC' ? 'ASC' : 'DESC',
+      );
+    }
+
     try {
-      return await this.createFilterQuery(filterDto)
-        .leftJoinAndSelect('book.wallsBooks', 'WallsBook')
+      return await query
         .offset((filterDto.page - 1) * filterDto.limit)
         .limit(filterDto.limit)
-        .getMany();
+        .getRawMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getBook(
+    identifier: string,
+    slug: string,
+    username: string,
+  ): Promise<any> {
+    const query = this.createQueryBuilder('book');
+    query.where('book.identifier = :identifier', { identifier });
+    query.andWhere('book.slug = :slug', { slug });
+
+    if (username) {
+      query.leftJoinAndSelect(
+        WallsBook,
+        'wallBook',
+        'wallBook.username = :username AND wallBook.bookId = book.id',
+        {
+          username,
+        },
+      );
+    }
+
+    query
+      .leftJoin(BookStats, 'bookStats', 'book.id = bookStats.bookId')
+      .addSelect('bookStats.members')
+      .addSelect('bookStats.avgScore')
+      .addSelect('bookStats.countScore');
+
+    try {
+      const book = await query.getRawOne();
+      return book;
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -77,26 +147,5 @@ export class BooksRepository extends Repository<Book> {
     }
 
     return query;
-  }
-
-  async getCompleteBook(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Book> {
-    const query = this.createQueryBuilder('book');
-    query.where('book.identifier = :identifier', { identifier });
-    query.andWhere('book.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('book.wallsBooks', 'WallsBook');
-    }
-
-    try {
-      const book = await query.getOne();
-      return book;
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
   }
 }

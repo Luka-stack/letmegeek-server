@@ -13,6 +13,10 @@ import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsComicDto } from './dto/update-walls-comic.dto';
 import { ComicsRepository } from '../../comics/comics.repository';
 import { WallsComicsRepository } from './walls-comics.repository';
+import {
+  allWallArticleStatusesModes,
+  WallArticleStatus,
+} from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsComicsService {

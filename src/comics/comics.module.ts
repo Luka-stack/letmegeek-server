@@ -13,13 +13,14 @@ import { ComicsService } from './comics.service';
 import { ComicsController } from './comics.controller';
 import { ComicsRepository } from './comics.repository';
 import { UserMiddleware } from '../auth/middlewares/user.middleware';
+import { ComicStatsRepository } from './comics-stats.repository';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([ComicsRepository]),
+    TypeOrmModule.forFeature([ComicsRepository, ComicStatsRepository]),
   ],
   controllers: [ComicsController],
   providers: [ComicsService],

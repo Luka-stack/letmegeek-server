@@ -13,6 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import User from '../users/entities/user.entity';
 import Manga from './entities/manga.entity';
@@ -26,7 +27,6 @@ import { HasRoles } from '../auth/decorators/has-roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { editFilename, imageFileFilter } from '../utils/file-uploads';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginatedMangasDto } from './dto/paginated-mangas.dto';
 
 const multerOptions = {
@@ -66,7 +66,7 @@ export class MangasController {
     @Param('identifier') identifier: string,
     @Param('slug') slug: string,
     @GetUser() user: User,
-  ): Promise<Manga> {
+  ): Promise<any> {
     return this.mangasService.getOneManga(identifier, slug, user);
   }
 

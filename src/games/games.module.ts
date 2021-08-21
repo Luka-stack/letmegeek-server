@@ -13,13 +13,14 @@ import { GamesService } from './games.service';
 import { GamesRepository } from './games.repository';
 import { GamesController } from './games.controller';
 import { UserMiddleware } from '../auth/middlewares/user.middleware';
+import { GameStatsRepository } from './game-stats.repository';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([GamesRepository]),
+    TypeOrmModule.forFeature([GamesRepository, GameStatsRepository]),
   ],
   controllers: [GamesController],
   providers: [GamesService],

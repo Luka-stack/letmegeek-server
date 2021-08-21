@@ -1,20 +1,90 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
-import User from '../users/entities/user.entity';
 import Comic from './entities/comic.entity';
+import ComicStats from './entities/comic-stats.viewentity';
+import WallsComic from '../walls/walls-comics/entities/walls-comic.entity';
 import { ComicsFilterDto } from './dto/comics-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
 
 @EntityRepository(Comic)
 export class ComicsRepository extends Repository<Comic> {
-  async getComics(filterDto: ComicsFilterDto): Promise<Array<Comic>> {
+  async getComics(
+    filterDto: ComicsFilterDto,
+    username: string,
+  ): Promise<Array<any>> {
+    const { orderBy, ordering } = filterDto;
+    const query = this.createFilterQuery(filterDto).leftJoin(
+      ComicStats,
+      'comicStats',
+      'comic.id = comicStats.comicId',
+    );
+
+    if (username) {
+      query
+        .leftJoin(
+          WallsComic,
+          'wallComic',
+          'wallComic.username = :username AND wallComic.comicId = comic.id',
+          {
+            username,
+          },
+        )
+        .addSelect('wallComic.score')
+        .addSelect('wallComic.status');
+    }
+
+    query
+      .addSelect('comicStats.members')
+      .addSelect('comicStats.avgScore')
+      .addSelect('comicStats.countScore');
+
+    if (orderBy) {
+      query.orderBy(
+        `comicStats.${orderBy} IS NOT NULL`,
+        ordering && ordering === 'ASC' ? 'ASC' : 'DESC',
+      );
+    }
+
     try {
-      return await this.createFilterQuery(filterDto)
-        .leftJoinAndSelect('comic.wallsComics', 'WallsComic')
+      return await query
         .offset((filterDto.page - 1) * filterDto.limit)
         .limit(filterDto.limit)
-        .getMany();
+        .getRawMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getComic(
+    identifier: string,
+    slug: string,
+    username: string,
+  ): Promise<any> {
+    const query = this.createQueryBuilder('comic');
+    query.where('comic.identifier = :identifier', { identifier });
+    query.andWhere('comic.slug = :slug', { slug });
+
+    if (username) {
+      query.leftJoinAndSelect(
+        WallsComic,
+        'wallComic',
+        'wallComic.username = :username AND wallComic.comicId = comic.id',
+        {
+          username,
+        },
+      );
+    }
+
+    query
+      .leftJoin(ComicStats, 'comicStats', 'comic.id = comicStats.comicId')
+      .addSelect('comicStats.members')
+      .addSelect('comicStats.avgScore')
+      .addSelect('comicStats.countScore');
+
+    try {
+      const comic = await query.getRawOne();
+      return comic;
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -23,27 +93,6 @@ export class ComicsRepository extends Repository<Comic> {
   async getFilterCount(filterDto: ComicsFilterDto): Promise<number> {
     try {
       return await this.createFilterQuery(filterDto).getCount();
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getCompleteComic(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Comic> {
-    const query = this.createQueryBuilder('comic');
-    query.where('comic.identifier = :identifier', { identifier });
-    query.andWhere('comic.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('comic.wallsComics', 'WallsComic');
-    }
-
-    try {
-      const comic = await query.getOne();
-      return comic;
     } catch (error) {
       throw new InternalServerErrorException();
     }

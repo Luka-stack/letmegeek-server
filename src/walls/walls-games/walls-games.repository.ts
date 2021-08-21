@@ -68,4 +68,19 @@ export class WallsGamesRepository extends Repository<WallsGame> {
       throw new InternalServerErrorException();
     }
   }
+
+  // async getUsersStats(username: string): Promise<Array<any>> {
+  //   try {
+  //     return await this.createQueryBuilder('wallsGames')
+  //       .select('AVG(wallsGames.score)', 'meanScore')
+  //       .addSelect('COUNT(wallsGames.id)', 'count')
+  //       .addSelect('wallsGames.status', 'status')
+  //       .where('username = :username', { username })
+  //       .groupBy('wallsGames.status')
+  //       .getRawMany();
+  //   } catch (err) {
+  //     console.log(err);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
 }

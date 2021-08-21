@@ -26,6 +26,7 @@ import { ReviewsModule } from './reviews/reviews.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
+        cache: true,
         autoLoadEntities: true,
         synchronize: true,
         host: configService.get('DB_HOST'),

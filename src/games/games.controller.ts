@@ -63,7 +63,7 @@ export class GamesController {
     @Param('identifier') identifier: string,
     @Param('slug') slug: string,
     @GetUser() user: User,
-  ): Promise<Game> {
+  ): Promise<any> {
     return this.gamesService.getOneGame(identifier, slug, user);
   }
 

@@ -1,6 +1,5 @@
-import Game from '../entities/game.entity';
-import { PaginatedResponseDto } from 'src/shared/dto/paginated-response.dto';
+import { PaginatedResponseDto } from '../../shared/dto/paginated-response.dto';
 
 export class PaginatedGamesDto extends PaginatedResponseDto {
-  data: Array<Game>;
+  data: Array<any>;
 }

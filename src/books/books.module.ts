@@ -13,13 +13,14 @@ import { BooksService } from './books.service';
 import { BooksController } from './books.controller';
 import { BooksRepository } from './books.repository';
 import { ConfigModule } from '@nestjs/config';
+import { BookStatsRepository } from './book-stats.repository';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([BooksRepository]),
+    TypeOrmModule.forFeature([BooksRepository, BookStatsRepository]),
   ],
   controllers: [BooksController],
   providers: [BooksService],

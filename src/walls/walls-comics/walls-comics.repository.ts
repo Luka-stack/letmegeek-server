@@ -68,4 +68,19 @@ export class WallsComicsRepository extends Repository<WallsComic> {
       throw new InternalServerErrorException();
     }
   }
+
+  // async getUsersStats(username: string): Promise<Array<any>> {
+  //   try {
+  //     return await this.createQueryBuilder('wallsComics')
+  //       .select('AVG(wallsComics.score)', 'meanScore')
+  //       .addSelect('COUNT(wallsComics.id)', 'count')
+  //       .addSelect('wallsComics.status', 'status')
+  //       .where('username = :username', { username })
+  //       .groupBy('wallsComics.status')
+  //       .getRawMany();
+  //   } catch (err) {
+  //     console.log(err);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
 }

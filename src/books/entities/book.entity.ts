@@ -32,7 +32,7 @@ export default class Book extends Article {
 
   @Exclude()
   @OneToMany(() => WallsBook, (wallsBook) => wallsBook.book, {
-    eager: true,
+    eager: false,
   })
   wallsBooks: Array<WallsBook>;
 

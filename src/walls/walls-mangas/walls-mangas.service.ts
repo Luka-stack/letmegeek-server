@@ -13,6 +13,7 @@ import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsMangaDto } from './dto/update-walls-manga.dto';
 import { MangasRepository } from '../../mangas/mangas.repository';
 import { WallsMangasRepository } from './walls-mangas.repository';
+import { WallArticleStatus } from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsMangasService {

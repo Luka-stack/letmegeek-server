@@ -64,20 +64,10 @@ export class MangasService {
     filterDto.page = Number(filterDto.page);
 
     const totalCount = await this.mangasRepository.getFilterCount(filterDto);
-    const mangas = await this.mangasRepository
-      .getMangas(filterDto)
-      .then((result: Array<Manga>) => {
-        if (result) {
-          result.map((manga: Manga) => {
-            const wall = manga.wallsMangas.find(
-              (wall) => wall.username === user.username,
-            );
-            manga.userWallsManga = wall;
-          });
-        }
-
-        return result;
-      });
+    const mangas = await this.mangasRepository.getMangas(
+      filterDto,
+      user?.username,
+    );
 
     const apiQuery = this.createQuery(filterDto);
 
@@ -106,23 +96,18 @@ export class MangasService {
     identifier: string,
     slug: string,
     user: User,
-  ): Promise<Manga> {
-    return this.mangasRepository
-      .getCompleteManga(identifier, slug, user)
-      .then((result: Manga) => {
-        if (!result) {
-          throw new NotFoundException('Manga not found');
-        }
+  ): Promise<any> {
+    const manga = await this.mangasRepository.getManga(
+      identifier,
+      slug,
+      user?.username,
+    );
 
-        if (user) {
-          const wall = result.wallsMangas.find(
-            (wall) => wall.username === user.username,
-          );
-          result.userWallsManga = wall;
-        }
+    if (!manga) {
+      throw new NotFoundException('Manga not found');
+    }
 
-        return result;
-      });
+    return manga;
   }
 
   async updateManga(

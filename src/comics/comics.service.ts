@@ -64,20 +64,10 @@ export class ComicsService {
     filterDto.page = Number(filterDto.page);
 
     const totalCount = await this.comicsRepository.getFilterCount(filterDto);
-    const comics = await this.comicsRepository
-      .getComics(filterDto)
-      .then((result: Array<Comic>) => {
-        if (user) {
-          result.map((comic: Comic) => {
-            const wall = comic.wallsComics.find(
-              (wall) => wall.username === user.username,
-            );
-            comic.userWallsComic = wall;
-          });
-        }
-
-        return result;
-      });
+    const comics = await this.comicsRepository.getComics(
+      filterDto,
+      user?.username,
+    );
 
     const apiQuery = this.createQuery(filterDto);
 
@@ -106,23 +96,18 @@ export class ComicsService {
     identifier: string,
     slug: string,
     user: User,
-  ): Promise<Comic> {
-    return await this.comicsRepository
-      .getCompleteComic(identifier, slug, user)
-      .then((result: Comic) => {
-        if (!result) {
-          throw new NotFoundException('Comic book not found');
-        }
+  ): Promise<any> {
+    const comic = await this.comicsRepository.getComic(
+      identifier,
+      slug,
+      user?.username,
+    );
 
-        if (user) {
-          const wall = result.wallsComics.find(
-            (wall) => wall.username === user.username,
-          );
-          result.userWallsComic = wall;
-        }
+    if (!comic) {
+      throw new NotFoundException('Comic not found');
+    }
 
-        return result;
-      });
+    return comic;
   }
 
   async updateComic(

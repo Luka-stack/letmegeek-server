@@ -1,6 +1,5 @@
-import Comic from '../entities/comic.entity';
-import { PaginatedResponseDto } from 'src/shared/dto/paginated-response.dto';
+import { PaginatedResponseDto } from '../../shared/dto/paginated-response.dto';
 
 export class PaginatedComicsDto extends PaginatedResponseDto {
-  data: Array<Comic>;
+  data: Array<any>;
 }

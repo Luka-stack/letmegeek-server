@@ -66,7 +66,7 @@ export class ComicsController {
     @Param('identifier') identifier: string,
     @Param('slug') slug: string,
     @GetUser() user: User,
-  ): Promise<Comic> {
+  ): Promise<any> {
     return this.comicsService.getOneComic(identifier, slug, user);
   }
 

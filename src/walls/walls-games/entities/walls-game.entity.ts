@@ -26,7 +26,7 @@ export default class WallsGame extends Wall {
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 
-  @ManyToOne(() => Game, { eager: true, nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Game, { eager: false, nullable: false, onDelete: 'CASCADE' })
   game: Game;
 
   updateFields(updateWallsGameDto: UpdateWallsGameDto) {

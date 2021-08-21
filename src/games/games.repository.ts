@@ -2,19 +2,89 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 
 import Game from './entities/game.entity';
+import GameStats from './entities/game-stats.viewentity';
+import WallsGame from '../walls/walls-games/entities/walls-game.entity';
 import { GamesFilterDto } from './dto/games-filter.dto';
 import { prepareMultipleNestedAndQueryForStringField } from '../utils/helpers';
-import User from 'src/users/entities/user.entity';
 
 @EntityRepository(Game)
 export class GamesRepository extends Repository<Game> {
-  async getGames(filterDto: GamesFilterDto): Promise<Array<Game>> {
+  async getGames(
+    filterDto: GamesFilterDto,
+    username: string,
+  ): Promise<Array<any>> {
+    const { orderBy, ordering } = filterDto;
+    const query = this.createFilterQuery(filterDto).leftJoin(
+      GameStats,
+      'gameStats',
+      'game.id = gameStats.gameId',
+    );
+
+    if (username) {
+      query
+        .leftJoin(
+          WallsGame,
+          'wallGame',
+          'wallGame.username = :username AND wallGame.gameId = game.id',
+          {
+            username,
+          },
+        )
+        .addSelect('wallGame.score')
+        .addSelect('wallGame.status');
+    }
+
+    query
+      .addSelect('gameStats.members')
+      .addSelect('gameStats.avgScore')
+      .addSelect('gameStats.countScore');
+
+    if (orderBy) {
+      query.orderBy(
+        `gameStats.${orderBy} IS NOT NULL`,
+        ordering && ordering === 'ASC' ? 'ASC' : 'DESC',
+      );
+    }
+
     try {
-      return await this.createFilterQuery(filterDto)
-        .leftJoinAndSelect('game.wallsGames', 'WallsGames')
+      return await query
         .offset((filterDto.page - 1) * filterDto.limit)
         .limit(filterDto.limit)
-        .getMany();
+        .getRawMany();
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getGame(
+    identifier: string,
+    slug: string,
+    username: string,
+  ): Promise<any> {
+    const query = this.createQueryBuilder('game');
+    query.where('game.identifier = :identifier', { identifier });
+    query.andWhere('game.slug = :slug', { slug });
+
+    if (username) {
+      query.leftJoinAndSelect(
+        WallsGame,
+        'wallGame',
+        'wallGame.username = :username AND wallGame.gameId = game.id',
+        {
+          username,
+        },
+      );
+    }
+
+    query
+      .leftJoin(GameStats, 'gameStats', 'game.id = gameStats.gameId')
+      .addSelect('gameStats.members')
+      .addSelect('gameStats.avgScore')
+      .addSelect('gameStats.countScore');
+
+    try {
+      const game = await query.getRawOne();
+      return game;
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -23,26 +93,6 @@ export class GamesRepository extends Repository<Game> {
   async getFilterCount(filterDto: GamesFilterDto): Promise<number> {
     try {
       return await this.createFilterQuery(filterDto).getCount();
-    } catch (error) {
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getCompleteGame(
-    identifier: string,
-    slug: string,
-    user: User,
-  ): Promise<Game> {
-    const query = this.createQueryBuilder('game');
-    query.where('game.identifier = :identifier', { identifier });
-    query.andWhere('game.slug = :slug', { slug });
-
-    if (user) {
-      query.leftJoinAndSelect('game.wallsGames', 'WallsGame');
-    }
-
-    try {
-      return await query.getOne();
     } catch (error) {
       throw new InternalServerErrorException();
     }

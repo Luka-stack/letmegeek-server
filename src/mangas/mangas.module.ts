@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
@@ -11,15 +12,15 @@ import { UsersModule } from '../users/users.module';
 import { MangasService } from './mangas.service';
 import { MangasController } from './mangas.controller';
 import { MangasRepository } from './mangas.repository';
-import { UserMiddleware } from 'src/auth/middlewares/user.middleware';
-import { ConfigModule } from '@nestjs/config';
+import { UserMiddleware } from '../auth/middlewares/user.middleware';
+import { MangaStatsRepository } from './manga-stats.repository';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([MangasRepository]),
+    TypeOrmModule.forFeature([MangasRepository, MangaStatsRepository]),
   ],
   controllers: [MangasController],
   providers: [MangasService],

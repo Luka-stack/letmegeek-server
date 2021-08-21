@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import Book from '../../books/entities/book.entity';
 import User from '../../users/entities/user.entity';
 import WallsBook from './entities/walls-book.entity';
 import { WallsBookDto } from './dto/walls-book.dto';
@@ -28,16 +27,12 @@ export class WallsBooksService {
     wallsBookDto: WallsBookDto,
     user: User,
   ): Promise<WallsBook> {
-    const book = await this.booksRepository
-      .findOne({
-        identifier: bookIdentifier,
-      })
-      .then((result: Book) => {
-        if (!result) {
-          throw new NotFoundException('Book not found');
-        }
-        return result;
-      });
+    const book = await this.booksRepository.findOne({
+      identifier: bookIdentifier,
+    });
+    if (!book) {
+      throw new NotFoundException('Book not found');
+    }
 
     await this.wallsBooksRepository
       .findOne({

@@ -14,6 +14,7 @@ import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsGameDto } from './dto/update-walls-game.dto';
 import { GamesRepository } from '../../games/games.repository';
 import { WallsGamesRepository } from './walls-games.repository';
+import { WallArticleStatus } from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsGamesService {

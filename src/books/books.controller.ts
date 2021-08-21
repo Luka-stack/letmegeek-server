@@ -63,7 +63,7 @@ export class BooksController {
     @Param('identifier') identifier: string,
     @Param('slug') slug: string,
     @GetUser() user: User,
-  ): Promise<Book> {
+  ): Promise<any> {
     return this.booksService.getOneBook(identifier, slug, user);
   }
 

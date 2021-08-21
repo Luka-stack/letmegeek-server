@@ -1,6 +1,7 @@
 import { IsNumberString, IsOptional, IsString, Length } from 'class-validator';
 
 import { PaginationDto } from './pagination.dto';
+import { IsArticlesStatProperty } from '../../utils/validators/article-stats-order.validator';
 
 export class ArticleFitlerDto extends PaginationDto {
   @IsOptional()
@@ -23,4 +24,12 @@ export class ArticleFitlerDto extends PaginationDto {
   @IsNumberString()
   @Length(4)
   premiered?: number;
+
+  @IsOptional()
+  @IsArticlesStatProperty()
+  orderBy?: string;
+
+  @IsOptional()
+  @IsString()
+  ordering?: string;
 }

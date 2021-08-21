@@ -29,7 +29,11 @@ export default class WallsManga extends Wall {
   @JoinColumn({ name: 'username', referencedColumnName: 'username' })
   user: User;
 
-  @ManyToOne(() => Manga, { eager: true, nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Manga, {
+    eager: false,
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   manga: Manga;
 
   updateFields(updateWallsMangaDto: UpdateWallsMangaDto) {
