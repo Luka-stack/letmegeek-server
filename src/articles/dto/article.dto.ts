@@ -33,6 +33,10 @@ export default abstract class ArticleDto {
   @IsDateString()
   premiered?: Date;
 
+  @IsOptional()
+  @IsBoolean()
+  rewardContributor?: boolean;
+
   @IsNotEmpty()
   @IsBoolean()
   draft: boolean;

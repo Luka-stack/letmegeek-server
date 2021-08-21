@@ -5,7 +5,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ArticleFitlerDto } from '../../../shared/dto/article-filter.dto';
+import { ArticleFitlerDto } from '../../dto/article-filter.dto';
 
 export class MangasFilterDto extends ArticleFitlerDto {
   @IsOptional()

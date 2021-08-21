@@ -1,6 +1,6 @@
 import { IsDateString, IsNumber, IsOptional } from 'class-validator';
 
-import ArticleDto from '../../../shared/dto/article.dto';
+import ArticleDto from '../../dto/article.dto';
 
 export class ComicDto extends ArticleDto {
   @IsOptional()

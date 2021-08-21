@@ -1,7 +1,7 @@
 import { IsDateString, IsNumber, IsOptional } from 'class-validator';
 import { IsMangaType } from 'src/utils/validators/manga-type.validator';
 
-import ArticleDto from '../../../shared/dto/article.dto';
+import ArticleDto from '../../dto/article.dto';
 import { MangaType } from '../entities/manga-type';
 
 export class MangaDto extends ArticleDto {

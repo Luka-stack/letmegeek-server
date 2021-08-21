@@ -1,6 +1,6 @@
 import { IsNumberString, IsOptional, IsString, Length } from 'class-validator';
 
-import { PaginationDto } from './pagination.dto';
+import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { IsArticlesStatProperty } from '../../utils/validators/article-stats-order.validator';
 
 export class ArticleFitlerDto extends PaginationDto {

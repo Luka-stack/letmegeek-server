@@ -175,6 +175,19 @@ export class UsersService {
     return user;
   }
 
+  async sendContributionPoints(username: string): Promise<{ message: string }> {
+    const user: User = await this.usersRepository.findOne({ username });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    ++user.contributionPoints;
+    this.usersRepository.save(user);
+
+    return { message: 'User received contribution points' };
+  }
+
   createQuery(filterDto: UserFilterDto): string {
     const ordering =
       filterDto.order === 'ASC' || filterDto.order === 'ASCENDING'

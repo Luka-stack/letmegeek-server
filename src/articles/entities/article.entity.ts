@@ -41,6 +41,12 @@ export default abstract class Article {
   @Column()
   draft: boolean;
 
+  @Column({ nullable: true })
+  contributor: string;
+
+  @Column({ nullable: true })
+  accepted: boolean;
+
   @Column()
   createdAt: Date;
 

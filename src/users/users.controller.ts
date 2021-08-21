@@ -47,6 +47,15 @@ export class UsersController {
     return this.usersService.getUsers(userFilterDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @HasRoles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Post('/sendContributionPoints/:username')
+  sendContributionPoints(
+    @Param('username') username: string,
+  ): Promise<{ message: string }> {
+    return this.usersService.sendContributionPoints(username);
+  }
+
   @Get('/:username')
   getUserByUsername(
     @Query() userDetailsFilter: UserDetailsFilterDto,

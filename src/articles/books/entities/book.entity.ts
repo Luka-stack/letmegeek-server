@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-import Article from '../../../shared/entities/article.entity';
+import Article from '../../entities/article.entity';
 import WallsBook from '../../../walls/walls-books/entities/walls-book.entity';
 import { UpdateBookDto } from '../dto/update-book.dto';
 
@@ -48,6 +48,7 @@ export default class Book extends Article {
     this.genres = updateBookDto.genres || this.genres;
     this.authors = updateBookDto.authors || this.authors;
     this.publishers = updateBookDto.publishers || this.publishers;
+    this.accepted = updateBookDto.accepted || this.accepted;
 
     if (updateBookDto.draft != null) {
       this.draft = updateBookDto.draft;

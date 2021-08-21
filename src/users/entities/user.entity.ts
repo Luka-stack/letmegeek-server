@@ -39,6 +39,9 @@ export default class User {
   @Exclude()
   imageUrn: string;
 
+  @Column({ nullable: true })
+  contributionPoints: number;
+
   @Expose()
   statistics: Array<UserStatsDto>;
 
@@ -95,5 +98,6 @@ export default class User {
     this.role = UserRole.USER;
     this.enabled = false;
     this.blocked = false;
+    this.contributionPoints = 0;
   }
 }

@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-import Article from '../../../shared/entities/article.entity';
+import Article from '../../entities/article.entity';
 import WallsManga from '../../../walls/walls-mangas/entities/walls-manga.entity';
 import { MangaType } from './manga-type';
 import { UpdateMangaDto } from '../dto/update-manga.dto';

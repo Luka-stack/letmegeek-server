@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-import Article from '../../../shared/entities/article.entity';
+import Article from '../../entities/article.entity';
 import WallsGame from '../../../walls/walls-games/entities/walls-game.entity';
 import { UpdateGameDto } from '../dto/update-game.dto';
 
