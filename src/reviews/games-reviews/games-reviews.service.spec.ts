@@ -3,13 +3,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
-import Game from '../../games/entities/game.entity';
+import Game from '../../articles/games/entities/game.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import GamesReview from './entities/games-review.entity';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { GamesReviewDto } from './dto/games-review.dto';
 import { GamesReviewsService } from './games-reviews.service';
-import { GamesRepository } from '../../games/games.repository';
+import { GamesRepository } from '../../articles/games/games.repository';
 import { WallsGamesRepository } from '../../walls/walls-games/walls-games.repository';
 import { GamesReviewsRepository } from './games-reviews.repository';
 import { UpdateGamesReviewDto } from './dto/update-games-review.dto';

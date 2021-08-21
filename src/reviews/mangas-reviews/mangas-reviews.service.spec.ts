@@ -3,14 +3,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
-import Manga from '../../mangas/entities/manga.entity';
+import Manga from '../../articles/mangas/entities/manga.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import MangasReview from './entities/mangas-review.entity';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { MangasReviewDto } from './dto/mangas-review.dto';
 import { UpdateMangasReviewDto } from './dto/update-mangas-review.dto';
 import { MangasReviewsService } from './mangas-reviews.service';
-import { MangasRepository } from '../../mangas/mangas.repository';
+import { MangasRepository } from '../../articles/mangas/mangas.repository';
 import { WallsMangasRepository } from '../../walls/walls-mangas/walls-mangas.repository';
 import { MangasReviewsRepository } from './mangas-reviews.repository';
 

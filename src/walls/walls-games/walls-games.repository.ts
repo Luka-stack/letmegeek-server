@@ -3,7 +3,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 
 import WallsGame from './entities/walls-game.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
-import Game from 'src/games/entities/game.entity';
+import Game from 'src/articles/games/entities/game.entity';
 
 @EntityRepository(WallsGame)
 export class WallsGamesRepository extends Repository<WallsGame> {

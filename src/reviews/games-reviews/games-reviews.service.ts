@@ -13,7 +13,7 @@ import { UserRole } from '../../auth/entities/user-role';
 import { GamesReviewDto } from './dto/games-review.dto';
 import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { UpdateGamesReviewDto } from './dto/update-games-review.dto';
-import { GamesRepository } from '../../games/games.repository';
+import { GamesRepository } from '../../articles/games/games.repository';
 import { WallsGamesRepository } from '../../walls/walls-games/walls-games.repository';
 import { GamesReviewsRepository } from './games-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';

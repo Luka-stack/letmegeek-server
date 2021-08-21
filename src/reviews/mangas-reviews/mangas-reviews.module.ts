@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../../auth/auth.module';
-import { MangasModule } from '../../mangas/mangas.module';
+import { MangasModule } from '../../articles/mangas/mangas.module';
 import { WallsMangasModule } from '../../walls/walls-mangas/walls-mangas.module';
 import { MangasReviewsService } from './mangas-reviews.service';
 import { MangasReviewsController } from './mangas-reviews.controller';

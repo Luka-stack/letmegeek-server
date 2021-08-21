@@ -4,7 +4,7 @@ import {
   ValidationOptions,
 } from 'class-validator';
 
-import { allMangaTypes } from '../../mangas/entities/manga-type';
+import { allMangaTypes } from '../../articles/mangas/entities/manga-type';
 
 export function IsMangaType(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {

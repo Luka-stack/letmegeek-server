@@ -3,10 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { BooksModule } from './books/books.module';
-import { GamesModule } from './games/games.module';
-import { ComicsModule } from './comics/comics.module';
-import { MangasModule } from './mangas/mangas.module';
 import { UsersModule } from './users/users.module';
 import { WallsModule } from './walls/walls.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { configValidationSchema } from './config.schema';
 import { CommentsModule } from './comments/comments.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -37,10 +34,7 @@ import { ReviewsModule } from './reviews/reviews.module';
       }),
     }),
     ScheduleModule.forRoot(),
-    BooksModule,
-    GamesModule,
-    ComicsModule,
-    MangasModule,
+    ArticlesModule,
     UsersModule,
     WallsModule,
     AuthModule,

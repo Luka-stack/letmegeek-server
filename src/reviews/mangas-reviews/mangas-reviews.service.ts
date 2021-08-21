@@ -13,7 +13,7 @@ import { UserRole } from '../../auth/entities/user-role';
 import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { MangasReviewDto } from './dto/mangas-review.dto';
 import { UpdateMangasReviewDto } from './dto/update-mangas-review.dto';
-import { MangasRepository } from '../../mangas/mangas.repository';
+import { MangasRepository } from '../../articles/mangas/mangas.repository';
 import { WallsMangasRepository } from '../../walls/walls-mangas/walls-mangas.repository';
 import { MangasReviewsRepository } from './mangas-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';

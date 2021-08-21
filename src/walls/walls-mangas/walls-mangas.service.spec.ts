@@ -2,10 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
-import Manga from '../../mangas/entities/manga.entity';
+import Manga from '../../articles/mangas/entities/manga.entity';
 import WallsManga from './entities/walls-manga.entity';
 import { UserRole } from '../../auth/entities/user-role';
-import { MangasRepository } from '../../mangas/mangas.repository';
+import { MangasRepository } from '../../articles/mangas/mangas.repository';
 import { WallArticleStatus } from '../entities/wall-article-status';
 import { WallsMangaDto } from './dto/walls-manga.dto';
 import { WallsMangasRepository } from './walls-mangas.repository';

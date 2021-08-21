@@ -1,4 +1,3 @@
-import { SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   ConflictException,
@@ -6,15 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import Game from '../../games/entities/game.entity';
+import Game from '../../articles/games/entities/game.entity';
 import User from '../../users/entities/user.entity';
 import WallsGame from './entities/walls-game.entity';
 import { WallsGameDto } from './dto/walls-game.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsGameDto } from './dto/update-walls-game.dto';
-import { GamesRepository } from '../../games/games.repository';
+import { GamesRepository } from '../../articles/games/games.repository';
 import { WallsGamesRepository } from './walls-games.repository';
-import { WallArticleStatus } from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsGamesService {

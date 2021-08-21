@@ -3,7 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import WallsComic from './entities/walls-comic.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { InternalServerErrorException } from '@nestjs/common';
-import Comic from 'src/comics/entities/comic.entity';
+import Comic from 'src/articles/comics/entities/comic.entity';
 
 @EntityRepository(WallsComic)
 export class WallsComicsRepository extends Repository<WallsComic> {

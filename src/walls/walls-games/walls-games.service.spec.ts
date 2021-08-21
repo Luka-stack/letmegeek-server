@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import Game from '../../games/entities/game.entity';
+import Game from '../../articles/games/entities/game.entity';
 import User from '../../users/entities/user.entity';
 import WallsGame from './entities/walls-game.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { WallsGameDto } from './dto/walls-game.dto';
 import { WallArticleStatus } from '../entities/wall-article-status';
-import { GamesRepository } from '../../games/games.repository';
+import { GamesRepository } from '../../articles/games/games.repository';
 import { WallsGamesRepository } from './walls-games.repository';
 import { WallsGamesService } from './walls-games.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';

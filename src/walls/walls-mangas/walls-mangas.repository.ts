@@ -1,7 +1,7 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 
-import Manga from '../../mangas/entities/manga.entity';
+import Manga from '../../articles/mangas/entities/manga.entity';
 import WallsManga from './entities/walls-manga.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 

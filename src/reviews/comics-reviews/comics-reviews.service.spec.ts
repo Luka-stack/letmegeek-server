@@ -3,14 +3,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
-import Comic from '../../comics/entities/comic.entity';
+import Comic from '../../articles/comics/entities/comic.entity';
 import ComicsReview from './entities/comics-review.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { PaginationDto } from '../../shared/dto/pagination.dto';
 import { ComicsReviewDto } from './dto/comics-review.dto';
 import { UpdateComicsReviewDto } from './dto/update-comics-review.dto';
 import { ComicsReviewsService } from './comics-reviews.service';
-import { ComicsRepository } from '../../comics/comics.repository';
+import { ComicsRepository } from '../../articles/comics/comics.repository';
 import { WallsComicsRepository } from '../../walls/walls-comics/walls-comics.repository';
 import { ComicsReviewsRepository } from './comics-reviews.repository';
 

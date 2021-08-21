@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 
-import Book from '../../books/entities/book.entity';
+import Book from '../../articles/books/entities/book.entity';
 import WallsBook from './entities/walls-book.entity';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 

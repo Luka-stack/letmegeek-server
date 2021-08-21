@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import Wall from '../../entities/wall.entity';
-import Game from '../../../games/entities/game.entity';
+import Game from '../../../articles/games/entities/game.entity';
 import User from '../../../users/entities/user.entity';
 import { UpdateWallsGameDto } from '../dto/update-walls-game.dto';
 

@@ -2,12 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
-import Book from '../../books/entities/book.entity';
+import Book from '../../articles/books/entities/book.entity';
 import BooksReview from './entities/books-review.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { BooksReviewDto } from './dto/books-review.dto';
 import { BooksReviewsService } from './books-reviews.service';
-import { BooksRepository } from '../../books/books.repository';
+import { BooksRepository } from '../../articles/books/books.repository';
 import { WallsBooksRepository } from '../../walls/walls-books/walls-books.repository';
 import { BooksReviewsRepository } from './books-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';

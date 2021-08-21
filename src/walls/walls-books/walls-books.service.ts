@@ -9,7 +9,7 @@ import User from '../../users/entities/user.entity';
 import WallsBook from './entities/walls-book.entity';
 import { WallsBookDto } from './dto/walls-book.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
-import { BooksRepository } from '../../books/books.repository';
+import { BooksRepository } from '../../articles/books/books.repository';
 import { WallsBooksRepository } from './walls-books.repository';
 import { UpdateWallsBookDto } from './dto/update-walls-book.dto';
 

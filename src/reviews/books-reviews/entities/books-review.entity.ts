@@ -1,6 +1,6 @@
 import { Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import Book from '../../../books/entities/book.entity';
+import Book from '../../../articles/books/entities/book.entity';
 import User from '../../../users/entities/user.entity';
 import Review from '../../entities/review.entity';
 import { UpdateBooksReviewDto } from '../dto/update-books-review.dto';

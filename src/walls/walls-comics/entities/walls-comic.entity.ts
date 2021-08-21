@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import User from '../../../users/entities/user.entity';
 import Wall from '../../entities/wall.entity';
-import Comic from '../../../comics/entities/comic.entity';
+import Comic from '../../../articles/comics/entities/comic.entity';
 import { UpdateWallsComicDto } from '../dto/update-walls-comic.dto';
 
 @Entity('walls_comics')

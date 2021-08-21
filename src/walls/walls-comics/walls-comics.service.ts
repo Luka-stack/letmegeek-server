@@ -5,18 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import Comic from '../../comics/entities/comic.entity';
+import Comic from '../../articles/comics/entities/comic.entity';
 import User from '../../users/entities/user.entity';
 import WallsComic from './entities/walls-comic.entity';
 import { WallsComicDto } from './dto/walls-comic.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsComicDto } from './dto/update-walls-comic.dto';
-import { ComicsRepository } from '../../comics/comics.repository';
+import { ComicsRepository } from '../../articles/comics/comics.repository';
 import { WallsComicsRepository } from './walls-comics.repository';
-import {
-  allWallArticleStatusesModes,
-  WallArticleStatus,
-} from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsComicsService {

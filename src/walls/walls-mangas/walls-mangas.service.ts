@@ -5,15 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import Manga from '../../mangas/entities/manga.entity';
+import Manga from '../../articles/mangas/entities/manga.entity';
 import User from '../../users/entities/user.entity';
 import WallsManga from './entities/walls-manga.entity';
 import { WallsMangaDto } from './dto/walls-manga.dto';
 import { WallsFilterDto } from '../dto/wall-filter.dto';
 import { UpdateWallsMangaDto } from './dto/update-walls-manga.dto';
-import { MangasRepository } from '../../mangas/mangas.repository';
+import { MangasRepository } from '../../articles/mangas/mangas.repository';
 import { WallsMangasRepository } from './walls-mangas.repository';
-import { WallArticleStatus } from '../entities/wall-article-status';
 
 @Injectable()
 export class WallsMangasService {

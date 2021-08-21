@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import User from '../../../users/entities/user.entity';
-import Book from '../../../books/entities/book.entity';
+import Book from '../../../articles/books/entities/book.entity';
 import Wall from '../../entities/wall.entity';
 import { UpdateWallsBookDto } from '../dto/update-walls-book.dto';
 

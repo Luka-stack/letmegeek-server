@@ -13,7 +13,7 @@ import { UserRole } from '../../auth/entities/user-role';
 import { BooksReviewDto } from './dto/books-review.dto';
 import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { UpdateBooksReviewDto } from './dto/update-books-review.dto';
-import { BooksRepository } from '../../books/books.repository';
+import { BooksRepository } from '../../articles/books/books.repository';
 import { WallsBooksRepository } from '../../walls/walls-books/walls-books.repository';
 import { BooksReviewsRepository } from './books-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';

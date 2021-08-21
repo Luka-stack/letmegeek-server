@@ -13,7 +13,7 @@ import { UserRole } from '../../auth/entities/user-role';
 import { WallArticleStatus } from '../../walls/entities/wall-article-status';
 import { ComicsReviewDto } from './dto/comics-review.dto';
 import { UpdateComicsReviewDto } from './dto/update-comics-review.dto';
-import { ComicsRepository } from '../../comics/comics.repository';
+import { ComicsRepository } from '../../articles/comics/comics.repository';
 import { WallsComicsRepository } from '../../walls/walls-comics/walls-comics.repository';
 import { ComicsReviewsRepository } from './comics-reviews.repository';
 import { PaginationDto } from '../../shared/dto/pagination.dto';

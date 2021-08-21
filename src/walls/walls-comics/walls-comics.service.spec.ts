@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 import User from '../../users/entities/user.entity';
-import Comic from '../../comics/entities/comic.entity';
+import Comic from '../../articles/comics/entities/comic.entity';
 import WallsComic from './entities/walls-comic.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { WallsComicDto } from './dto/walls-comic.dto';
 import { WallArticleStatus } from '../entities/wall-article-status';
 import { WallsComicsService } from './walls-comics.service';
-import { ComicsRepository } from '../../comics/comics.repository';
+import { ComicsRepository } from '../../articles/comics/comics.repository';
 import { WallsComicsRepository } from './walls-comics.repository';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
