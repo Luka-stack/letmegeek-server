@@ -30,11 +30,11 @@ export class BooksModule implements NestModule {
   configure(context: MiddlewareConsumer) {
     context.apply(UserMiddleware).forRoutes(
       {
-        path: 'api/books/:identifier/:slug',
+        path: 'api/articles/books/:identifier/:slug',
         method: RequestMethod.GET,
       },
       {
-        path: 'api/books',
+        path: 'api/articles/books',
         method: RequestMethod.GET,
       },
     );

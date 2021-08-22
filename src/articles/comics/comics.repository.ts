@@ -14,11 +14,12 @@ export class ComicsRepository extends Repository<Comic> {
     username: string,
   ): Promise<Array<any>> {
     const { orderBy, ordering } = filterDto;
-    const query = this.createFilterQuery(filterDto).leftJoin(
-      ComicStats,
-      'comicStats',
-      'comic.id = comicStats.comicId',
-    );
+    const query = this.createFilterQuery(filterDto)
+      .addSelect(
+        `COALESCE(NULLIF(comic.imageUrn, '${process.env.APP_URL}/images/comic.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'comic_imageUrl',
+      )
+      .leftJoin(ComicStats, 'comicStats', 'comic.id = comicStats.comicId');
 
     if (username) {
       query

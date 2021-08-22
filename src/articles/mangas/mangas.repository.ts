@@ -14,11 +14,12 @@ export class MangasRepository extends Repository<Manga> {
     username: string,
   ): Promise<Array<any>> {
     const { orderBy, ordering } = filterDto;
-    const query = this.createFilterQuery(filterDto).leftJoin(
-      MangaStats,
-      'mangaStats',
-      'manga.id = mangaStats.mangaId',
-    );
+    const query = this.createFilterQuery(filterDto)
+      .addSelect(
+        `COALESCE(NULLIF(manga.imageUrn, '${process.env.APP_URL}/images/manga.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'manga_imageUrl',
+      )
+      .leftJoin(MangaStats, 'mangaStats', 'manga.id = mangaStats.mangaId');
 
     if (username) {
       query

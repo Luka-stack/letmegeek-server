@@ -1,0 +1,2377 @@
+{
+	"info": {
+		"_postman_id": "5e98b650-575f-4e6d-89c8-fb110ab2ecb9",
+		"name": "Let Me Geek",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Sign up",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"postman@testpost.com\",\r\n    \"username\": \"UserPostmanTester\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/auth/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log In User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"postman@testpost.com\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log In Admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"luka-stack@gmail.com\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Account Confirmation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/auth/accountConfirmation?token=Dm8YZKLlqctnueuv",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"accountConfirmation"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "Dm8YZKLlqctnueuv"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log Out",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/auth/logout",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Articles",
+			"item": [
+				{
+					"name": "Books",
+					"item": [
+						{
+							"name": "Create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"House of Earth and Blood Test 5\",\r\n    \"authors\": \"Sarah J. Maas\",\r\n    \"description\": \"Bryce Quinlan had the perfect life—working hard all day and partying all night—until a demon murdered her closest friends, leaving her bereft, wounded, and alone. When the accused is behind bars but the crimes start up again, Bryce finds herself at the heart of the investigation.\",\r\n    \"draft\": false,\r\n    \"genres\": \"fantasy, romance\",\r\n    \"pages\": 803,\r\n    \"premiered\": \"2020-03-03\",\r\n    \"publishers\": \"Bloomsbury Publishing\",\r\n    \"series\": \"Crescent City\",\r\n    \"volume\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/books",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Image",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/books/wDO3XKna/house_of_earth_and_blood/upload",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books",
+										"wDO3XKna",
+										"house_of_earth_and_blood",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Books",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/books?page=1&limit=20&orderBy=avgScore&ordering=DESC",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books"
+									],
+									"query": [
+										{
+											"key": "genres",
+											"value": "romance",
+											"disabled": true
+										},
+										{
+											"key": "authors",
+											"value": "Markus Zusak",
+											"disabled": true
+										},
+										{
+											"key": "publishers",
+											"value": "Knopf Books",
+											"disabled": true
+										},
+										{
+											"key": "pages",
+											"value": "550",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "Thief",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "20"
+										},
+										{
+											"key": "orderBy",
+											"value": "avgScore"
+										},
+										{
+											"key": "ordering",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get One",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/books/ek1mAVwa/postman_user_test",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books",
+										"ek1mAVwa",
+										"postman_user_test"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Book",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"pages\": 400\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/books/W438JywA/the_book_thief",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books",
+										"W438JywA",
+										"the_book_thief"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Book",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/books/YWbIZcAR/memoirs_of_a_geisha",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"books",
+										"YWbIZcAR",
+										"memoirs_of_a_geisha"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Comics",
+					"item": [
+						{
+							"name": "Create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Comics Postman Test\",\r\n    \"draft\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/comics",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Image",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/comics/a217xLHz/invincible/upload",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics",
+										"a217xLHz",
+										"invincible",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Comics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/comics?page=1&limit=2&orderBy=avgScore&ordering=DESC",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "Spider-man",
+											"disabled": true
+										},
+										{
+											"key": "finished",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "genres",
+											"value": "fantasy",
+											"disabled": true
+										},
+										{
+											"key": "authors",
+											"value": "Spencer",
+											"disabled": true
+										},
+										{
+											"key": "premiered",
+											"value": "2018",
+											"disabled": true
+										},
+										{
+											"key": "issues",
+											"value": "123",
+											"disabled": true
+										},
+										{
+											"key": "publishers",
+											"value": "marvel",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "2"
+										},
+										{
+											"key": "orderBy",
+											"value": "avgScore"
+										},
+										{
+											"key": "ordering",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get One",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/comics/DGykCRP4/the_boys_t1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics",
+										"DGykCRP4",
+										"the_boys_t1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"publishers\": \"Marvel\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/comics/UAgaKj9a/the_amazing_spider_man",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics",
+										"UAgaKj9a",
+										"the_amazing_spider_man"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/comics/UwF1kJMH/the_boys",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"comics",
+										"UwF1kJMH",
+										"the_boys"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Games",
+					"item": [
+						{
+							"name": "Create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Game Postman Test\",\r\n    \"draft\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/games",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Image",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/games/oCI5khRR/biomutant/upload",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games",
+										"oCI5khRR",
+										"biomutant",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Games",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/games?page=1&limit=1&orderBy=avgScore&ordering=DESC",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "Ratchet",
+											"disabled": true
+										},
+										{
+											"key": "genres",
+											"value": "strategy",
+											"disabled": true
+										},
+										{
+											"key": "authors",
+											"value": "Insomniac",
+											"disabled": true
+										},
+										{
+											"key": "publishers",
+											"value": "Playstation",
+											"disabled": true
+										},
+										{
+											"key": "premiered",
+											"value": "2021",
+											"disabled": true
+										},
+										{
+											"key": "completeTime",
+											"value": "33",
+											"disabled": true
+										},
+										{
+											"key": "gameMode",
+											"value": "SINGLE_PLAYER",
+											"disabled": true
+										},
+										{
+											"key": "gears",
+											"value": "PC",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										},
+										{
+											"key": "orderBy",
+											"value": "avgScore"
+										},
+										{
+											"key": "ordering",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get One",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/games/UMXdUzpV/game_postman_test",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games",
+										"UMXdUzpV",
+										"game_postman_test"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"gears\": \"PlayStation 5\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/games/46N41TM5/ratchet_clank_rift_apart",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games",
+										"46N41TM5",
+										"ratchet_clank_rift_apart"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/games/46N41TM5/ratchet_clank_rift_apart",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"games",
+										"46N41TM5",
+										"ratchet_clank_rift_apart"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mangas",
+					"item": [
+						{
+							"name": "Create",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Manga Postman Test\",\r\n    \"draft\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Image",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas/lCzXWWO1/one_piece/upload",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas",
+										"lCzXWWO1",
+										"one_piece",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Mangas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas?page=1&limit=5&groupBy=avgScore&ordering=DESC",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "One Piece",
+											"disabled": true
+										},
+										{
+											"key": "genres",
+											"value": "action",
+											"disabled": true
+										},
+										{
+											"key": "volumes",
+											"value": "60",
+											"disabled": true
+										},
+										{
+											"key": "publishers",
+											"value": "Shounen",
+											"disabled": true
+										},
+										{
+											"key": "premiered",
+											"value": "1989",
+											"disabled": true
+										},
+										{
+											"key": "finished",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "type",
+											"value": "Manga",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "5"
+										},
+										{
+											"key": "groupBy",
+											"value": "avgScore"
+										},
+										{
+											"key": "ordering",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get One",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas/2t8Vh0Hf/manga_postman_test",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas",
+										"2t8Vh0Hf",
+										"manga_postman_test"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"volumes\": 150,\r\n    \"chapters\": 5000\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas/lCzXWWO1/one_piece",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas",
+										"lCzXWWO1",
+										"one_piece"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/mangas/mN0Uxt7E/solo_leveling",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"mangas",
+										"mN0Uxt7E",
+										"solo_leveling"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Misc",
+					"item": [
+						{
+							"name": "Get Drafts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/articles/misc/drafts?article=books",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"articles",
+										"misc",
+										"drafts"
+									],
+									"query": [
+										{
+											"key": "article",
+											"value": "books"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Walls",
+			"item": [
+				{
+					"name": "Books",
+					"item": [
+						{
+							"name": "Add Record",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"score\": 10,\r\n    \"startedAt\": \"2021-01-01\",\r\n    \"pages\": 700\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsbooks/book/ek1mAVwa",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsbooks",
+										"book",
+										"ek1mAVwa"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Records By Username",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsbooks/UserPostmanTester",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsbooks",
+										"UserPostmanTester"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "IN_PROGRESS",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Record",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"COMPLETED\",\r\n    \"score\": 9\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsbooks/book/ek1mAVwa",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsbooks",
+										"book",
+										"ek1mAVwa"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Record",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsbooks/book/YWbIZcAR",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsbooks",
+										"book",
+										"YWbIZcAR"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Comics",
+					"item": [
+						{
+							"name": "Add Record",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"issues\": 3,\r\n    \"score\": 8\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallscomics/comic/DGykCRP4",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallscomics",
+										"comic",
+										"DGykCRP4"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Records By Username",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallscomics/UserPostmanTester",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallscomics",
+										"UserPostmanTester"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Record",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"issues\": 25,\r\n    \"finishedAt\": \"2021-05-05\",\r\n    \"score\": 6\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallscomics/comic/DGykCRP4",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallscomics",
+										"comic",
+										"DGykCRP4"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Record",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallscomics/comic/UwF1kJMH",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallscomics",
+										"comic",
+										"UwF1kJMH"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Games",
+					"item": [
+						{
+							"name": "Create Record",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"COMPLETED\",\r\n    \"score\": 8\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsgames/game/UMXdUzpV",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsgames",
+										"game",
+										"UMXdUzpV"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Records By Username",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsgames/UserPostmanTester",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsgames",
+										"UserPostmanTester"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "IN_PROGRESS",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Record",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"hoursPlayed\": 15\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsgames/game/UMXdUzpV",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsgames",
+										"game",
+										"UMXdUzpV"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Record",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsgames/game/oCI5khRR",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsgames",
+										"game",
+										"oCI5khRR"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mangas",
+					"item": [
+						{
+							"name": "Create Record",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"DROPPED\",\r\n    \"score\": 4,\r\n    \"volumes\": 50,\r\n    \"chapters\": 150\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsmangas/manga/2t8Vh0Hf",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsmangas",
+										"manga",
+										"2t8Vh0Hf"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Records By Username",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsmangas/Luka",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsmangas",
+										"Luka"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "IN_PROGRESS",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Record",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"IN_PROGRESS\",\r\n    \"score\": 7\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/wallsmangas/manga/2t8Vh0Hf",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsmangas",
+										"manga",
+										"2t8Vh0Hf"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Record",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/wallsmangas/manga/lCzXWWO1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"wallsmangas",
+										"manga",
+										"lCzXWWO1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Filter Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/users?page=1&limit=15&order=ASC",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "15"
+								},
+								{
+									"key": "order",
+									"value": "ASC"
+								},
+								{
+									"key": "username",
+									"value": "luka",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/users/UserPostmanTester?articleStats=all",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"UserPostmanTester"
+							],
+							"query": [
+								{
+									"key": "articleStats",
+									"value": "all"
+								},
+								{
+									"key": "lastUpdates",
+									"value": "8",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/users/UserPostmanTester/stats?article=books&lastUpdates=2",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"UserPostmanTester",
+								"stats"
+							],
+							"query": [
+								{
+									"key": "article",
+									"value": "books"
+								},
+								{
+									"key": "lastUpdates",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Profile Image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/lkrra/Pictures/4479735.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:5000/api/users/upload",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change User's Role",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"role\": \"MODERATOR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/users/Test3/role",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"Test3",
+								"role"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change User's Blocked Status",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"status\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/users/Test3/blocked",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"Test3",
+								"blocked"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/users/account",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments",
+			"item": [
+				{
+					"name": "Create comment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"comment\": \"Test 345678910\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:5000/api/comments/Test3",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"comments",
+								"Test3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Comments For User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/comments/Test3?page=1&limit=15",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"comments",
+								"Test3"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "15"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:5000/api/comments/Test3-J2NRr1eRpBd2Z9FG",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"comments",
+								"Test3-J2NRr1eRpBd2Z9FG"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Books Reviews",
+					"item": [
+						{
+							"name": "Create Review",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"review\": \"Noice\",\r\n    \"overall\": 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/booksreviews/book/wDO3XKna",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"booksreviews",
+										"book",
+										"wDO3XKna"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For Book",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/booksreviews/book/wDO3XKna?page=1&limit=50",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"booksreviews",
+										"book",
+										"wDO3XKna"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "50"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/booksreviews/user/Luka?page=1&limit=50",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"booksreviews",
+										"user",
+										"Luka"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "50"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update User's Review",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"characters\": 9,\r\n    \"story\": 7\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/booksreviews/Luka-s6RwxkS1o8Y6htPW",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"booksreviews",
+										"Luka-s6RwxkS1o8Y6htPW"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User's Review",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/booksreviews/Luka-s6RwxkS1o8Y6htPW",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"booksreviews",
+										"Luka-s6RwxkS1o8Y6htPW"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Comics Reviews",
+					"item": [
+						{
+							"name": "Create Review",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"review\": \"Not Noice\",\r\n    \"overall\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/comicsreviews/comic/DGykCRP4",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"comicsreviews",
+										"comic",
+										"DGykCRP4"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For Comic",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/comicsreviews/comic/a217xLHz?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"comicsreviews",
+										"comic",
+										"a217xLHz"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/comicsreviews/user/Test3?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"comicsreviews",
+										"user",
+										"Test3"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Review",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/comicsreviews/Test3-CQugkh8bU1pwH8Ix",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"comicsreviews",
+										"Test3-CQugkh8bU1pwH8Ix"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Review",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"art\": 10,\r\n    \"enjoyment\": 10\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/comicsreviews/Test3-fLUtLxhKIiV3GDWi",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"comicsreviews",
+										"Test3-fLUtLxhKIiV3GDWi"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Games Reviews",
+					"item": [
+						{
+							"name": "Create Review",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"review\": \"a Little Noice\",\r\n    \"overall\": 5,\r\n    \"music\": 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/gamesreviews/game/SiELLr6p",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"gamesreviews",
+										"game",
+										"SiELLr6p"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For Game",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/gamesreviews/game/SiELLr6p?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"gamesreviews",
+										"game",
+										"SiELLr6p"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/gamesreviews/user/Test3?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"gamesreviews",
+										"user",
+										"Test3"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Review",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/gamesreviews/Test3-zZXwydOVdYwlMFxK",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"gamesreviews",
+										"Test3-zZXwydOVdYwlMFxK"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Review",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"characters\": 10,\r\n    \"review\": \"A little more than noicu\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/gamesreviews/Test3-zZXwydOVdYwlMFxK",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"gamesreviews",
+										"Test3-zZXwydOVdYwlMFxK"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Mangas Reviews",
+					"item": [
+						{
+							"name": "Create Review",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"review\": \"Super Najsu\",\r\n    \"overall\": 9,\r\n    \"art\": 9\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/mangasreviews/manga/lCzXWWO1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"mangasreviews",
+										"manga",
+										"lCzXWWO1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For Manga",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/mangasreviews/manga/lCzXWWO1?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"mangasreviews",
+										"manga",
+										"lCzXWWO1"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Reviews For User",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/mangasreviews/user/Test3?page=1&limit=1",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"mangasreviews",
+										"user",
+										"Test3"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Review",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/api/mangasreviews/Test3-K3pI29ws2QQ47nXW",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"mangasreviews",
+										"Test3-K3pI29ws2QQ47nXW"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Review",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"story\": 10\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/api/mangasreviews/Test3-K3pI29ws2QQ47nXW",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"api",
+										"mangasreviews",
+										"Test3-K3pI29ws2QQ47nXW"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

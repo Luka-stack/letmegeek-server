@@ -225,6 +225,14 @@ export class GamesService {
       query += `publishers=${filterDto.publishers}&`;
     }
 
+    if (filterDto.orderBy) {
+      query += `orderBy=${filterDto.orderBy}&`;
+    }
+
+    if (filterDto.ordering) {
+      query += `ordering=${filterDto.orderBy}&`;
+    }
+
     return query;
   }
 }

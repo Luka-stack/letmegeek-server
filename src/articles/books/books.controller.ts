@@ -12,6 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
 import Book from './entities/book.entity';
@@ -26,7 +27,6 @@ import { UserRole } from '../../auth/entities/user-role';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { editFilename, imageFileFilter } from '../../utils/file-uploads';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginatedBooksDto } from './dto/paginated-books.dto';
 
 const multerOptions = {

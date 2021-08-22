@@ -14,11 +14,12 @@ export class GamesRepository extends Repository<Game> {
     username: string,
   ): Promise<Array<any>> {
     const { orderBy, ordering } = filterDto;
-    const query = this.createFilterQuery(filterDto).leftJoin(
-      GameStats,
-      'gameStats',
-      'game.id = gameStats.gameId',
-    );
+    const query = this.createFilterQuery(filterDto)
+      .addSelect(
+        `COALESCE(NULLIF(game.imageUrn, '${process.env.APP_URL}/images/game.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'game_imageUrl',
+      )
+      .leftJoin(GameStats, 'gameStats', 'game.id = gameStats.gameId');
 
     if (username) {
       query

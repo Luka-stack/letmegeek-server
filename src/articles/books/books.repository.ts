@@ -14,11 +14,12 @@ export class BooksRepository extends Repository<Book> {
     username: string,
   ): Promise<Array<any>> {
     const { orderBy, ordering } = filterDto;
-    const query = this.createFilterQuery(filterDto).leftJoin(
-      BookStats,
-      'bookStats',
-      'book.id = bookStats.bookId',
-    );
+    const query = this.createFilterQuery(filterDto)
+      .addSelect(
+        `COALESCE(NULLIF(book.imageUrn, '${process.env.APP_URL}/images/book.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'book_imageUrl',
+      )
+      .leftJoin(BookStats, 'bookStats', 'book.id = bookStats.bookId');
 
     if (username) {
       query
@@ -52,6 +53,7 @@ export class BooksRepository extends Repository<Book> {
         .limit(filterDto.limit)
         .getRawMany();
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }
@@ -101,7 +103,7 @@ export class BooksRepository extends Repository<Book> {
   createFilterQuery(filterDto: BooksFilterDto): SelectQueryBuilder<Book> {
     const { name, genres, authors, publishers, pages, premiered } = filterDto;
     const query = this.createQueryBuilder('book');
-    query.where('1=1');
+    query.where('book.draft = false');
 
     if (name) {
       query.andWhere(

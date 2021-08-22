@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { getManager } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
@@ -48,7 +47,7 @@ export class BooksService {
     const book = this.booksRepository.create(bookDto);
     book.createdAt = new Date();
     book.contributor = user.username;
-    book.accepted = bookDto.draft;
+    book.accepted = !bookDto.draft;
 
     await this.booksRepository.save(book).catch((err) => {
       if (err.code == 23505) {
@@ -208,6 +207,14 @@ export class BooksService {
 
     if (filterDto.publishers) {
       query += `publishers=${filterDto.publishers}&`;
+    }
+
+    if (filterDto.orderBy) {
+      query += `orderBy=${filterDto.orderBy}&`;
+    }
+
+    if (filterDto.ordering) {
+      query += `ordering=${filterDto.orderBy}&`;
     }
 
     return query;

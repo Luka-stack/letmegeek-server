@@ -30,11 +30,11 @@ export class MangasModule implements NestModule {
   configure(context: MiddlewareConsumer) {
     context.apply(UserMiddleware).forRoutes(
       {
-        path: 'api/mangas/:identifier/:slug',
+        path: 'api/articles/mangas/:identifier/:slug',
         method: RequestMethod.GET,
       },
       {
-        path: 'api/mangas',
+        path: 'api/articles/mangas',
         method: RequestMethod.GET,
       },
     );

@@ -30,11 +30,11 @@ export class GamesModule implements NestModule {
   configure(context: MiddlewareConsumer) {
     context.apply(UserMiddleware).forRoutes(
       {
-        path: 'api/games/:identifier/:slug',
+        path: 'api/articles/games/:identifier/:slug',
         method: RequestMethod.GET,
       },
       {
-        path: 'api/games',
+        path: 'api/articles/games',
         method: RequestMethod.GET,
       },
     );

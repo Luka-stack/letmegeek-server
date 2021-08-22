@@ -30,11 +30,11 @@ export class ComicsModule implements NestModule {
   configure(context: MiddlewareConsumer) {
     context.apply(UserMiddleware).forRoutes(
       {
-        path: 'api/comics/:identifier/:slug',
+        path: 'api/articles/comics/:identifier/:slug',
         method: RequestMethod.GET,
       },
       {
-        path: 'api/comics',
+        path: 'api/articles/comics',
         method: RequestMethod.GET,
       },
     );
