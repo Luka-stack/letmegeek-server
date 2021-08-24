@@ -62,9 +62,13 @@ export class GamesRepository extends Repository<Game> {
     slug: string,
     username: string,
   ): Promise<any> {
-    const query = this.createQueryBuilder('game');
-    query.where('game.identifier = :identifier', { identifier });
-    query.andWhere('game.slug = :slug', { slug });
+    const query = this.createQueryBuilder('game')
+      .addSelect(
+        `COALESCE(NULLIF(game.imageUrn, '${process.env.APP_URL}/images/game.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'game_imageUrl',
+      )
+      .where('game.identifier = :identifier', { identifier })
+      .andWhere('game.slug = :slug', { slug });
 
     if (username) {
       query.leftJoinAndSelect(

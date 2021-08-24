@@ -50,6 +50,8 @@ export class GamesService {
 
     const game = this.gamesRepository.create(gameDto);
     game.createdAt = new Date();
+    game.contributor = user.username;
+    game.accepted = !gameDto.draft;
 
     await this.gamesRepository.save(game).catch((err) => {
       if (err.code == 23505) {

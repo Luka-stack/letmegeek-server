@@ -62,9 +62,13 @@ export class ComicsRepository extends Repository<Comic> {
     slug: string,
     username: string,
   ): Promise<any> {
-    const query = this.createQueryBuilder('comic');
-    query.where('comic.identifier = :identifier', { identifier });
-    query.andWhere('comic.slug = :slug', { slug });
+    const query = this.createQueryBuilder('comic')
+      .addSelect(
+        `COALESCE(NULLIF(comic.imageUrn, '${process.env.APP_URL}/images/comic.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'comic_imageUrl',
+      )
+      .where('comic.identifier = :identifier', { identifier })
+      .andWhere('comic.slug = :slug', { slug });
 
     if (username) {
       query.leftJoinAndSelect(

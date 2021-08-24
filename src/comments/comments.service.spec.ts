@@ -69,7 +69,7 @@ describe('CommentsService', () => {
     const recipient = mockUser('Recipient', UserRole.USER);
 
     it('throw NotFoundExcepiton (404), attempt to add comment to users profile that doesnt exsist', async () => {
-      usersRepository.findOne.mockResolvedValue(recipient);
+      usersRepository.findOne.mockResolvedValue(null);
 
       expect(
         commentsService.createComment('Recipient', commentDto, author),

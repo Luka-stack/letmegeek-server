@@ -27,10 +27,10 @@ export class UserStatsService {
         query = this.wallsBooksRepository.createQueryBuilder('wall');
         break;
       case 'comics':
-        query = this.wallsMangasRepository.createQueryBuilder('wall');
+        query = this.wallsComicsRepository.createQueryBuilder('wall');
         break;
       case 'mangas':
-        query = this.wallsComicsRepository.createQueryBuilder('wall');
+        query = this.wallsMangasRepository.createQueryBuilder('wall');
         break;
       case 'games':
         query = this.wallsGamesRepository.createQueryBuilder('wall');

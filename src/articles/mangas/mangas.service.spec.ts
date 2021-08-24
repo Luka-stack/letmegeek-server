@@ -4,37 +4,35 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import Manga from './entities/manga.entity';
 import User from '../../users/entities/user.entity';
-import WallsManga from '../../walls/walls-mangas/entities/walls-manga.entity';
 import { UserRole } from '../../auth/entities/user-role';
 import { MangaType } from './entities/manga-type';
 import { MangasService } from './mangas.service';
 import { MangasRepository } from './mangas.repository';
-import { slugify } from '../../utils/helpers';
 import { MangasFilterDto } from './dto/mangas-filter.dto';
+import { allWallArticleStatusesModes } from '../../walls/entities/wall-article-status';
+import { UpdateMangaDto } from './dto/update-manga.dto';
 
 const mockMangasRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
   delete: jest.fn(),
+  getManga: jest.fn(),
   getMangas: jest.fn(),
   getFilterCount: jest.fn(),
-  getCompleteManga: jest.fn(),
 });
 
 const mockManga = () => {
-  return {
-    id: '643790b4-ad59-49dc-baec-f5617e700bac',
-    slug: 'title_test',
-    identifier: '80Vni9G',
-    title: 'Title test',
-    volumes: 55,
-    type: MangaType.MANGA,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    draft: false,
-    wallsMangas: [],
-  };
+  const manga = new Manga();
+  manga.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+  manga.slug = 'title_test';
+  manga.identifier = '80Vni9G';
+  manga.title = 'Title test';
+  manga.volumes = 55;
+  manga.type = MangaType.MANGA;
+  manga.updatedAt = new Date();
+  manga.draft = false;
+  return manga;
 };
 
 const mockUser = () => {
@@ -67,29 +65,26 @@ describe('MangasService', () => {
   });
 
   describe('createManga', () => {
-    it('call MangasRepository.createManga and save, create and return manga', async () => {
+    it('call MangasRepository.createManga as a normal user and save, create draft and return manga', async () => {
       // given
       const manga = mockManga();
-      manga.createdAt = null;
+      const user = mockUser();
       mangasRepository.create.mockReturnValue(manga);
-      mangasRepository.save.mockResolvedValue({});
+      mangasRepository.save.mockResolvedValue(manga);
 
       // when
-      const result = await mangasService.createManga(manga, mockUser());
+      const result = await mangasService.createManga(manga, user);
 
       // then
-      expect(result).toEqual({
-        id: expect.any(String),
-        identifier: expect.any(String),
-        slug: slugify(manga.title),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        title: manga.title,
-        volumes: manga.volumes,
-        type: manga.type,
-        wallsMangas: [],
-        draft: true,
-      });
+      const expectedManga = mockManga();
+      expectedManga.contributor = user.username;
+      expectedManga.draft = true;
+      expectedManga.accepted = false;
+      expectedManga.createdAt = result.createdAt;
+      expectedManga.updatedAt = result.updatedAt;
+      expect(result.createdAt).toEqual(expect.any(Date));
+      expect(result.updatedAt).toEqual(expect.any(Date));
+      expect(result).toEqual(expectedManga);
     });
 
     it('call MangasRepository.createManga as an admin user, create book and returns it', async () => {
@@ -104,18 +99,14 @@ describe('MangasService', () => {
       const result = await mangasService.createManga(manga, user);
 
       // then
-      expect(result).toEqual({
-        id: expect.any(String),
-        identifier: expect.any(String),
-        slug: slugify(manga.title),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        title: manga.title,
-        volumes: manga.volumes,
-        type: manga.type,
-        wallsMangas: [],
-        draft: manga.draft,
-      });
+      const expectedManga = mockManga();
+      expectedManga.contributor = user.username;
+      expectedManga.accepted = !expectedManga.draft;
+      expectedManga.createdAt = result.createdAt;
+      expectedManga.updatedAt = result.updatedAt;
+      expect(result.createdAt).toEqual(expect.any(Date));
+      expect(result.updatedAt).toEqual(expect.any(Date));
+      expect(result).toEqual(expectedManga);
     });
 
     it('call MangasRepository.createManga and save, return 409 since Title is not unique', async () => {
@@ -132,13 +123,41 @@ describe('MangasService', () => {
 
   describe('getMangas', () => {
     const mangasFilter = new MangasFilterDto();
-
     const user = mockUser();
-    const manga = mockManga();
-    const wallsManga = new WallsManga();
-    wallsManga.username = user.username;
-    wallsManga.score = 2;
-    manga.wallsMangas = [wallsManga];
+
+    const manga = {
+      manga_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      manga_slug: 'title_test',
+      manga_identifier: '80Vni9G',
+      manga_title: 'Title Test',
+      manga_draft: false,
+      manga_createdAt: new Date(),
+      manga_updatedAt: new Date(),
+      manga_volumes: '55',
+      manga_type: MangaType.MANGA,
+      manga_imageUrl: 'image Path',
+      mangaStats_avgScore: '5',
+      mangaStats_countScore: '5',
+      mangaStats_members: '5',
+    };
+
+    const mangaWithUsersScoring = {
+      manga_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      manga_slug: 'title_test',
+      manga_identifier: '80Vni9G',
+      manga_title: 'Title Test',
+      manga_draft: false,
+      manga_createdAt: new Date(),
+      manga_updatedAt: new Date(),
+      manga_imageUrl: 'image Path',
+      manga_volumes: '55',
+      manga_type: MangaType.MANGA,
+      mangaStats_avgScore: '5',
+      mangaStats_countScore: '5',
+      mangaStats_members: '5',
+      wallManga_status: allWallArticleStatusesModes()[0],
+      wallManga_score: '5',
+    };
 
     it('return paginated data : total count 0, no prev, no next, no mangas', async () => {
       mangasRepository.getFilterCount.mockResolvedValue(0);
@@ -209,7 +228,7 @@ describe('MangasService', () => {
       expect(response.prevPage).toMatch(/limit/);
     });
 
-    it('call MangasRepository.getMangas as a user, return array of mangas with users wallsmanga', async () => {
+    it('call MangasRepository.getMangas as a user, return array of mangas with statistics', async () => {
       mangasFilter.page = 1;
       mangasFilter.limit = 1;
 
@@ -220,37 +239,70 @@ describe('MangasService', () => {
       const result = await mangasService.getMangas(mangasFilter, user);
 
       // then
+      expect(result.data.length).toEqual(1);
       expect(result.data).toEqual([manga]);
-      expect(result.data[0].userWallsManga).toEqual(wallsManga);
+    });
+
+    it('call MangasRepository.getMangas as a user, return array of mangas with statistics and users score', async () => {
+      mangasFilter.page = 1;
+      mangasFilter.limit = 1;
+
+      mangasRepository.getFilterCount.mockResolvedValue(1);
+      mangasRepository.getMangas.mockResolvedValue([
+        manga,
+        mangaWithUsersScoring,
+      ]);
+
+      // when
+      const result = await mangasService.getMangas(mangasFilter, user);
+
+      // then
+      expect(result.data.length).toEqual(2);
+      expect(result.data[0]).toEqual(manga);
+      expect(result.data[1]).toEqual(mangaWithUsersScoring);
     });
   });
 
   describe('getOneManga', () => {
-    const manga = mockManga();
     const user = mockUser();
-    const wallsManga = new WallsManga();
-    wallsManga.username = user.username;
-    wallsManga.score = 5;
-    manga.wallsMangas = [wallsManga];
 
-    it('call MangasRepository.getOneManga, return manga', async () => {
+    const manga = {
+      manga_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      manga_slug: 'title_test',
+      manga_identifier: '80Vni9G',
+      manga_title: 'Title Test',
+      manga_draft: false,
+      manga_createdAt: new Date(),
+      manga_updatedAt: new Date(),
+      manga_volumes: '55',
+      manga_type: MangaType.MANGA,
+      manga_imageUrl: 'image Path',
+      mangaStats_avgScore: '5',
+      mangaStats_countScore: '5',
+      mangaStats_members: '5',
+    };
+
+    const mangaWithUsersScoring = {
+      manga_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      manga_slug: 'title_test',
+      manga_identifier: '80Vni9G',
+      manga_title: 'Title Test',
+      manga_draft: false,
+      manga_createdAt: new Date(),
+      manga_updatedAt: new Date(),
+      manga_imageUrl: 'image Path',
+      manga_volumes: '55',
+      manga_type: MangaType.MANGA,
+      mangaStats_avgScore: '5',
+      mangaStats_countScore: '5',
+      mangaStats_members: '5',
+      wallManga_status: allWallArticleStatusesModes()[0],
+      wallManga_score: '5',
+    };
+
+    it('call MangasRepository.getOneManga, return manga with statistics', async () => {
       // given
-      mangasRepository.getCompleteManga.mockResolvedValue(manga);
-
-      // when
-      const result = await mangasService.getOneManga(
-        'identifier',
-        'slug',
-        null,
-      );
-
-      // then
-      expect(result).toEqual(manga);
-    });
-
-    it('call MangasRepository.getOneManga as a user, return manga with users wallsbook', async () => {
-      // given
-      mangasRepository.getCompleteManga.mockResolvedValue(manga);
+      mangasRepository.getManga.mockResolvedValue(manga);
 
       // when
       const result = await mangasService.getOneManga(
@@ -261,23 +313,36 @@ describe('MangasService', () => {
 
       // then
       expect(result).toEqual(manga);
-      expect(result.userWallsManga).toEqual(wallsManga);
+    });
+
+    it('call MangasRepository.getOneManga as a user, return manga with statistics and users score', async () => {
+      // given
+      mangasRepository.getManga.mockResolvedValue(mangaWithUsersScoring);
+
+      // when
+      const result = await mangasService.getOneManga(
+        'identifier',
+        'slug',
+        user,
+      );
+
+      // then
+      expect(result).toEqual(mangaWithUsersScoring);
     });
 
     it('call MangasRepository.getOneManga, return 404', async () => {
       // given
-      mangasRepository.getCompleteManga.mockResolvedValue(null);
+      mangasRepository.getManga.mockResolvedValue(null);
 
       // when, then
       expect(
-        mangasService.getOneManga('someId', 'slug', null),
+        mangasService.getOneManga('someId', 'slug', user),
       ).rejects.toThrowError(NotFoundException);
     });
   });
 
   describe('updateManga', () => {
     const manga = mockManga();
-    const mangaClass = new Manga();
 
     it('call MangasRepository.findOne and return 404', async () => {
       // given
@@ -290,9 +355,8 @@ describe('MangasService', () => {
 
     it('call MangasRepository.findOne, find Manga then call MangasRepository.save, update and returns Manga', async () => {
       // given
-      mangaClass.title = manga.title;
-      mangasRepository.findOne.mockResolvedValue(mangaClass);
-      mangasRepository.save.mockResolvedValue(mangaClass);
+      mangasRepository.findOne.mockResolvedValue(manga);
+      mangasRepository.save.mockResolvedValue(manga);
 
       // when
       const updateManga = {
@@ -307,11 +371,34 @@ describe('MangasService', () => {
       );
 
       // then
-      expect(result).toEqual({
-        title: updateManga.title,
-        volumes: updateManga.volumes,
-        premiered: updateManga.premiered,
-      });
+      manga.title = updateManga.title;
+      manga.volumes = updateManga.volumes;
+      manga.premiered = updateManga.premiered;
+      expect(result).toEqual(manga);
+    });
+
+    it('call MangasRepository.findOne, find Manga, validate authors, publishers and genres', async () => {
+      mangasRepository.findOne.mockResolvedValue(manga);
+      mangasRepository.save.mockResolvedValue(manga);
+
+      // when
+      const updatedManga = {
+        authors: 'Test1, Test1, Test1',
+        publishers: 'Test2, Test2, Test2',
+        genres: 'Test3, Test3, Test3',
+      };
+      const result = await mangasService.updateManga(
+        manga.identifier,
+        manga.slug,
+        updatedManga,
+      );
+
+      // then
+      expect(result.authors).toEqual(updatedManga.authors.replace(' ', ''));
+      expect(result.publishers).toEqual(
+        updatedManga.publishers.replace(' ', ''),
+      );
+      expect(result.genres).toEqual(updatedManga.genres.replace(' ', ''));
     });
 
     it('call MangasRepository.findOne, find Manga then call MangasRepository.save, update draft to true and update timestamp', async () => {
@@ -319,10 +406,8 @@ describe('MangasService', () => {
       const date = new Date();
       date.setFullYear(2000);
 
-      mangaClass.title = manga.title;
-      mangaClass.createdAt = date;
-      mangasRepository.findOne.mockResolvedValue(mangaClass);
-      mangasRepository.save.mockResolvedValue(mangaClass);
+      mangasRepository.findOne.mockResolvedValue(manga);
+      mangasRepository.save.mockResolvedValue(manga);
 
       // when
       const updatedManga = {
@@ -340,13 +425,8 @@ describe('MangasService', () => {
 
     it('call MangasRepository.findOne, find Manga then call MangasRepository.save, draft and timestamp doesnt change', async () => {
       // given
-      const date = new Date();
-      date.setFullYear(2000);
-
-      mangaClass.title = manga.title;
-      mangaClass.createdAt = date;
-      mangasRepository.findOne.mockResolvedValue(mangaClass);
-      mangasRepository.save.mockResolvedValue(mangaClass);
+      mangasRepository.findOne.mockResolvedValue(manga);
+      mangasRepository.save.mockResolvedValue(manga);
 
       // when
       const updatedManga = {
@@ -359,18 +439,21 @@ describe('MangasService', () => {
       );
 
       // then
-      expect(result.createdAt).toEqual(date);
+      expect(result.createdAt).toEqual(manga.createdAt);
     });
 
     it('call MangasRepository.findOne, find Manga then call MangasRepository.save and throw 409 due to not unique Title', async () => {
       // given
-      mangaClass.title = manga.title;
-      mangasRepository.findOne.mockResolvedValue(mangaClass);
+      mangasRepository.findOne.mockResolvedValue(manga);
       mangasRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
       expect(
-        mangasService.updateManga(manga.identifier, manga.slug, {}),
+        mangasService.updateManga(
+          manga.identifier,
+          manga.slug,
+          new UpdateMangaDto(),
+        ),
       ).rejects.toThrowError(ConflictException);
     });
   });

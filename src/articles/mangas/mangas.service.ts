@@ -44,8 +44,10 @@ export class MangasService {
       mangaDto.genres = removeSpacesFromCommaSeparatedString(mangaDto.genres);
     }
 
-    const manga = this.mangasRepository.create(mangaDto);
+    const manga = await this.mangasRepository.create(mangaDto);
     manga.createdAt = new Date();
+    manga.contributor = user.username;
+    manga.accepted = !mangaDto.draft;
 
     await this.mangasRepository.save(manga).catch((err) => {
       if (err.code == 23505) {

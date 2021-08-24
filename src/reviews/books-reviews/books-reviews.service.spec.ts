@@ -235,8 +235,6 @@ describe('BooksReviewsService', () => {
       expect(response.prevPage).toMatch(/book/);
       expect(response.prevPage).toMatch(/page/);
       expect(response.prevPage).toMatch(/limit/);
-
-      console.log(response);
     });
 
     it('For Book : total count 0, no prev and next page, no reviews', async () => {

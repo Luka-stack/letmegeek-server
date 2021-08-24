@@ -54,6 +54,7 @@ export default class Manga extends Article {
     this.publishers = updateMangaDto.publishers || this.publishers;
     this.genres = updateMangaDto.genres || this.genres;
     this.type = updateMangaDto.type || this.type;
+    this.accepted = updateMangaDto.accepted || this.accepted;
 
     if (updateMangaDto.draft != null) {
       this.draft = updateMangaDto.draft;

@@ -4,35 +4,33 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import User from '../../users/entities/user.entity';
 import Comic from './entities/comic.entity';
-import WallsComic from '../../walls/walls-comics/entities/walls-comic.entity';
 import { UserRole } from '../../auth/entities/user-role';
-import { slugify } from '../../utils/helpers';
 import { ComicsRepository } from './comics.repository';
 import { ComicsService } from './comics.service';
 import { ComicsFilterDto } from './dto/comics-filter.dto';
+import { allWallArticleStatusesModes } from '../../walls/entities/wall-article-status';
+import { UpdateComicDto } from './dto/update-comic.dto';
 
 const mockComicsRepository = () => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
   delete: jest.fn(),
+  getComic: jest.fn(),
   getComics: jest.fn(),
   getFilterCount: jest.fn(),
-  getCompleteComic: jest.fn(),
 });
 
 const mockComic = () => {
-  return {
-    id: '643790b4-ad59-49dc-baec-f5617e700bac',
-    slug: 'title_test',
-    identifier: '80Vni9GC',
-    title: 'Title Test',
-    issues: 55,
-    draft: false,
-    wallsComics: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const comic = new Comic();
+  comic.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+  comic.slug = 'title_test';
+  comic.identifier = '80Vni9GC';
+  comic.title = 'Title Test';
+  comic.issues = 55;
+  comic.draft = false;
+  comic.updatedAt = new Date();
+  return comic;
 };
 
 const mockUser = () => {
@@ -65,53 +63,53 @@ describe('ComicsService', () => {
   });
 
   describe('createComic', () => {
-    const comic = mockComic();
-
     it('call ComicsRepository.create and save, create and return comic', async () => {
+      const comic = mockComic();
+      const user = mockUser();
+
       comicsRepository.create.mockReturnValue(comic);
-      comicsRepository.save.mockResolvedValue({});
+      comicsRepository.save.mockResolvedValue(comic);
 
       // when
-      const result = await comicsService.createComic(comic, mockUser());
+      const result = await comicsService.createComic(comic, user);
 
       // then
-      expect(result).toEqual({
-        id: expect.any(String),
-        identifier: expect.any(String),
-        slug: slugify(comic.title),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        title: comic.title,
-        draft: true,
-        issues: comic.issues,
-        wallsComics: [],
-      });
+      const expectedComic = mockComic();
+      expectedComic.contributor = user.username;
+      expectedComic.draft = true;
+      expectedComic.accepted = false;
+      expectedComic.createdAt = result.createdAt;
+      expectedComic.updatedAt = result.updatedAt;
+      expect(result.createdAt).toEqual(expect.any(Date));
+      expect(result.updatedAt).toEqual(expect.any(Date));
+      expect(result).toEqual(expectedComic);
     });
 
     it('call ComicsRepository.create and save as an admin user, create and return comic', async () => {
+      const comic = mockComic();
+      const user = mockUser();
+
       comicsRepository.create.mockReturnValue(comic);
-      comicsRepository.save.mockResolvedValue({});
+      comicsRepository.save.mockResolvedValue(comic);
 
       // when
-      const user = mockUser();
       user.role = UserRole.ADMIN;
       const result = await comicsService.createComic(comic, user);
 
       // then
-      expect(result).toEqual({
-        id: expect.any(String),
-        identifier: expect.any(String),
-        slug: slugify(comic.title),
-        createdAt: expect.any(Date),
-        updatedAt: expect.any(Date),
-        title: comic.title,
-        draft: comic.draft,
-        issues: comic.issues,
-        wallsComics: [],
-      });
+      const expectedComic = mockComic();
+      expectedComic.contributor = user.username;
+      expectedComic.accepted = !expectedComic.draft;
+      expectedComic.createdAt = result.createdAt;
+      expectedComic.updatedAt = result.updatedAt;
+      expect(result.createdAt).toEqual(expect.any(Date));
+      expect(result.updatedAt).toEqual(expect.any(Date));
+      expect(result).toEqual(expectedComic);
     });
 
     it('call ComicsRepository.create and save, return 409 since Title is not unique', async () => {
+      const comic = mockComic();
+
       // given
       comicsRepository.create.mockResolvedValue(comic);
       comicsRepository.save.mockRejectedValue({ code: 23505 });
@@ -125,13 +123,37 @@ describe('ComicsService', () => {
 
   describe('getComics', () => {
     const comicsFilter = new ComicsFilterDto();
-
     const user = mockUser();
-    const comic = mockComic();
-    const wallsComic = new WallsComic();
-    wallsComic.username = user.username;
-    wallsComic.score = 2;
-    comic.wallsComics = [wallsComic];
+
+    const comic = {
+      comic_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      comic_slug: 'title_test',
+      comic_identifier: '80Vni9G',
+      comic_title: 'Title Test',
+      comic_draft: false,
+      comic_createdAt: new Date(),
+      comic_updatedAt: new Date(),
+      comic_imageUrl: 'image Path',
+      comicStats_avgScore: '5',
+      comicStats_countScore: '5',
+      comicStats_members: '5',
+    };
+
+    const comicWithUsersScoring = {
+      comic_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      comic_slug: 'title_test',
+      comic_identifier: '80Vni9G',
+      comic_title: 'Title Test',
+      comic_draft: false,
+      comic_createdAt: new Date(),
+      comic_updatedAt: new Date(),
+      comic_imageUrl: 'image Path',
+      comicStats_avgScore: '5',
+      comicStats_countScore: '5',
+      comicStats_members: '5',
+      wallComic_status: allWallArticleStatusesModes()[0],
+      wallComic_score: '5',
+    };
 
     it('return paginated data : total count 0, no prev, no next, no comica', async () => {
       comicsRepository.getFilterCount.mockResolvedValue(0);
@@ -202,7 +224,7 @@ describe('ComicsService', () => {
       expect(response.prevPage).toMatch(/limit/);
     });
 
-    it('call ComicsRepository.getComics as a user, return array of comics with users wallsComic', async () => {
+    it('call ComicsRepository.getComics as a user, return array of comics with statistics', async () => {
       comicsFilter.page = 1;
       comicsFilter.limit = 1;
 
@@ -214,37 +236,67 @@ describe('ComicsService', () => {
       const result = await comicsService.getComics(comicsFilter, user);
 
       // then
+      expect(result.data.length).toEqual(1);
       expect(result.data).toEqual([comic]);
-      expect(result.data[0].userWallsComic).toEqual(wallsComic);
+    });
+
+    it('call ComicsRepository.getComics as a user, return array of books with statistics and users score', async () => {
+      comicsFilter.page = 1;
+      comicsFilter.limit = 1;
+
+      // given
+      comicsRepository.getFilterCount.mockResolvedValue(1);
+      comicsRepository.getComics.mockResolvedValue([
+        comic,
+        comicWithUsersScoring,
+      ]);
+
+      // when
+      const result = await comicsService.getComics(comicsFilter, user);
+
+      // then
+      expect(result.data.length).toEqual(2);
+      expect(result.data[0]).toEqual(comic);
+      expect(result.data[1]).toEqual(comicWithUsersScoring);
     });
   });
 
   describe('getOneComic', () => {
-    const book = mockComic();
     const user = mockUser();
-    const wallsComic = new WallsComic();
-    wallsComic.username = user.username;
-    wallsComic.score = 5;
-    book.wallsComics = [wallsComic];
 
-    it('call ComicsRepository.getOneComic, return comic', async () => {
+    const comic = {
+      comic_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      comic_slug: 'title_test',
+      comic_identifier: '80Vni9G',
+      comic_title: 'Title Test',
+      comic_draft: false,
+      comic_createdAt: new Date(),
+      comic_updatedAt: new Date(),
+      comic_imageUrl: 'image Path',
+      comicStats_avgScore: '5',
+      comicStats_countScore: '5',
+      comicStats_members: '5',
+    };
+
+    const comicWithUsersScoring = {
+      comic_id: '643790b4-ad59-49dc-baec-f5617e700bac',
+      comic_slug: 'title_test',
+      comic_identifier: '80Vni9G',
+      comic_title: 'Title Test',
+      comic_draft: false,
+      comic_createdAt: new Date(),
+      comic_updatedAt: new Date(),
+      comic_imageUrl: 'image Path',
+      comicStats_avgScore: '5',
+      comicStats_countScore: '5',
+      comicStats_members: '5',
+      wallComic_status: allWallArticleStatusesModes()[0],
+      wallComic_score: '5',
+    };
+
+    it('call ComicsRepository.getOneComic, return comic with statistics', async () => {
       // given
-      comicsRepository.getCompleteComic.mockResolvedValue(book);
-
-      // when
-      const result = await comicsService.getOneComic(
-        'identifier',
-        'slug',
-        null,
-      );
-
-      // then
-      expect(result).toEqual(book);
-    });
-
-    it('call ComicsRepository.getOneComic as a user, return comic with users wallsComic', async () => {
-      // given
-      comicsRepository.getCompleteComic.mockResolvedValue(book);
+      comicsRepository.getComic.mockResolvedValue(comic);
 
       // when
       const result = await comicsService.getOneComic(
@@ -254,38 +306,50 @@ describe('ComicsService', () => {
       );
 
       // then
-      expect(result).toEqual(book);
-      expect(result.userWallsComic).toEqual(wallsComic);
+      expect(result).toEqual(comic);
+    });
+
+    it('call ComicsRepository.getOneComic as a user, return comic with statistics and users score', async () => {
+      // given
+      comicsRepository.getComic.mockResolvedValue(comicWithUsersScoring);
+
+      // when
+      const result = await comicsService.getOneComic(
+        'identifier',
+        'slug',
+        user,
+      );
+
+      // then
+      expect(result).toEqual(comicWithUsersScoring);
     });
 
     it('call ComicsRepository.getOneComic, return 404', async () => {
       // given
-      comicsRepository.getCompleteComic.mockResolvedValue(null);
+      comicsRepository.getComic.mockResolvedValue(null);
 
       // when, then
       expect(
-        comicsService.getOneComic('someId', 'slug', null),
+        comicsService.getOneComic('someId', 'slug', user),
       ).rejects.toThrowError(NotFoundException);
     });
   });
 
   describe('updateComic', () => {
     const comic = mockComic();
-    const comicClass = new Comic();
 
     it('call ComicsRepository.findOne and throw NotFoundException', async () => {
       comicsRepository.findOne.mockResolvedValue(null);
 
-      expect(comicsService.updateComic('someId', 'slug', {})).rejects.toThrow(
-        NotFoundException,
-      );
+      expect(
+        comicsService.updateComic('someId', 'slug', {}),
+      ).rejects.toThrowError(NotFoundException);
     });
 
     it('call ComicsRepository.findOne, find Comic then calls ComicsRepository.save, update and return comic', async () => {
       // given
-      comicClass.title = comic.title;
-      comicsRepository.findOne.mockResolvedValue(comicClass);
-      comicsRepository.save.mockResolvedValue(comicClass);
+      comicsRepository.findOne.mockResolvedValue(comic);
+      comicsRepository.save.mockResolvedValue(comic);
 
       // when
       const updateComic = {
@@ -299,10 +363,33 @@ describe('ComicsService', () => {
       );
 
       // then
-      expect(result).toEqual({
-        title: updateComic.title,
-        issues: updateComic.issues,
-      });
+      comic.title = updateComic.title;
+      comic.issues = updateComic.issues;
+      expect(result).toEqual(comic);
+    });
+
+    it('call ComicsRepository.findOne, find Comic, validate authors, publishers and genres', async () => {
+      comicsRepository.findOne.mockResolvedValue(comic);
+      comicsRepository.save.mockResolvedValue(comic);
+
+      // when
+      const updatedComic = {
+        authors: 'Test1, Test1, Test1',
+        publishers: 'Test2, Test2, Test2',
+        genres: 'Test3, Test3, Test3',
+      };
+      const result = await comicsService.updateComic(
+        comic.identifier,
+        comic.slug,
+        updatedComic,
+      );
+
+      // then
+      expect(result.authors).toEqual(updatedComic.authors.replace(' ', ''));
+      expect(result.publishers).toEqual(
+        updatedComic.publishers.replace(' ', ''),
+      );
+      expect(result.genres).toEqual(updatedComic.genres.replace(' ', ''));
     });
 
     it('call ComicsRepository.findOne, find Comic then call ComicsRepository.save, update draft to true and update timestamp', async () => {
@@ -310,11 +397,8 @@ describe('ComicsService', () => {
       const date = new Date();
       date.setFullYear(2000);
 
-      comicClass.title = comic.title;
-      comicClass.createdAt = date;
-
-      comicsRepository.findOne.mockResolvedValue(comicClass);
-      comicsRepository.save.mockResolvedValue(comicClass);
+      comicsRepository.findOne.mockResolvedValue(comic);
+      comicsRepository.save.mockResolvedValue(comic);
 
       // when
       const updatedComic = {
@@ -332,13 +416,8 @@ describe('ComicsService', () => {
 
     it('call ComicsRepository.findOne, find Comic then call ComicsRepository.save, draft and timestamp doesnt change', async () => {
       // given
-      const date = new Date();
-      date.setFullYear(2000);
-
-      comicClass.title = comic.title;
-      comicClass.createdAt = date;
-      comicsRepository.findOne.mockResolvedValue(comicClass);
-      comicsRepository.save.mockResolvedValue(comicClass);
+      comicsRepository.findOne.mockResolvedValue(comic);
+      comicsRepository.save.mockResolvedValue(comic);
 
       // when
       const updatedComic = {
@@ -351,18 +430,21 @@ describe('ComicsService', () => {
       );
 
       // then
-      expect(result.createdAt).toEqual(date);
+      expect(result.createdAt).toEqual(comic.createdAt);
     });
 
     it('call ComicsRepository.findOne, find Comic then call ComicsRepository.save and throw 409 due to not unique Title', async () => {
       // given
-      comicClass.title = comic.title;
-      comicsRepository.findOne.mockResolvedValue(comicClass);
+      comicsRepository.findOne.mockResolvedValue(comic);
       comicsRepository.save.mockRejectedValue({ code: 23505 });
 
       // when, then
       expect(
-        comicsService.updateComic(comic.identifier, comic.slug, {}),
+        comicsService.updateComic(
+          comic.identifier,
+          comic.slug,
+          new UpdateComicDto(),
+        ),
       ).rejects.toThrowError(ConflictException);
     });
   });
@@ -376,12 +458,12 @@ describe('ComicsService', () => {
       ).rejects.toThrowError(NotFoundException);
     });
 
-    // it('call ComicsRepository.delete, delet Comic and returns void', async () => {
+    // it('call ComicsRepository.delete, delete Comic and returns void', async () => {
     //   comicsRepository.delete.mockResolvedValue({ affected: 1 });
 
     //   expect(
     //     comicsService.deleteComic('someId', 'someSlug'),
-    //   ).resolves.toBeCalled();
+    //   ).resolves.toHaveBeenCalledTimes(1);
     // });
   });
 });

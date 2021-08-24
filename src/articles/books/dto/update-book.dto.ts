@@ -5,5 +5,5 @@ import { BookDto } from './book.dto';
 export class UpdateBookDto extends PartialType(BookDto) {
   @IsOptional()
   @IsBoolean()
-  accepted: boolean;
+  accepted?: boolean;
 }

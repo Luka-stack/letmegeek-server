@@ -47,6 +47,7 @@ export default class Game extends Article {
     this.description = updateGameDto.description || this.description;
     this.publishers = updateGameDto.publishers || this.publishers;
     this.genres = updateGameDto.genres || this.genres;
+    this.accepted = updateGameDto.accepted || this.accepted;
 
     if (updateGameDto.draft != null) {
       this.draft = updateGameDto.draft;

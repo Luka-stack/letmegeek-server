@@ -46,6 +46,8 @@ export class ComicsService {
 
     const comic = this.comicsRepository.create(comicDto);
     comic.createdAt = new Date();
+    comic.contributor = user.username;
+    comic.accepted = !comicDto.draft;
 
     await this.comicsRepository.save(comic).catch((err) => {
       if (err.code == 23505) {

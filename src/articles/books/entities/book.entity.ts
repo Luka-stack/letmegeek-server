@@ -36,9 +36,6 @@ export default class Book extends Article {
   })
   wallsBooks: Array<WallsBook>;
 
-  @Expose()
-  userWallsBook: WallsBook;
-
   updateFields(updateBookDto: UpdateBookDto) {
     this.title = updateBookDto.title || this.title;
     this.series = updateBookDto.series || this.series;

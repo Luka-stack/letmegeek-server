@@ -43,6 +43,7 @@ export default class Comic extends Article {
     this.genres = updateComicDto.genres || this.genres;
     this.authors = updateComicDto.authors || this.authors;
     this.publishers = updateComicDto.publishers || this.publishers;
+    this.accepted = updateComicDto.accepted || this.accepted;
 
     if (updateComicDto.draft != null) {
       this.draft = updateComicDto.draft;

@@ -44,7 +44,7 @@ export class BooksService {
       bookDto.genres = removeSpacesFromCommaSeparatedString(bookDto.genres);
     }
 
-    const book = this.booksRepository.create(bookDto);
+    const book = await this.booksRepository.create(bookDto);
     book.createdAt = new Date();
     book.contributor = user.username;
     book.accepted = !bookDto.draft;

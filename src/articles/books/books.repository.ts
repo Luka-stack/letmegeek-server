@@ -63,9 +63,13 @@ export class BooksRepository extends Repository<Book> {
     slug: string,
     username: string,
   ): Promise<any> {
-    const query = this.createQueryBuilder('book');
-    query.where('book.identifier = :identifier', { identifier });
-    query.andWhere('book.slug = :slug', { slug });
+    const query = this.createQueryBuilder('book')
+      .addSelect(
+        `COALESCE(NULLIF(book.imageUrn, '${process.env.APP_URL}/images/book.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'book_imageUrl',
+      )
+      .where('book.identifier = :identifier', { identifier })
+      .andWhere('book.slug = :slug', { slug });
 
     if (username) {
       query.leftJoinAndSelect(

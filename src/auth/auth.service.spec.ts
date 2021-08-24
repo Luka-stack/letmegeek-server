@@ -211,7 +211,7 @@ describe('AuthService', () => {
       );
     });
 
-    it('create user with token and hased password, return user email, message and expire date', async () => {
+    it('create user with token and hashed password, return user email, message and expire date', async () => {
       const basicPassword = signupDto.password;
       let hashedPassword: string;
       let confirmationToken: string;

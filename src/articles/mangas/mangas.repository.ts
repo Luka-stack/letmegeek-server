@@ -62,9 +62,13 @@ export class MangasRepository extends Repository<Manga> {
     slug: string,
     username: string,
   ): Promise<any> {
-    const query = this.createQueryBuilder('manga');
-    query.where('manga.identifier = :identifier', { identifier });
-    query.andWhere('manga.slug = :slug', { slug });
+    const query = this.createQueryBuilder('manga')
+      .addSelect(
+        `COALESCE(NULLIF(manga.imageUrn, '${process.env.APP_URL}/images/manga.imageUrn'), 'https://via.placeholder.com/225x320')`,
+        'manga_imageUrl',
+      )
+      .where('manga.identifier = :identifier', { identifier })
+      .andWhere('manga.slug = :slug', { slug });
 
     if (username) {
       query.leftJoinAndSelect(
