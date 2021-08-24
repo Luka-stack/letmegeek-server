@@ -4,13 +4,14 @@ import {
   registerDecorator,
 } from 'class-validator';
 
-export function IsUsername(validationOptions?: ValidationOptions) {
+export function IsPassword(validationOptions?: ValidationOptions) {
   return function (object: unknown, propertyName: string) {
     const message =
-      'Username must contain only letters, digits, "-", "_", "." and must be at least 2 characters long';
+      'Password must contain at least 1 number, 1 uppercase letter, 1 lowercase letter, 1 non-alpha numeric number and be at least 8 characters long';
 
     const validate = function (value: any, _args: ValidationArguments) {
-      const regex = /^[A-Za-z][A-Za-z0-9_\.\-\_]+$/;
+      const regex =
+        /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,}$/;
 
       if (typeof value !== 'string') {
         return false;
@@ -28,7 +29,7 @@ export function IsUsername(validationOptions?: ValidationOptions) {
     };
 
     registerDecorator({
-      name: 'isUsername',
+      name: 'isPassword',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
