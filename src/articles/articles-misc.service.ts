@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRole } from 'src/auth/entities/user-role';
 
 import User from '../users/entities/user.entity';
+import { UserRole } from '../auth/entities/user-role';
 import { BooksRepository } from './books/books.repository';
 import { ComicsRepository } from './comics/comics.repository';
 import { ArticleDraftsFilterDto } from './dto/article-drafts-flter.dto';

@@ -2,8 +2,13 @@ import { NotFoundException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
+import Book from '../articles/books/entities/book.entity';
+import Comic from '../articles/comics/entities/comic.entity';
+import Manga from '../articles/mangas/entities/manga.entity';
+import Game from '../articles/games/entities/game.entity';
 import User from './entities/user.entity';
 import { UserRole } from '../auth/entities/user-role';
+import { MangaType } from '../articles/mangas/entities/manga-type';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { UserUpdateRoleDto, UserUpdateStatusDto } from './dto/user-update.dto';
 import { UsersService } from './users.service';
@@ -186,6 +191,17 @@ describe('UsersService', () => {
       finishedAt: null,
     };
 
+    const mockGame = () => {
+      const game = new Game();
+      game.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+      game.slug = 'title_slug';
+      game.identifier = '80Vni9G';
+      game.title = 'Title Slug';
+      game.gears = 'PlayStation 5';
+      game.draft = false;
+      return game;
+    };
+
     const mangaUpdate = {
       status: 'IN_PROGRESS',
       score: 7,
@@ -195,6 +211,18 @@ describe('UsersService', () => {
       chapters: 150,
       startedAt: null,
       finishedAt: null,
+    };
+
+    const mockManga = () => {
+      const manga = new Manga();
+      manga.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+      manga.slug = 'title_test';
+      manga.identifier = '80Vni9G';
+      manga.title = 'Title test';
+      manga.volumes = 55;
+      manga.type = MangaType.MANGA;
+      manga.draft = false;
+      return manga;
     };
 
     const comicUpdate = {
@@ -207,6 +235,17 @@ describe('UsersService', () => {
       finishedAt: '2021-05-05T00:00:00.000Z',
     };
 
+    const mockComic = () => {
+      const comic = new Comic();
+      comic.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+      comic.slug = 'title_test';
+      comic.identifier = '80Vni9GC';
+      comic.title = 'Title Test';
+      comic.issues = 55;
+      comic.draft = false;
+      return comic;
+    };
+
     const bookUpdate = {
       status: 'COMPLETED',
       score: 9,
@@ -215,6 +254,16 @@ describe('UsersService', () => {
       pages: 700,
       startedAt: '2021-01-01T00:00:00.000Z',
       finishedAt: null,
+    };
+
+    const mockBook = () => {
+      const book = new Book();
+      book.id = '643790b4-ad59-49dc-baec-f5617e700bac';
+      book.slug = 'title_test';
+      book.identifier = '80Vni9G';
+      book.title = 'Title Test';
+      book.draft = false;
+      return book;
     };
 
     it('throw NotFoundException (404), user with provided username doesnt exsit', async () => {
@@ -249,15 +298,20 @@ describe('UsersService', () => {
         getRawMany: () => [numericStat],
       };
 
+      const lastUpdate = {
+        ...bookUpdate,
+        book: mockBook(),
+      };
       userDetailsFilter.articleStats = 'books';
+
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
       wallBooksRepository.createQueryBuilder.mockImplementationOnce(
         () => createQueryBuilder,
       );
       wallBooksRepository.find.mockResolvedValue([
-        bookUpdate,
-        bookUpdate,
-        bookUpdate,
+        lastUpdate,
+        lastUpdate,
+        lastUpdate,
       ]);
 
       const result = await usersService.getUserByUsername(
@@ -269,9 +323,9 @@ describe('UsersService', () => {
       expect(result.statistics[0].article).toEqual('books');
       expect(result.statistics[0].numericStats).toEqual([numericStat]);
       expect(result.statistics[0].lastUpdates).toEqual([
-        bookUpdate,
-        bookUpdate,
-        bookUpdate,
+        lastUpdate,
+        lastUpdate,
+        lastUpdate,
       ]);
     });
 
@@ -284,13 +338,18 @@ describe('UsersService', () => {
         getRawMany: () => [numericStat],
       };
 
+      const lastUpdate = {
+        ...comicUpdate,
+        comic: mockComic(),
+      };
       userDetailsFilter.articleStats = 'comics';
       userDetailsFilter.lastUpdates = '1';
+
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
       wallComicsRepository.createQueryBuilder.mockImplementationOnce(
         () => createQueryBuilder,
       );
-      wallComicsRepository.find.mockResolvedValue([comicUpdate]);
+      wallComicsRepository.find.mockResolvedValue([lastUpdate]);
 
       const result = await usersService.getUserByUsername(
         'username',
@@ -300,7 +359,7 @@ describe('UsersService', () => {
       expect(result.statistics.length).toEqual(1);
       expect(result.statistics[0].article).toEqual('comics');
       expect(result.statistics[0].numericStats).toEqual([numericStat]);
-      expect(result.statistics[0].lastUpdates).toEqual([comicUpdate]);
+      expect(result.statistics[0].lastUpdates).toEqual([lastUpdate]);
     });
 
     it('return User with provided username and mangas statistics and 1 last update', async () => {
@@ -312,13 +371,18 @@ describe('UsersService', () => {
         getRawMany: () => [numericStat],
       };
 
+      const lastUpdate = {
+        ...mangaUpdate,
+        manga: mockManga(),
+      };
       userDetailsFilter.articleStats = 'mangas';
       userDetailsFilter.lastUpdates = '1';
+
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
       wallMangasRepository.createQueryBuilder.mockImplementationOnce(
         () => createQueryBuilder,
       );
-      wallMangasRepository.find.mockResolvedValue([mangaUpdate]);
+      wallMangasRepository.find.mockResolvedValue([lastUpdate]);
 
       const result = await usersService.getUserByUsername(
         'username',
@@ -328,7 +392,7 @@ describe('UsersService', () => {
       expect(result.statistics.length).toEqual(1);
       expect(result.statistics[0].article).toEqual('mangas');
       expect(result.statistics[0].numericStats).toEqual([numericStat]);
-      expect(result.statistics[0].lastUpdates).toEqual([mangaUpdate]);
+      expect(result.statistics[0].lastUpdates).toEqual([lastUpdate]);
     });
 
     it('return User with provided username and games statistics and 1 last update', async () => {
@@ -340,13 +404,18 @@ describe('UsersService', () => {
         getRawMany: () => [numericStat],
       };
 
+      const lastUpdate = {
+        ...gameUpdate,
+        game: mockGame(),
+      };
       userDetailsFilter.articleStats = 'games';
       userDetailsFilter.lastUpdates = '1';
+
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
       wallGamesRepository.createQueryBuilder.mockImplementationOnce(
         () => createQueryBuilder,
       );
-      wallGamesRepository.find.mockResolvedValue([gameUpdate]);
+      wallGamesRepository.find.mockResolvedValue([lastUpdate]);
 
       const result = await usersService.getUserByUsername(
         'username',
@@ -356,7 +425,7 @@ describe('UsersService', () => {
       expect(result.statistics.length).toEqual(1);
       expect(result.statistics[0].article).toEqual('games');
       expect(result.statistics[0].numericStats).toEqual([numericStat]);
-      expect(result.statistics[0].lastUpdates).toEqual([gameUpdate]);
+      expect(result.statistics[0].lastUpdates).toEqual([lastUpdate]);
     });
 
     it('return User with provided username and all articles statistics and 1 last update', async () => {
@@ -366,6 +435,26 @@ describe('UsersService', () => {
         groupBy: () => createQueryBuilder,
         where: () => createQueryBuilder,
         getRawMany: () => [numericStat],
+      };
+
+      const bookUpdateBundle = {
+        ...bookUpdate,
+        book: mockBook(),
+      };
+
+      const comicUpdateBundle = {
+        ...comicUpdate,
+        comic: mockComic(),
+      };
+
+      const gameUpdateBundle = {
+        ...gameUpdate,
+        game: mockGame(),
+      };
+
+      const mangaUpdateBundle = {
+        ...mangaUpdate,
+        manga: mockManga(),
       };
 
       userDetailsFilter.articleStats = 'all';
@@ -384,10 +473,10 @@ describe('UsersService', () => {
       wallMangasRepository.createQueryBuilder.mockImplementationOnce(
         () => createQueryBuilder,
       );
-      wallGamesRepository.find.mockResolvedValue([gameUpdate]);
-      wallBooksRepository.find.mockResolvedValue([bookUpdate]);
-      wallComicsRepository.find.mockResolvedValue([comicUpdate]);
-      wallMangasRepository.find.mockResolvedValue([mangaUpdate]);
+      wallGamesRepository.find.mockResolvedValue([gameUpdateBundle]);
+      wallBooksRepository.find.mockResolvedValue([bookUpdateBundle]);
+      wallComicsRepository.find.mockResolvedValue([comicUpdateBundle]);
+      wallMangasRepository.find.mockResolvedValue([mangaUpdateBundle]);
 
       const result = await usersService.getUserByUsername(
         'username',
@@ -399,22 +488,22 @@ describe('UsersService', () => {
         {
           article: 'books',
           numericStats: [numericStat],
-          lastUpdates: [bookUpdate],
+          lastUpdates: [bookUpdateBundle],
         },
         {
           article: 'comics',
           numericStats: [numericStat],
-          lastUpdates: [comicUpdate],
+          lastUpdates: [comicUpdateBundle],
         },
         {
           article: 'mangas',
           numericStats: [numericStat],
-          lastUpdates: [mangaUpdate],
+          lastUpdates: [mangaUpdateBundle],
         },
         {
           article: 'games',
           numericStats: [numericStat],
-          lastUpdates: [gameUpdate],
+          lastUpdates: [gameUpdateBundle],
         },
       ]);
     });

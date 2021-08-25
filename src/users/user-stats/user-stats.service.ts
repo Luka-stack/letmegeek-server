@@ -57,18 +57,23 @@ export class UserStatsService {
     limit = 3,
   ): Promise<Array<any>> {
     let repository;
+    let relation;
     switch (article) {
       case 'books':
         repository = this.wallsBooksRepository;
+        relation = 'book';
         break;
       case 'comics':
         repository = this.wallsComicsRepository;
+        relation = 'comic';
         break;
       case 'mangas':
         repository = this.wallsMangasRepository;
+        relation = 'manga';
         break;
       case 'games':
         repository = this.wallsGamesRepository;
+        relation = 'game';
         break;
     }
 
@@ -77,6 +82,7 @@ export class UserStatsService {
         where: {
           username: username,
         },
+        relations: [relation],
         order: {
           updatedAt: 'DESC',
         },
