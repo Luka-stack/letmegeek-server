@@ -222,7 +222,7 @@ export class ComicsService {
     }
 
     if (filterDto.ordering) {
-      query += `ordering=${filterDto.orderBy}&`;
+      query += `ordering=${filterDto.ordering}&`;
     }
 
     return query;

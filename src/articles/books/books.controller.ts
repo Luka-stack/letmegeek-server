@@ -44,6 +44,12 @@ const multerOptions = {
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
+  @Get('/test')
+  test(@Query() test) {
+    console.log(test);
+    return { message: 'TEST' };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post()
   createBook(@Body() bookDto: BookDto, @GetUser() user: User): Promise<Book> {

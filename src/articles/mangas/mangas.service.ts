@@ -226,7 +226,7 @@ export class MangasService {
     }
 
     if (filterDto.ordering) {
-      query += `ordering=${filterDto.orderBy}&`;
+      query += `ordering=${filterDto.ordering}&`;
     }
 
     return query;

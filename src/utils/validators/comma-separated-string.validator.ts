@@ -11,6 +11,10 @@ export function IsCommaSeparatedString(validationOptions?: ValidationOptions) {
     )} can contain only letters and numbers. Multiple values have to be separate with a comma`;
 
     const validate = function (value: any, _args: ValidationArguments) {
+      if (typeof value !== 'string') {
+        return false;
+      }
+
       let result = true;
       const regex = /^[a-zA-Z0-9\s.()-]+$/;
       const genres = value.split(',').map((v: string) => v.trim());

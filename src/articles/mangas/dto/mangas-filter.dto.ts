@@ -17,6 +17,6 @@ export class MangasFilterDto extends ArticleFitlerDto {
   finished?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString() //TODO add validation
   type?: string;
 }
