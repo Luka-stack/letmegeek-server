@@ -8,7 +8,7 @@ export class UserFilterDto extends PaginationDto {
 
   @IsOptional()
   @IsString()
-  order: string;
+  ordering: string;
 
   @IsOptional()
   @IsBooleanString()

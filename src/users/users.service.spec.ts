@@ -267,7 +267,7 @@ describe('UsersService', () => {
     };
 
     it('throw NotFoundException (404), user with provided username doesnt exsit', async () => {
-      userDetailsFilter.articleStats = '';
+      userDetailsFilter.article = '';
       userDetailsFilter.lastUpdates = '2';
 
       usersRepository.getUserByUsername.mockResolvedValue(null);
@@ -278,7 +278,7 @@ describe('UsersService', () => {
     });
 
     it('return User with provided username', async () => {
-      userDetailsFilter.articleStats = undefined;
+      userDetailsFilter.article = undefined;
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
 
       const result = await usersService.getUserByUsername(
@@ -302,7 +302,7 @@ describe('UsersService', () => {
         ...bookUpdate,
         book: mockBook(),
       };
-      userDetailsFilter.articleStats = 'books';
+      userDetailsFilter.article = 'books';
 
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
       wallBooksRepository.createQueryBuilder.mockImplementationOnce(
@@ -342,7 +342,7 @@ describe('UsersService', () => {
         ...comicUpdate,
         comic: mockComic(),
       };
-      userDetailsFilter.articleStats = 'comics';
+      userDetailsFilter.article = 'comics';
       userDetailsFilter.lastUpdates = '1';
 
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
@@ -375,7 +375,7 @@ describe('UsersService', () => {
         ...mangaUpdate,
         manga: mockManga(),
       };
-      userDetailsFilter.articleStats = 'mangas';
+      userDetailsFilter.article = 'mangas';
       userDetailsFilter.lastUpdates = '1';
 
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
@@ -408,7 +408,7 @@ describe('UsersService', () => {
         ...gameUpdate,
         game: mockGame(),
       };
-      userDetailsFilter.articleStats = 'games';
+      userDetailsFilter.article = 'games';
       userDetailsFilter.lastUpdates = '1';
 
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());
@@ -457,7 +457,7 @@ describe('UsersService', () => {
         manga: mockManga(),
       };
 
-      userDetailsFilter.articleStats = 'all';
+      userDetailsFilter.article = 'all';
       userDetailsFilter.lastUpdates = '1';
 
       usersRepository.getUserByUsername.mockResolvedValue(mockUser());

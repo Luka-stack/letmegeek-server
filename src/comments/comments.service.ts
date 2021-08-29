@@ -28,7 +28,7 @@ export class CommentsService {
   ): Promise<Comment> {
     const recipiant = await this.usersRepository.findOne({ username });
     if (!recipiant) {
-      throw new NotFoundException('Uset not found');
+      throw new NotFoundException('User not found');
     }
 
     const comment = this.commentsRepository.create({

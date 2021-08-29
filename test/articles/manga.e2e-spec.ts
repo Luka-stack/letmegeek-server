@@ -7,15 +7,15 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 
-import User from '../src/users/entities/user.entity';
-import Manga from '../src/articles/mangas/entities/manga.entity';
-import { UserRole } from '../src/auth/entities/user-role';
-import { MangaType } from '../src/articles/mangas/entities/manga-type';
-import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
-import { JwtStrategy } from '../src/auth/guards/jwt.strategy';
-import { MangasController } from '../src/articles/mangas/mangas.controller';
-import { MangasRepository } from '../src/articles/mangas/mangas.repository';
-import { MangasService } from '../src/articles/mangas/mangas.service';
+import User from '../../src/users/entities/user.entity';
+import Manga from '../../src/articles/mangas/entities/manga.entity';
+import { UserRole } from '../../src/auth/entities/user-role';
+import { MangaType } from '../../src/articles/mangas/entities/manga-type';
+import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
+import { JwtStrategy } from '../../src/auth/guards/jwt.strategy';
+import { MangasController } from '../../src/articles/mangas/mangas.controller';
+import { MangasRepository } from '../../src/articles/mangas/mangas.repository';
+import { MangasService } from '../../src/articles/mangas/mangas.service';
 
 const mockMangasRepository = () => ({
   create: jest.fn((dto) => {

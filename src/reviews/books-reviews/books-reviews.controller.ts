@@ -52,11 +52,7 @@ export class BooksReviewsController {
     @Param('username') username: string,
     @Query() paginationDto: PaginationDto,
   ): Promise<PaginatedBooksReviewsDto> {
-    return this.booksReviewsService.getReviews(
-      paginationDto,
-      undefined,
-      username,
-    );
+    return this.booksReviewsService.getReviews(paginationDto, null, username);
   }
 
   @UseGuards(JwtAuthGuard)

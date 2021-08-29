@@ -14,7 +14,7 @@ export class BooksReviewsRepository extends Repository<BooksReview> {
           .leftJoin('review.book', 'book')
           .where('book.identifier = :identifier', { identifier });
       } else {
-        query.where('rewview.username = :username', { username });
+        query.where('review.username = :username', { username });
       }
 
       return await query.getCount();

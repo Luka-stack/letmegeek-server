@@ -5,7 +5,7 @@ import { IsArticleName } from '../../utils/validators/article-name.validator';
 export class UserDetailsFilterDto {
   @IsOptional()
   @IsArticleName()
-  articleStats: string;
+  article: string;
 
   @IsOptional()
   @IsNumberString()

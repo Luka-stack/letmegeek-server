@@ -89,10 +89,10 @@ export class WallsBooksService {
     await this.wallsBooksRepository.delete({ id: wallsBook.id });
   }
 
-  getRecordsByUser(
+  async getRecordsByUser(
     username: string,
     filterDto: WallsFilterDto,
   ): Promise<Array<WallsBook>> {
-    return this.wallsBooksRepository.getRecords(username, filterDto);
+    return await this.wallsBooksRepository.getRecords(username, filterDto);
   }
 }

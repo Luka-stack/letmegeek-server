@@ -55,11 +55,11 @@ export class UsersService {
     username: string,
     userDetailsFilter: UserDetailsFilterDto,
   ): Promise<User> {
-    const { articleStats, lastUpdates } = userDetailsFilter;
+    const { article, lastUpdates } = userDetailsFilter;
     const wantedArticles =
-      articleStats && articleStats === 'all'
+      article && article === 'all'
         ? ['books', 'comics', 'mangas', 'games']
-        : [articleStats];
+        : [article];
 
     const user = await this.usersRepository.getUserByUsername(username);
 
@@ -67,7 +67,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    if (articleStats) {
+    if (article) {
       const stats: Array<UserStatsDto> = [];
       for (const article of wantedArticles) {
         stats.push({
@@ -190,10 +190,10 @@ export class UsersService {
 
   createQuery(filterDto: UserFilterDto): string {
     const ordering =
-      filterDto.order === 'ASC' || filterDto.order === 'ASCENDING'
+      filterDto.ordering === 'ASC' || filterDto.ordering === 'ASCENDING'
         ? 'ASC'
         : 'DESC';
-    let query = `order=${ordering}&`;
+    let query = `ordering=${ordering}&`;
 
     if (filterDto.username) {
       query += `username=${filterDto.username}&`;

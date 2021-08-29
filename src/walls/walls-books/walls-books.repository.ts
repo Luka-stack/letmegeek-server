@@ -24,7 +24,7 @@ export class WallsBooksRepository extends Repository<WallsBook> {
       });
     }
 
-    query.leftJoinAndSelect('w.book', 'book');
+    query.innerJoinAndSelect('w.book', 'book');
 
     try {
       const result = query.getMany();

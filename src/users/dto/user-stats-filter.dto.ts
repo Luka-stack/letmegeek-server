@@ -1,4 +1,4 @@
-import { IsNumberString, IsOptional } from 'class-validator';
+import { IsNumberString, IsOptional, Max } from 'class-validator';
 
 import { IsArticleName } from '../../utils/validators/article-name.validator';
 

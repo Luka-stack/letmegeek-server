@@ -18,6 +18,7 @@ import User from './entities/user.entity';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { UsersService } from './users.service';
 import { editFilename, imageFileFilter } from '../utils/file-uploads';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { HasRoles } from '../auth/decorators/has-roles.decorator';
@@ -47,8 +48,9 @@ export class UsersController {
     return this.usersService.getUsers(userFilterDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @HasRoles(UserRole.ADMIN, UserRole.MODERATOR)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HttpCode(200)
   @Post('/sendContributionPoints/:username')
   sendContributionPoints(
     @Param('username') username: string,
@@ -72,8 +74,9 @@ export class UsersController {
     return this.usersService.getUsersArticleStats(username, userStatsFilter);
   }
 
-  @UseGuards(JwtAuthGuard)
   @HasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HttpCode(200)
   @Post('/:username/blocked')
   changeUserBlockedStatus(
     @Param('username') username: string,
@@ -85,8 +88,9 @@ export class UsersController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
   @HasRoles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @HttpCode(200)
   @Post('/:username/role')
   changeUserRole(
     @Param('username') username: string,

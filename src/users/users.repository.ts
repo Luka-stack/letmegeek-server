@@ -71,7 +71,7 @@ export class UsersRepository extends Repository<User> {
   }
 
   createFilterQuery(filterDto: UserFilterDto): SelectQueryBuilder<User> {
-    const { username, order, isBlocked } = filterDto;
+    const { username, ordering, isBlocked } = filterDto;
     const query = this.createQueryBuilder('user');
     query.where('1=1');
 
@@ -85,11 +85,11 @@ export class UsersRepository extends Repository<User> {
       query.andWhere('user.blocked = :blocked', { blocked: isBlocked });
     }
 
-    const ordering =
-      order.toLowerCase() === 'ASC' || order.toLowerCase() === 'ASCENDING'
+    const order =
+      ordering.toLowerCase() === 'ASC' || ordering.toLowerCase() === 'ASCENDING'
         ? 'ASC'
         : 'DESC';
-    query.orderBy('user.createdAt', ordering);
+    query.orderBy('user.createdAt', order);
 
     return query;
   }
